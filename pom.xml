@@ -8,7 +8,7 @@
   </parent>
 	<groupId>org.raisercostin</groupId>
 	<artifactId>jedio</artifactId>
-	<version>0.2</version>
+	<version>0.3-SNAPSHOT</version>
 	<name>jedio</name>
 	<description>Uniform, fluent access to files, urls and other resources API for java, kotlin and scala.</description>
 	<url>${git.url}</url>
@@ -20,7 +20,7 @@
 		<connection>scm:git:${git.url}.git</connection>
 		<developerConnection>scm:git:${git.url}.git</developerConnection>
 		<url>${git.url}</url>
-		<tag>jedio-0.2</tag>
+		<tag>${project.artifactId}-${project.version}</tag>
 	</scm>
 	<distributionManagement>
 		<repository>
