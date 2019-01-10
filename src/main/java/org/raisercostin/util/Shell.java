@@ -1,5 +1,7 @@
 package org.raisercostin.util;
 
+import java.nio.file.Path;
+
 import org.raisercostin.jedio.FolderLocation;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
@@ -41,4 +43,8 @@ public interface Shell {
   ProcessResult executeWithResult(String command);
 
   void blur(String sensibleRegex);
+
+  default Path pwdPath() {
+    return pwd().asPathLocation().toPath();
+  }
 }

@@ -8,9 +8,7 @@ public interface ReadableFileLocation extends FileLocation {
 
   Option<String> read();
 
-  // TODO @Deprecated(message="replace with functional equivalent that also
-  // closes the stream:
-  // safeInputStream")
+  // TODO @Deprecated(message="replace with functional equivalent that also closes the stream: safeInputStream")
   InputStream unsafeInputStream();
 
   String readContent();
