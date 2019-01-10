@@ -21,8 +21,7 @@ import org.raisercostin.jedio.RelativeLocation;
 // An instance must be created when is needed as is not thread safe.
 @NotThreadSafe
 public class SimpleShell implements Shell {
-  private static final org.slf4j.Logger logger =
-      org.slf4j.LoggerFactory.getLogger(SimpleShell.class);
+  private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(SimpleShell.class);
   private static final Pattern SPLIT_PARAMS_PATTERN = Pattern.compile("\"([^\"]*)\"|(\\S+)");
   private Stack<FolderLocation> dirs = new Stack<FolderLocation>();
   private FolderLocation current;
@@ -84,12 +83,10 @@ public class SimpleShell implements Shell {
     try {
       // File input = File.createTempFile("restfs", ".input");
       // TODO splitting command should work for "aaa bbbb" as argument
-      ProcessBuilder builder =
-          new ProcessBuilder(commandAndParams)
-              .redirectOutput(Redirect.PIPE)
-              .redirectError(Redirect.PIPE)
-              // .redirectInput(input)
-              .directory(path.asPathLocation().toFile());
+      ProcessBuilder builder = new ProcessBuilder(commandAndParams).redirectOutput(Redirect.PIPE)
+          .redirectError(Redirect.PIPE)
+          // .redirectInput(input)
+          .directory(path.asPathLocation().toFile());
       // .inheritIO();
       Map<String, String> currentEnvironment = builder.environment();
       currentEnvironment.putAll(env);

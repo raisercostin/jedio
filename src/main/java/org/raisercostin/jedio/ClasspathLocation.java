@@ -17,10 +17,8 @@ import org.apache.commons.io.IOUtils;
  * @author raiser
  */
 @Data
-public class ClasspathLocation
-    implements FolderLocation, ExistingLocation, ReferenceLocation, ReadableFileLocation {
-  private static final org.slf4j.Logger logger =
-      org.slf4j.LoggerFactory.getLogger(ClasspathLocation.class);
+public class ClasspathLocation implements FolderLocation, ExistingLocation, ReferenceLocation, ReadableFileLocation {
+  private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ClasspathLocation.class);
 
   private final String path;
 
@@ -188,9 +186,8 @@ public class ClasspathLocation
   }
 
   public String readContent() {
-    try (BufferedInputStream b =
-        new BufferedInputStream(
-            ClasspathLocation.class.getClassLoader().getResourceAsStream(path))) {
+    try (BufferedInputStream b = new BufferedInputStream(
+        ClasspathLocation.class.getClassLoader().getResourceAsStream(path))) {
       return IOUtils.toString(b, "UTF-8");
     } catch (IOException e) {
       throw new RuntimeException("Can't read resource [" + path + "]", e);

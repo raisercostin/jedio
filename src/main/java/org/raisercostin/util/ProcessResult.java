@@ -24,16 +24,14 @@ import org.raisercostin.jedio.FolderLocation;
 @Getter(value = AccessLevel.NONE)
 @Setter(value = AccessLevel.NONE)
 public class ProcessResult {
-  private static final org.slf4j.Logger logger =
-      org.slf4j.LoggerFactory.getLogger(ProcessResult.class);
+  private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ProcessResult.class);
   public final String command;
   public final String output;
   public final String error;
   public final boolean finished;
   private Process proc;
 
-  public ProcessResult(
-      FolderLocation current, List<String> commandAndParams, Pattern sensibleRegex, Process proc) {
+  public ProcessResult(FolderLocation current, List<String> commandAndParams, Pattern sensibleRegex, Process proc) {
     try {
       String command = blurMessage(sensibleRegex, Joiner.on(" ").join(commandAndParams));
       boolean finished = proc.waitFor(10, TimeUnit.SECONDS);
@@ -58,68 +56,47 @@ public class ProcessResult {
   }
 
   public Try<ProcessResult> get() {
-    return Try.ofCallable(
-        () -> {
-          if (finished) {
-            int exitValue = proc.exitValue();
-            if (exitValue != 0) {
-              if (!error.isEmpty())
-                throw new RuntimeException(
-                    "Couldn't execute ["
-                        + command
-                        + "] errorCode="
-                        + exitValue
-                        + "\nOutput:["
-                        + output
-                        + "]\n Error:["
-                        + error
-                        + "]");
-            }
-          } else {
-            throw new RuntimeException(
-                "Timeout. Couldn't execute ["
-                    + command
-                    + "] errorCode=none\nOutput:["
-                    + output
-                    + "]\n Error:["
-                    + error
-                    + "]");
-          }
-          return this;
-        });
+    return Try.ofCallable(() -> {
+      if (finished) {
+        int exitValue = proc.exitValue();
+        if (exitValue != 0) {
+          if (!error.isEmpty())
+            throw new RuntimeException("Couldn't execute [" + command + "] errorCode=" + exitValue + "\nOutput:["
+                + output + "]\n Error:[" + error + "]");
+        }
+      } else {
+        throw new RuntimeException("Timeout. Couldn't execute [" + command + "] errorCode=none\nOutput:[" + output
+            + "]\n Error:[" + error + "]");
+      }
+      return this;
+    });
   }
 
   public ProcessResult valid() {
     return get().get();
   }
 
-  private void message(
-      FolderLocation current, int exitValue, String command, String output, String error) {
+  private void message(FolderLocation current, int exitValue, String command, String output, String error) {
     if (exitValue == 0 && output.isEmpty() && error.isEmpty())
       logger.info(current.toString() + " > [" + command + "]");
     else
-      logger.info(
-          current.toString()
-              + " > "
-              + command
-              + "\nExitValue: "
-              + exitValue
-              + "\nOutput:["
-              + print(output)
-              + "]\nError:["
-              + print(error)
-              + "]\n");
+      logger.info(current.toString() + " > " + command + "\nExitValue: " + exitValue + "\nOutput:[" + print(output)
+          + "]\nError:[" + print(error) + "]\n");
   }
 
   private String print(String message) {
-    if (message.isEmpty()) return "";
-    if (message.contains("\n")) return "\n" + message;
+    if (message.isEmpty())
+      return "";
+    if (message.contains("\n"))
+      return "\n" + message;
     return message;
   }
 
   private String blurMessage(Pattern sensibleRegex, String message) {
-    if (sensibleRegex != null) return sensibleRegex.matcher(message).replaceAll("***");
-    else return message;
+    if (sensibleRegex != null)
+      return sensibleRegex.matcher(message).replaceAll("***");
+    else
+      return message;
   }
 
   private static String toString(final InputStream input, final String encoding) {
@@ -179,8 +156,7 @@ public class ProcessResult {
 
   private static final int EOF = -1;
 
-  private static long copyLarge(final Reader input, final Writer output, final char[] buffer)
-      throws IOException {
+  private static long copyLarge(final Reader input, final Writer output, final char[] buffer) throws IOException {
     long count = 0;
     int n;
     while (EOF != (n = input.read(buffer))) {

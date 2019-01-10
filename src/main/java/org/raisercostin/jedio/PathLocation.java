@@ -24,15 +24,9 @@ import org.raisercostin.util.SimpleShell;
  * @author raiser
  */
 @Data
-public class PathLocation
-    implements FolderLocation,
-        NonExistingLocation,
-        ReferenceLocation,
-        ReadableFileLocation,
-        WritableFileLocation,
-        LinkLocation {
-  private static final org.slf4j.Logger logger =
-      org.slf4j.LoggerFactory.getLogger(PathLocation.class);
+public class PathLocation implements FolderLocation, NonExistingLocation, ReferenceLocation, ReadableFileLocation,
+    WritableFileLocation, LinkLocation {
+  private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PathLocation.class);
 
   private final Path path;
 
@@ -81,8 +75,7 @@ public class PathLocation
 
   @Override
   /**
-   * Returns a path that is this path with redundant name elements eliminated. @see
-   * java.nio.file.Path.normalize()
+   * Returns a path that is this path with redundant name elements eliminated. @see java.nio.file.Path.normalize()
    */
   public String normalized() {
     return toPath().normalize().toString();
@@ -90,8 +83,7 @@ public class PathLocation
 
   @Override
   /**
-   * A canonical pathname is both absolute and unique. The precise definition of canonical form is
-   * system-dependent.
+   * A canonical pathname is both absolute and unique. The precise definition of canonical form is system-dependent.
    */
   public String canonical() {
     return toPath().normalize().toString();
@@ -113,8 +105,10 @@ public class PathLocation
 
   @Override
   public NonExistingLocation deleteFolder(DeleteOptions options) {
-    if (options.deleteByRename) deleteFolderByRename();
-    else deleteFolderPermanently();
+    if (options.deleteByRename)
+      deleteFolderByRename();
+    else
+      deleteFolderPermanently();
     return this;
   }
 
@@ -138,8 +132,10 @@ public class PathLocation
 
   @Override
   public NonExistingLocation deleteFile(DeleteOptions options) {
-    if (options.deleteByRename) deleteFileByRename();
-    else deleteFilePermanently();
+    if (options.deleteByRename)
+      deleteFileByRename();
+    else
+      deleteFilePermanently();
     return this;
   }
 
@@ -163,8 +159,10 @@ public class PathLocation
 
   @Override
   public NonExistingLocation delete(DeleteOptions options) {
-    if (isFolder()) deleteFolder(options);
-    else deleteFile(options);
+    if (isFolder())
+      deleteFolder(options);
+    else
+      deleteFile(options);
     return this;
   }
 
@@ -180,20 +178,26 @@ public class PathLocation
 
   @Override
   public Option<FolderLocation> existing() {
-    if (Files.exists(path)) return Option.of(this);
-    else return Option.none();
+    if (Files.exists(path))
+      return Option.of(this);
+    else
+      return Option.none();
   }
 
   @Override
   public Option<NonExistingLocation> nonExisting() {
-    if (!Files.exists(path)) return Option.of(this);
-    else return Option.none();
+    if (!Files.exists(path))
+      return Option.of(this);
+    else
+      return Option.none();
   }
 
   @Override
   public NonExistingLocation nonExistingOrElse(Function<FolderLocation, NonExistingLocation> fn) {
-    if (exists()) return fn.apply(this);
-    else return this;
+    if (exists())
+      return fn.apply(this);
+    else
+      return this;
   }
 
   public boolean exists() {
@@ -202,8 +206,10 @@ public class PathLocation
 
   @Override
   public FolderLocation existingOrElse(Function<NonExistingLocation, FolderLocation> fn) {
-    if (!exists()) return fn.apply(this);
-    else return this;
+    if (!exists())
+      return fn.apply(this);
+    else
+      return this;
   }
 
   @Override
@@ -222,8 +228,10 @@ public class PathLocation
   public Option<String> read() {
     try {
       File file = toFile();
-      if (file.exists()) return Option.of(FileUtils.readFileToString(file, "UTF-8"));
-      else return Option.none();
+      if (file.exists())
+        return Option.of(FileUtils.readFileToString(file, "UTF-8"));
+      else
+        return Option.none();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -347,7 +355,8 @@ public class PathLocation
     String pathChild = absoluteAndNormalized();
     if (pathChild.startsWith(pathAncestor))
       return Option.of(Locations.relative(pathChild.substring(pathAncestor.length())));
-    else return Option.none();
+    else
+      return Option.none();
   }
 
   @Override
@@ -362,10 +371,10 @@ public class PathLocation
 
   private void createJunction(Path symlink, Path target) {
     try {
-      if (SystemUtils.IS_OS_WINDOWS) createWindowsJunction(symlink, symlink, target);
+      if (SystemUtils.IS_OS_WINDOWS)
+        createWindowsJunction(symlink, symlink, target);
       else
-        createLinuxSymlink(
-            symlink, symlink.toFile().getAbsolutePath(), target.toFile().getAbsolutePath());
+        createLinuxSymlink(symlink, symlink.toFile().getAbsolutePath(), target.toFile().getAbsolutePath());
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     } catch (IOException e) {
@@ -381,11 +390,9 @@ public class PathLocation
   private void createSymlink(Path symlink, Path target) {
     try {
       if (SystemUtils.IS_OS_WINDOWS)
-        createWindowsSymlink(
-            symlink, symlink.toFile().getAbsolutePath(), target.toFile().getName());
+        createWindowsSymlink(symlink, symlink.toFile().getAbsolutePath(), target.toFile().getName());
       else
-        createLinuxSymlink(
-            symlink, symlink.toFile().getAbsolutePath(), target.toFile().getAbsolutePath());
+        createLinuxSymlink(symlink, symlink.toFile().getAbsolutePath(), target.toFile().getAbsolutePath());
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     } catch (IOException e) {
@@ -406,8 +413,10 @@ public class PathLocation
 
   @Override
   public Option<LinkLocation> asSymlink() {
-    if (isSymlink()) return Option.of(this);
-    else return Option.none();
+    if (isSymlink())
+      return Option.of(this);
+    else
+      return Option.none();
   }
 
   @Override
@@ -423,7 +432,8 @@ public class PathLocation
   public ReferenceLocation getTarget() {
     Preconditions.checkState(isSymlink());
     try {
-      if (isJunctionInWindows()) return create(path.toRealPath(LinkOption.NOFOLLOW_LINKS));
+      if (isJunctionInWindows())
+        return create(path.toRealPath(LinkOption.NOFOLLOW_LINKS));
       return create(Files.readSymbolicLink(path));
     } catch (IOException e) {
       throw new RuntimeException(e);
