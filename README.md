@@ -26,3 +26,7 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
 			<releases><enabled>true</enabled></releases>
 			<snapshots><enabled>false</enabled></snapshots>
 		</repository>
+
+## Development
+
+- To release `mvn release:prepare release:perform -DskipTests=true -Prelease -Darguments="-DskipTests=true -Prelease"`
