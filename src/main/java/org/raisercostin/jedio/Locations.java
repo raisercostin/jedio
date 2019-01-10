@@ -33,12 +33,12 @@ public class Locations {
 
   @sugar
   public static FolderLocation existingFolder(Path path) {
-    return folder(path).existing().get();
+    return folder(path).mkdirIfNecessary();
   }
 
   @sugar
   public static FolderLocation existingFolder(String path) {
-    return folder(path).existing().get();
+    return existingFolder(Paths.get(path));
   }
 
   public static ReadableFileLocation classpath(String path) {

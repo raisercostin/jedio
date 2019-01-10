@@ -68,7 +68,7 @@ public interface ReferenceLocation {
   boolean isSymlink();
 
   @sugar
-  default void mkdirIfNecessary() {
-    nonExisting().map(x -> x.mkdir());
+  default FolderLocation mkdirIfNecessary() {
+    return existingOrElse(x -> x.mkdir());
   }
 }
