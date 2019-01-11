@@ -1,20 +1,40 @@
 package org.raisercostin.jedio;
 
-import com.google.common.base.Preconditions;
-import io.vavr.control.Option;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
+import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Duration;
 import java.util.function.Function;
-import lombok.Data;
+
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.apache.commons.lang3.SystemUtils;
+import org.raisercostin.jedio.impl.PathObservables;
 import org.raisercostin.util.SimpleShell;
+
+import com.google.common.base.Preconditions;
+
+import io.vavr.control.Option;
+import lombok.Data;
+import lombok.val;
+import reactor.core.publisher.Flux;
 
 /**
  * What is Absolute, Relative and Canonical Path
@@ -25,7 +45,7 @@ import org.raisercostin.util.SimpleShell;
  */
 @Data
 public class PathLocation implements FolderLocation, NonExistingLocation, ReferenceLocation, ReadableFileLocation,
-    WritableFileLocation, LinkLocation {
+    WritableFileLocation, ChangableLocation, LinkLocation {
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PathLocation.class);
 
   private final Path path;
@@ -75,7 +95,8 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
 
   @Override
   /**
-   * Returns a path that is this path with redundant name elements eliminated. @see java.nio.file.Path.normalize()
+   * Returns a path that is this path with redundant name elements
+   * eliminated. @see java.nio.file.Path.normalize()
    */
   public String normalized() {
     return toPath().normalize().toString();
@@ -83,7 +104,8 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
 
   @Override
   /**
-   * A canonical pathname is both absolute and unique. The precise definition of canonical form is system-dependent.
+   * A canonical pathname is both absolute and unique. The precise definition of
+   * canonical form is system-dependent.
    */
   public String canonical() {
     return toPath().normalize().toString();
@@ -449,4 +471,211 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
   public PathLocation asPathLocation() {
     return this;
   }
+
+  @Override
+  public ChangableLocation asChangableLocation() {
+    return this;
+  }
+
+  @Override
+  public Flux<FileAltered> watch() {
+    /*Implementation inspired from 
+     * - http://blog2.vorburger.ch/2015/04/java-7-watchservice-based.html
+     * - https://docs.oracle.com/javase/tutorial/essential/io/notification.html
+     * - http://commons.apache.org/proper/commons-io/javadocs/api-release/index.html?org/apache/commons/io/monitor/package-summary.html
+     */
+    logger.info("watch "+this);
+//    WatchService watcher = FileSystems.getDefault().newWatchService();
+//    val key = path.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY, OVERFLOW);
+//    //key.pollEvents();
+//    watcher.poll()
+//    Flux.in
+//    new DirectoryWatcherBuilder().dir(dir)
+//        .listener((directory, changeKind) -> System.out.println(changeKind.toString() + " " + directory.toString()));
+//    val observer = new FileAlterationObserver(toFile());
+//    val monitor = new FileAlterationMonitor(pollingIntervalInMillis);
+    return PathObservables.watchNonRecursive(path);
+        //.map(x->{System.out.println(x.kind().type()+" "+x.kind().name()+" "+x.context()+" "+x.count()+" "+((Path)x.context()).toAbsolutePath());return x;})
+        //.map(x->new FileAltered());
+    //throw new RuntimeException("Not implemented yet!!!");
+  }
+//  @Override
+//  public Flux<FileAltered> watch2() {
+//    val observer = new FileAlterationObserver(toFile());
+//    
+//    return Flux.interval(Duration.ofSeconds(1)).map{x->{
+//      });
+//    }
+//  }
+  // def watch(pollingIntervalInMillis: Long = 1000): Observable[FileAltered] =
+  // {
+  // Observable.apply { obs =>
+  // val observer = new FileAlterationObserver(toFile);
+  // val monitor = new FileAlterationMonitor(pollingIntervalInMillis);
+  // val fileListener = new FileAlterationListenerAdaptor() {
+  // // override def onFileCreate(file: File) = {
+  // // val location = Locations.file(file)
+  // // try {
+  // // obs.onNext(FileCreated(file))
+  // // } catch {
+  // // case NonFatal(e) =>
+  // // obs.onError(new RuntimeException(s"Processing of
+  // [${Locations.file(file)}] failed.", e))
+  // // }
+  // // }
+  // /**File system observer started checking event.*/
+  // //override def onStart(file:FileAlterationObserver) =
+  // obs.onNext(FileChanged(file))
+  // override def onDirectoryCreate(file: File) =
+  // obs.onNext(DirectoryCreated(file))
+  // override def onDirectoryChange(file: File) =
+  // obs.onNext(DirectoryChanged(file))
+  // override def onDirectoryDelete(file: File) =
+  // obs.onNext(DirectoryDeleted(file))
+  // override def onFileCreate(file: File) = obs.onNext(FileCreated(file))
+  // override def onFileChange(file: File) = obs.onNext(FileChanged(file))
+  // override def onFileDelete(file: File) = obs.onNext(FileDeleted(file))
+  // /**File system observer finished checking event.*/
+  // //override def onStop(file:FileAlterationObserver) =
+  // obs.onNext(FileChanged(file))
+  // }
+  // observer.addListener(fileListener)
+  // monitor.addObserver(observer)
+  // monitor.start()
+  // Subscription { monitor.stop() }
+  // }
+  // }
+
 }
+//
+//  /**
+//   * Register the rootDirectory, and all its sub-directories.
+//   */
+//  private void registerAll(final Path rootDirectory, final WatchService watcher) throws IOException {
+//    Files.walkFileTree(rootDirectory, new SimpleFileVisitor<Path>() {
+//      @Override
+//      public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
+//        register(dir, watcher);
+//        return FileVisitResult.CONTINUE;
+//      }
+//    });
+//  }
+//
+//  private void register(final Path dir, final WatchService watcher) throws IOException {
+//    final WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+//    directoriesByKey.put(key, dir);
+//  }
+/// **
+// * Copyright (C) 2015 by Michael Vorburger
+// */
+// package ch.vorburger.hotea.watchdir;
+//
+// import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
+// import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
+// import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
+//
+// import java.io.IOException;
+// import java.nio.file.ClosedWatchServiceException;
+// import java.nio.file.FileSystems;
+// import java.nio.file.FileVisitResult;
+// import java.nio.file.Files;
+// import java.nio.file.Path;
+// import java.nio.file.SimpleFileVisitor;
+// import java.nio.file.StandardWatchEventKinds;
+// import java.nio.file.WatchEvent;
+// import java.nio.file.WatchEvent.Kind;
+// import java.nio.file.WatchKey;
+// import java.nio.file.WatchService;
+// import java.nio.file.attribute.BasicFileAttributes;
+//
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
+//
+/// **
+// * DirectoryWatcher based on java.nio.file.WatchService.
+// *
+// * @author Michael Vorburger
+// */
+//// intentionally package local, for now
+// public class DirectoryWatcherImpl implements DirectoryWatcher {
+// private final static Logger log =
+/// LoggerFactory.getLogger(DirectoryWatcherImpl.class);
+//
+// protected final WatchService watcher =
+/// FileSystems.getDefault().newWatchService(); // better final, as it will be
+/// accessed by both threads (normally OK either way, but still)
+// protected final Thread thread;
+//
+// /** Clients should use DirectoryWatcherBuilder */
+// protected DirectoryWatcherImpl(boolean watchSubDirectories, final Path
+/// watchBasePath, final Listener listener, ExceptionHandler exceptionHandler)
+/// throws IOException {
+// if (!watchBasePath.toFile().isDirectory())
+// throw new IllegalArgumentException("Not a directory: " +
+/// watchBasePath.toString());
+//
+// register(watchSubDirectories, watchBasePath);
+// Runnable r = () -> {
+// for (;;) {
+// WatchKey key;
+// try {
+// key = watcher.take();
+// } catch (ClosedWatchServiceException e) {
+// log.debug("WatchService take() interrupted by ClosedWatchServiceException,
+/// terminating Thread (as planned).");
+// return;
+// } catch (InterruptedException e) {
+// log.debug("Thread InterruptedException, terminating (as planned, if caused by
+/// close()).");
+// return;
+// }
+// Path watchKeyWatchablePath = (Path) key.watchable();
+// // We have a polled event, now we traverse it and receive all the states from
+/// it
+// for (WatchEvent<?> event : key.pollEvents()) {
+//
+// Kind<?> kind = event.kind();
+// if (kind == StandardWatchEventKinds.OVERFLOW) {
+// // TODO Not sure how to correctly "handle" an Overflow.. ?
+// log.error("Received {} (TODO how to handle?)", kind.name());
+// continue;
+// }
+//
+// Path relativePath = (Path) event.context();
+// if (relativePath == null) {
+// log.error("Received {} but event.context() == null: {}", kind.name(),
+/// event.toString());
+// continue;
+// }
+// Path absolutePath = watchKeyWatchablePath.resolve(relativePath);
+// if (log.isTraceEnabled())
+// log.trace("Received {} for: {}", kind.name(), absolutePath);
+//
+// if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
+// if (Files.isDirectory(absolutePath)) { // don't NOFOLLOW_LINKS
+// try {
+// register(watchSubDirectories, watchBasePath);
+// } catch (IOException e) {
+// exceptionHandler.onException(e);
+// }
+// }
+// }
+//
+// if (kind == StandardWatchEventKinds.ENTRY_MODIFY || kind ==
+/// StandardWatchEventKinds.ENTRY_DELETE) {
+// // To reduce notifications, only call the Listener on Modify and Delete but
+/// not Create,
+// // because (on Linux at least..) every ENTRY_CREATE from new file
+// // is followed by an ENTRY_MODIFY anyway.
+// try {
+// ChangeKind ourKind = kind == StandardWatchEventKinds.ENTRY_MODIFY ?
+/// ChangeKind.MODIFIED : ChangeKind.DELETED;
+// listener.onChange(absolutePath, ourKind);
+// } catch (Throwable e) {
+// exceptionHandler.onException(e);
+// }
+// }
+// }
+// key.reset();
+// }
+// };

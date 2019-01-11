@@ -193,4 +193,9 @@ public class ClasspathLocation implements FolderLocation, ExistingLocation, Refe
       throw new RuntimeException("Can't read resource [" + path + "]", e);
     }
   }
+
+  @Override
+  public ChangableLocation asChangableLocation() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 }

@@ -12,4 +12,6 @@ public interface FolderLocation extends ExistingLocation {
   default ReferenceLocation child(String path) {
     return child(RelativeLocation.create(path));
   }
+
+  ChangableLocation asChangableLocation();
 }
