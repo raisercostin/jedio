@@ -114,6 +114,7 @@ public final class PathObservables {
     /**
      * Register the rootDirectory, and all its sub-directories.
      */
+    //TODO use traversal from PathLocation
     private void registerAll(final Path rootDirectory, final WatchService watcher) throws IOException {
       Files.walkFileTree(rootDirectory, new SimpleFileVisitor<Path>() {
         @Override
