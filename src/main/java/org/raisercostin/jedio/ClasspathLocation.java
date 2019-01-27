@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Function;
 import lombok.Data;
+import reactor.core.publisher.Flux;
+
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -19,6 +21,7 @@ import org.apache.commons.io.IOUtils;
 @Data
 public class ClasspathLocation implements FolderLocation, ExistingLocation, ReferenceLocation, ReadableFileLocation {
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ClasspathLocation.class);
+  private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader()).getOrElse(ClassLoader.class.getClassLoader());
 
   private final String path;
 
@@ -48,11 +51,6 @@ public class ClasspathLocation implements FolderLocation, ExistingLocation, Refe
   @Override
   public Option<String> read() {
     return Try.ofSupplier(() -> readContent()).toOption();
-  }
-
-  @Override
-  public InputStream unsafeInputStream() {
-    throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
@@ -185,6 +183,11 @@ public class ClasspathLocation implements FolderLocation, ExistingLocation, Refe
     throw new RuntimeException("Not implemented yet!!!");
   }
 
+  @Override
+  public InputStream unsafeInputStream() {
+    return specialClassLoader.getResourceAsStream(path);
+  }
+
   public String readContent() {
     try (BufferedInputStream b = new BufferedInputStream(
         ClasspathLocation.class.getClassLoader().getResourceAsStream(path))) {
@@ -196,6 +199,16 @@ public class ClasspathLocation implements FolderLocation, ExistingLocation, Refe
 
   @Override
   public ChangableLocation asChangableLocation() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public Flux<ExistingLocation> find() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public Flux<FileLocation> findFiles() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 }
