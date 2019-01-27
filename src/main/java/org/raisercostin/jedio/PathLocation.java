@@ -1,32 +1,17 @@
 package org.raisercostin.jedio;
 
-import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
-import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.time.Duration;
 import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.apache.commons.lang3.SystemUtils;
-import org.raisercostin.jedio.find.FileTraversals.FileTraversal;
 import org.raisercostin.jedio.impl.PathObservables;
 import org.raisercostin.util.SimpleShell;
 
@@ -34,7 +19,6 @@ import com.google.common.base.Preconditions;
 
 import io.vavr.control.Option;
 import lombok.Data;
-import lombok.val;
 import reactor.core.publisher.Flux;
 
 /**

@@ -5,6 +5,7 @@ import java.io.File;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -17,6 +18,7 @@ import technology.tabula.CommandLineApp;
 @SpringBootApplication
 public class LocationsTest implements ApplicationRunner {
   @Test
+  @Disabled("not actual test")
   void test() {
     Flux<FileAltered> all = Locations.existingFolder("d:/work/watched").asChangableLocation().watch();
     all.log("rec").map(x -> {
