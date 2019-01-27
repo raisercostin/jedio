@@ -52,7 +52,6 @@ public class FileTraversals {
     return new CommonsIoTraversal(gitIgnores);
   }
 
-
   public static interface SimpleFileTraversal extends FileTraversal {
     abstract Flux<Path> traverse(Path start, boolean ignoreCase);
 
@@ -106,6 +105,7 @@ public class FileTraversals {
 
   /**
    * Sample gitIgnores:
+   * 
    * <pre>
    *     # for now only folders
    *     target
@@ -114,25 +114,26 @@ public class FileTraversals {
    * </pre>
    */
   protected static OrFileFilter createGitFilter(String gitIgnores, boolean ignoreCase) {
-      Stream<IOFileFilter> or = Streams.stream(Splitter.on("\n").omitEmptyStrings().trimResults().split(gitIgnores))
-              .filter(line -> !line.startsWith("#"))
-              .map(folder -> nameFileFilter(folder, ignoreCase ? IOCase.INSENSITIVE : IOCase.SENSITIVE));
-      List<IOFileFilter> all = or.collect(Collectors.toList());
-      return new OrFileFilter(all);
+    Stream<IOFileFilter> or = Streams.stream(Splitter.on("\n").omitEmptyStrings().trimResults().split(gitIgnores))
+        .filter(line -> !line.startsWith("#"))
+        .map(folder -> nameFileFilter(folder, ignoreCase ? IOCase.INSENSITIVE : IOCase.SENSITIVE));
+    List<IOFileFilter> all = or.collect(Collectors.toList());
+    return new OrFileFilter(all);
   }
 
   public static class FileFilterPathMatcherAdapter implements PathMatcher {
-      private final FileFilter filter;
+    private final FileFilter filter;
 
-      public FileFilterPathMatcherAdapter(FileFilter filter) {
-          this.filter = filter;
-      }
+    public FileFilterPathMatcherAdapter(FileFilter filter) {
+      this.filter = filter;
+    }
 
-      @Override
-      public boolean matches(Path path) {
-          return filter.accept(path.toFile());
-      }
+    @Override
+    public boolean matches(Path path) {
+      return filter.accept(path.toFile());
+    }
   }
+
   // public static class WalkFileTreeTraversal implements FileTraversal {
   // public Stream<Path> traverse(Path start) {
   // try {

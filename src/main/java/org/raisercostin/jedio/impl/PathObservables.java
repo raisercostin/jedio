@@ -35,9 +35,8 @@ public final class PathObservables {
   }
 
   /**
-   * Creates an observable that watches the given directory and all its
-   * subdirectories. Directories that are created after subscription are
-   * watched, too.
+   * Creates an observable that watches the given directory and all its subdirectories. Directories that are created
+   * after subscription are watched, too.
    * 
    * @param path
    *          Root directory to be watched
@@ -49,8 +48,7 @@ public final class PathObservables {
   }
 
   /**
-   * Creates an observable that watches the given path but not its
-   * subdirectories.
+   * Creates an observable that watches the given path but not its subdirectories.
    * 
    * @param path
    *          Path to be watched
@@ -83,7 +81,7 @@ public final class PathObservables {
             final WatchKey key = watcher.take();
             final Path dir = directoriesByKey.get(key);
             for (final WatchEvent<?> event : key.pollEvents()) {
-              subscriber.next(new FileAltered(dir,event));
+              subscriber.next(new FileAltered(dir, event));
               registerNewDirectory(subscriber, dir, watcher, event);
             }
             // reset key and remove from set if directory is no longer
@@ -111,7 +109,7 @@ public final class PathObservables {
     /**
      * Register the rootDirectory, and all its sub-directories.
      */
-    //TODO use traversal from PathLocation
+    // TODO use traversal from PathLocation
     private void registerAll(final Path rootDirectory, final WatchService watcher) throws IOException {
       Files.walkFileTree(rootDirectory, new SimpleFileVisitor<Path>() {
         @Override

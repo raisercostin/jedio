@@ -33,3 +33,4 @@
 /.cache-tests
 /.checkstyle
 /.externalToolBuilders/org.eclipse.jdt.core.javabuilder.launch
+/bin/

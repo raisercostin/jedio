@@ -22,7 +22,8 @@ import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualFo
  */
 @Data
 public class ClasspathLocation implements FolderLocation, ExistingLocation, ReferenceLocation, ReadableFileLocation {
-  private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader()).getOrElse(ClassLoader.class.getClassLoader());
+  private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
+      .getOrElse(ClassLoader.class.getClassLoader());
 
   private final String path;
 
@@ -204,7 +205,7 @@ public class ClasspathLocation implements FolderLocation, ExistingLocation, Refe
   }
 
   @Override
-  public Flux<ExistingLocation> find() {
+  public Flux<ExistingLocation> findFilesAndFolders() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 

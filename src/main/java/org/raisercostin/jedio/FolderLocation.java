@@ -15,9 +15,14 @@ public interface FolderLocation extends ExistingLocation {
     return child(RelativeLocation.create(path));
   }
 
+  @sugar
+  default FolderLocation childFolder(String path) {
+    return child(path).mkdirIfNecessary();
+  }
+
   ChangableLocation asChangableLocation();
 
-  Flux<ExistingLocation> find();
+  Flux<ExistingLocation> findFilesAndFolders();
 
   Flux<FileLocation> findFiles();
 }

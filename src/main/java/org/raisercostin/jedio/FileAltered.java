@@ -21,7 +21,7 @@ public class FileAltered {
 
   public String toString() {
     return location() + " " + event.kind().name() + "#" + event.count();
-  } 
+  }
 }
 // FileCreated, FileChanged, FileDeleted, DirectoryCreated,
 // /**

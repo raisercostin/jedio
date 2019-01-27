@@ -4,7 +4,7 @@ import java.io.InputStream;
 
 import org.raisercostin.util.sugar;
 
-/** Writable by me or others?*/
+/** Writable by me or others? */
 public interface WritableFileLocation extends FileLocation {
   WritableFileLocation write(String content, String encoding);
 

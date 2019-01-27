@@ -18,18 +18,18 @@ public class Locations {
 
   @sugar
   public static ReferenceLocation folder(String path) {
-    // check if absolute?
     return folder(Paths.get(path));
+  }
+  @sugar
+  public static ReferenceLocation folder(File path) {
+    return folder(path.toPath());
   }
 
   public static ReferenceLocation folder(Path path) {
+    // check if absolute?
     return new PathLocation(path);
   }
 
-  public static ReferenceLocation folder(File path) {
-    // check if absolute?
-    return new PathLocation(path.toPath());
-  }
 
   @sugar
   public static FolderLocation existingFolder(Path path) {
@@ -43,5 +43,25 @@ public class Locations {
 
   public static ReadableFileLocation classpath(String path) {
     return new ClasspathLocation(path);
+  }
+
+  public static FolderLocation folderFromRelative(String relativePath) {
+    return folderFromRelative(relative(relativePath));
+  }
+
+  public static FolderLocation folderFromRelative(RelativeLocation relative) {
+    return current().child(relative).mkdirIfNecessary();
+  }
+
+  public static FolderLocation current() {
+    return new PathLocation(Paths.get("."));
+  }
+
+  public static ExistingLocation existingFolderOrFile(Path x) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  public static FileLocation existingFile(Path path) {
+    return new PathLocation(path);
   }
 }

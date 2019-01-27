@@ -87,8 +87,8 @@ public class GuavaAndDirectoryStreamTraversal3 implements FileTraversal2 {
       };
       Iterable<Path> iterable = recursive ? fileTraverser(createFilter(all)).depthFirstPreOrder(start)
           : Files.newDirectoryStream(start, createFilter(all));
-      return Flux.fromIterable(iterable).map(x -> new PathWithAttributes(x))
-          .filter(path -> filter.matches(path.path)).sort(foldersFirst());
+      return Flux.fromIterable(iterable).map(x -> new PathWithAttributes(x)).filter(path -> filter.matches(path.path))
+          .sort(foldersFirst());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
