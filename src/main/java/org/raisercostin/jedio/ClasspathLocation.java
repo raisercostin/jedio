@@ -10,6 +10,8 @@ import lombok.Data;
 import reactor.core.publisher.Flux;
 
 import org.apache.commons.io.IOUtils;
+import org.raisercostin.jedio.find.FileTraversal2;
+import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualFolders.PathWithAttributes;
 
 /**
  * What is Absolute, Relative and Canonical Path
@@ -20,7 +22,6 @@ import org.apache.commons.io.IOUtils;
  */
 @Data
 public class ClasspathLocation implements FolderLocation, ExistingLocation, ReferenceLocation, ReadableFileLocation {
-  private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ClasspathLocation.class);
   private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader()).getOrElse(ClassLoader.class.getClassLoader());
 
   private final String path;
@@ -209,6 +210,11 @@ public class ClasspathLocation implements FolderLocation, ExistingLocation, Refe
 
   @Override
   public Flux<FileLocation> findFiles() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 }

@@ -1,7 +1,5 @@
 package org.raisercostin.util;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Path;
@@ -11,17 +9,21 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.annotation.concurrent.NotThreadSafe;
+
 import org.raisercostin.jedio.DeleteOptions;
 import org.raisercostin.jedio.FolderLocation;
 import org.raisercostin.jedio.Locations;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 // An instance must be created when is needed as is not thread safe.
 @NotThreadSafe
 public class SimpleShell implements Shell {
-  private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(SimpleShell.class);
   private static final Pattern SPLIT_PARAMS_PATTERN = Pattern.compile("\"([^\"]*)\"|(\\S+)");
   private Stack<FolderLocation> dirs = new Stack<FolderLocation>();
   private FolderLocation current;

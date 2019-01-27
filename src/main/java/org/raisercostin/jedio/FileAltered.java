@@ -7,7 +7,6 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 @Data
 @Getter(value = AccessLevel.NONE)
@@ -22,7 +21,7 @@ public class FileAltered {
 
   public String toString() {
     return location() + " " + event.kind().name() + "#" + event.count();
-  }
+  } 
 }
 // FileCreated, FileChanged, FileDeleted, DirectoryCreated,
 // /**

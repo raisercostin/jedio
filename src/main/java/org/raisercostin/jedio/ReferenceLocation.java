@@ -1,7 +1,13 @@
 package org.raisercostin.jedio;
 
 import io.vavr.control.Option;
+import reactor.core.publisher.Flux;
+
 import java.util.function.Function;
+
+import org.raisercostin.jedio.find.FileTraversal2;
+import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualFolders;
+import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualFolders.PathWithAttributes;
 import org.raisercostin.util.sugar;
 
 // TODO maybe should contain type <T> of the actual internal instance
@@ -71,4 +77,6 @@ public interface ReferenceLocation {
   default FolderLocation mkdirIfNecessary() {
     return existingOrElse(x -> x.mkdir());
   }
+
+  Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore);
 }

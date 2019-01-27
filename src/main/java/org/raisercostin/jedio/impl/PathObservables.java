@@ -6,7 +6,6 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
 import java.io.IOException;
-import java.nio.file.FileSystem;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,8 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.raisercostin.jedio.FileAltered;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;

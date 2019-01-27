@@ -1,9 +1,8 @@
 package org.raisercostin.jedio;
 
 import java.io.InputStream;
-import org.raisercostin.util.sugar;
 
-import reactor.core.publisher.Flux;
+import org.raisercostin.util.sugar;
 
 /** Writable by me or others?*/
 public interface WritableFileLocation extends FileLocation {

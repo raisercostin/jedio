@@ -4,18 +4,27 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.StandardCopyOption;
 import java.util.function.Function;
 
+import javax.activation.MimetypesFileTypeMap;
+
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.raisercostin.jedio.find.FileTraversal2;
+import org.raisercostin.jedio.find.Filters;
+import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualFolders.PathWithAttributes;
 import org.raisercostin.jedio.impl.PathObservables;
 import org.raisercostin.util.SimpleShell;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 import io.vavr.control.Option;
 import lombok.Data;
@@ -32,6 +41,7 @@ import reactor.core.publisher.Flux;
 public class PathLocation implements FolderLocation, NonExistingLocation, ReferenceLocation, ReadableFileLocation,
     WritableFileLocation, ChangableLocation, LinkLocation {
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PathLocation.class);
+  private static final MimetypesFileTypeMap allMimeTypes = new javax.activation.MimetypesFileTypeMap();
 
   private final Path path;
 
@@ -670,8 +680,99 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
 
   @Override
   public Flux<FileLocation> findFiles() {
-    //FileTraversal traversal = new GuavaAndDirectoryStreamTraversalWithVirtualFolders();
+    // FileTraversal traversal = new GuavaAndDirectoryStreamTraversalWithVirtualFolders();
     throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore) {
+    PathMatcher matcher;
+    if (filter.startsWith("glob:"))
+      matcher = Filters.createAny(filter);
+    else if (filter.startsWith("default:"))
+      matcher = Filters.createGlob("**/*" + filter.replace("default:", "") + "*");
+    else if (filter.startsWith("content:"))
+      matcher = createContentFilter(StringUtils.unwrap(StringUtils.removeStart(filter, "content:"), "\""));
+    else
+      matcher = Filters.createGlob("**/*" + filter + "*");
+    Path parent = toPath();
+    logger.info(parent + " traverse");
+    boolean ignoreCase = true;
+    Flux<PathWithAttributes> paths = traversal.traverse2(parent,
+        Filters.filter(matcher, Filters.createGitFilter(gitIgnore, ignoreCase), ignoreCase), recursive);
+    return paths;
+  }
+
+  private PathMatcher createContentFilter(String filter) {
+    return new PathMatcher() {
+      @Override
+      public boolean matches(Path path) {
+        return checkIfContentOrPathContains(path, filter, false);
+      }
+    };
+  }
+
+  private boolean checkIfContentOrPathContains(Path path, String filter, boolean ignoreCase) {
+    try {
+      if (Files.isRegularFile(path)) {
+        if (Strings.isNullOrEmpty(filter))
+          return true;
+        else {
+          if (Files.size(path) < 10000 && !isBinaryFile(path)) {
+            logger.debug("searchInContent  [{}] in {}", filter, path);
+            String content = new String(Files.readAllBytes(path), Charset.forName("UTF-8"));
+            return contains(content, filter, ignoreCase);
+          }
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  boolean isBinaryFile(Path p) throws IOException {
+    String mimeType = allMimeTypes.getContentType(p.toFile());
+    if (mimeType.equals("application/octet-stream") || mimeType.equals("application/pdf"))
+      return true;
+    return false;
+    // return
+    // OptionConverters.toJava(Locations.file(p).mimeTypeFromName()).map(x ->
+    // x.isBinary()).orElse(false);
+    // String type = Files.probeContentType(p);
+    // System.out.println("probed ["+type+"]");
+    // if (type == null) {
+    // // type couldn't be determined, assume binary
+    // return true;
+    // } else if (type.startsWith("text")) {
+    // return false;
+    // } else {
+    // // type isn't text
+    // return true;
+    // }
+  }
+
+  private boolean contains(String string, String substring, boolean ignoreCase) {
+    if (Strings.isNullOrEmpty(substring))
+      return true;
+    return containsIgnoreCase(string, substring, ignoreCase);
+  }
+
+  public static boolean containsIgnoreCase(String str, String searchStr, boolean ignoreCase) {
+    if (str == null || searchStr == null)
+      return false;
+
+    final int length = searchStr.length();
+    if (length == 0)
+      return true;
+
+    for (int i = str.length() - length; i >= 0; i--) {
+      if (str.regionMatches(ignoreCase, i, searchStr, 0, length))
+        return true;
+    }
+    return false;
   }
 
 }
