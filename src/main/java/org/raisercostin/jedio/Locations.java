@@ -20,6 +20,7 @@ public class Locations {
   public static ReferenceLocation folder(String path) {
     return folder(Paths.get(path));
   }
+
   @sugar
   public static ReferenceLocation folder(File path) {
     return folder(path.toPath());
@@ -29,7 +30,6 @@ public class Locations {
     // check if absolute?
     return new PathLocation(path);
   }
-
 
   @sugar
   public static FolderLocation existingFolder(Path path) {
@@ -63,5 +63,15 @@ public class Locations {
 
   public static FileLocation existingFile(Path path) {
     return new PathLocation(path);
+  }
+
+  @sugar
+  public static FileLocation existingFile(File path) {
+    return existingFile(path.toPath());
+  }
+
+  @sugar
+  public static FileLocation existingFile(String path) {
+    return existingFile(Paths.get(path));
   }
 }

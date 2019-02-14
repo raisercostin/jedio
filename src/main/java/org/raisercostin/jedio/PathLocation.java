@@ -4,21 +4,15 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.nio.file.StandardCopyOption;
 import java.util.function.Function;
 
-import javax.activation.MimetypesFileTypeMap;
-
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.raisercostin.jedio.find.FileTraversal2;
-import org.raisercostin.jedio.find.Filters;
 import org.raisercostin.jedio.find.FindFilters;
 import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualFolders;
 import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualFolders.PathWithAttributes;
@@ -27,7 +21,6 @@ import org.raisercostin.jedio.impl.PathObservables;
 import org.raisercostin.util.SimpleShell;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 
 import io.vavr.control.Option;
 import lombok.Data;
@@ -690,7 +683,7 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
 
   @Override
   public Flux<FileLocation> findFiles() {
-    return find(traversal, "", true, "").flatMap(x->{
+    return find(traversal, "", true, "").flatMap(x -> {
       if (x.isDirectory())
         return Flux.empty();
       else

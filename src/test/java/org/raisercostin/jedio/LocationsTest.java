@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 class LocationsTest {
   @Test
   void test() {
-    assertEquals("PathLocation(path="+Paths.get(".").toAbsolutePath().normalize()+")",Locations.current().toString());
+    assertEquals("PathLocation(path=" + Paths.get(".").toAbsolutePath().normalize() + ")",
+        Locations.current().toString());
   }
 }

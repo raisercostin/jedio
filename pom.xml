@@ -25,7 +25,7 @@
 	<distributionManagement>
 		<repository>
 			<id>bintray</id>
-			<url>https://api.bintray.com/maven/${bintray.user}/${bintray.repo}/${bintray.package};publish=1</url>
+			<url>https://api.bintray.com/maven/${bintray.user}/${bintray.repo}/${bintray.package}/;publish=1</url>
 		</repository>
 		<!-- <snapshotRepository> <id>${org}-private-maven2-snapshots</id> <url>${dist.snapshot.url}</url> 
 			<uniqueVersion>false</uniqueVersion> </snapshotRepository> <site> <id>${org}-private-maven2-sites</id> 

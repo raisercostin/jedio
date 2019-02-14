@@ -19,7 +19,6 @@ import static org.raisercostin.jedio.find.Filters.*;
 public class FindFilters {
   private final static org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FindFilters.class);
   private static final MimetypesFileTypeMap allMimeTypes = new javax.activation.MimetypesFileTypeMap();
-  
 
   public static TraversalFilter createTotalCommanderFilter(String totalCommanderFilter) {
     List<String> list = Splitter.on("|").splitToList(totalCommanderFilter);
@@ -62,8 +61,7 @@ public class FindFilters {
       }
     };
   }
-  
-  
+
   public static TraversalFilter createFindFilter(String filter, String gitIgnore) {
     PathMatcher matcher;
     if (filter.startsWith("glob:"))
