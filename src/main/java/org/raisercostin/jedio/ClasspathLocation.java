@@ -51,7 +51,7 @@ public class ClasspathLocation implements FolderLocation, ExistingLocation, Refe
   }
 
   @Override
-  public Option<String> read() {
+  public Option<String> readIfExists() {
     return Try.ofSupplier(() -> readContent()).toOption();
   }
 
@@ -137,7 +137,7 @@ public class ClasspathLocation implements FolderLocation, ExistingLocation, Refe
 
   @Override
   public ReadableFileLocation asReadableFile() {
-    throw new RuntimeException("Not implemented yet!!!");
+    return this;
   }
 
   @Override

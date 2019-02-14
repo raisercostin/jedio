@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -11,6 +12,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.FindFilters;
@@ -85,7 +87,8 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
 
   @Override
   /**
-   * Returns a path that is this path with redundant name elements eliminated. @see java.nio.file.Path.normalize()
+   * Returns a path that is this path with redundant name elements
+   * eliminated. @see java.nio.file.Path.normalize()
    */
   public String normalized() {
     return toPath().normalize().toString();
@@ -93,7 +96,8 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
 
   @Override
   /**
-   * A canonical pathname is both absolute and unique. The precise definition of canonical form is system-dependent.
+   * A canonical pathname is both absolute and unique. The precise definition of
+   * canonical form is system-dependent.
    */
   public String canonical() {
     return toPath().normalize().toString();
@@ -230,12 +234,20 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
 
   @Override
   public ReadableFileLocation asReadableFile() {
-    // TODO check file exists
     return this;
   }
 
   @Override
-  public Option<String> read() {
+  public String readContent() {
+    try {
+      return IOUtils.toString(Files.newBufferedReader(toPath()));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public Option<String> readIfExists() {
     try {
       File file = toFile();
       if (file.exists())
@@ -451,11 +463,6 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
   }
 
   @Override
-  public String readContent() {
-    return read().get();
-  }
-
-  @Override
   public PathLocation asPathLocation() {
     return this;
   }
@@ -468,23 +475,27 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
   @Override
   public Flux<FileAltered> watch() {
     /*
-     * Implementation inspired from - http://blog2.vorburger.ch/2015/04/java-7-watchservice-based.html -
+     * Implementation inspired from -
+     * http://blog2.vorburger.ch/2015/04/java-7-watchservice-based.html -
      * https://docs.oracle.com/javase/tutorial/essential/io/notification.html -
-     * http://commons.apache.org/proper/commons-io/javadocs/api-release/index.html?org/apache/commons/io/monitor/package
-     * -summary.html
+     * http://commons.apache.org/proper/commons-io/javadocs/api-release/index.
+     * html?org/apache/commons/io/monitor/package -summary.html
      */
     logger.info("watch " + this);
     // WatchService watcher = FileSystems.getDefault().newWatchService();
-    // val key = path.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY, OVERFLOW);
+    // val key = path.register(watcher, ENTRY_CREATE, ENTRY_DELETE,
+    // ENTRY_MODIFY, OVERFLOW);
     // //key.pollEvents();
     // watcher.poll()
     // Flux.in
     // new DirectoryWatcherBuilder().dir(dir)
-    // .listener((directory, changeKind) -> System.out.println(changeKind.toString() + " " + directory.toString()));
+    // .listener((directory, changeKind) ->
+    // System.out.println(changeKind.toString() + " " + directory.toString()));
     // val observer = new FileAlterationObserver(toFile());
     // val monitor = new FileAlterationMonitor(pollingIntervalInMillis);
     return PathObservables.watchNonRecursive(path);
-    // .map(x->{System.out.println(x.kind().type()+" "+x.kind().name()+" "+x.context()+" "+x.count()+"
+    // .map(x->{System.out.println(x.kind().type()+" "+x.kind().name()+"
+    // "+x.context()+" "+x.count()+"
     // "+((Path)x.context()).toAbsolutePath());return x;})
     // .map(x->new FileAltered());
     // throw new RuntimeException("Not implemented yet!!!");
@@ -539,18 +550,22 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
   // /**
   // * Register the rootDirectory, and all its sub-directories.
   // */
-  // private void registerAll(final Path rootDirectory, final WatchService watcher) throws IOException {
+  // private void registerAll(final Path rootDirectory, final WatchService
+  // watcher) throws IOException {
   // Files.walkFileTree(rootDirectory, new SimpleFileVisitor<Path>() {
   // @Override
-  // public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
+  // public FileVisitResult preVisitDirectory(final Path dir, final
+  // BasicFileAttributes attrs) throws IOException {
   // register(dir, watcher);
   // return FileVisitResult.CONTINUE;
   // }
   // });
   // }
   //
-  // private void register(final Path dir, final WatchService watcher) throws IOException {
-  // final WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+  // private void register(final Path dir, final WatchService watcher) throws
+  // IOException {
+  // final WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE,
+  // ENTRY_MODIFY);
   // directoriesByKey.put(key, dir);
   // }
   /// **
@@ -613,12 +628,14 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
   /// terminating Thread (as planned).");
   // return;
   // } catch (InterruptedException e) {
-  // log.debug("Thread InterruptedException, terminating (as planned, if caused by
+  // log.debug("Thread InterruptedException, terminating (as planned, if caused
+  // by
   /// close()).");
   // return;
   // }
   // Path watchKeyWatchablePath = (Path) key.watchable();
-  // // We have a polled event, now we traverse it and receive all the states from
+  // // We have a polled event, now we traverse it and receive all the states
+  // from
   /// it
   // for (WatchEvent<?> event : key.pollEvents()) {
   //

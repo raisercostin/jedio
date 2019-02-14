@@ -11,7 +11,8 @@ import java.nio.file.PathMatcher;
 import reactor.core.publisher.Flux;
 
 /**
- * Reimplemented com.google.common.io.Files.fileTraverser using Files.newDirectoryStream.
+ * Reimplemented com.google.common.io.Files.fileTraverser using
+ * Files.newDirectoryStream.
  */
 public class GuavaAndDirectoryStreamTraversal2 implements FileTraversal2 {
   private static LinkOption[] options = { LinkOption.NOFOLLOW_LINKS };
