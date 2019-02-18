@@ -45,6 +45,10 @@ public class Locations {
     return new ClasspathLocation(path);
   }
 
+  public static FolderLocation classpathFolder(String path) {
+    return new ClasspathLocation(path);
+  }
+
   public static FolderLocation folderFromRelative(String relativePath) {
     return folderFromRelative(relative(relativePath));
   }

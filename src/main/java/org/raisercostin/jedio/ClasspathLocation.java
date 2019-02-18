@@ -181,8 +181,8 @@ public class ClasspathLocation implements FolderLocation, ExistingLocation, Refe
   }
 
   @Override
-  public ReferenceLocation child(RelativeLocation path) {
-    throw new RuntimeException("Not implemented yet!!!");
+  public ReferenceLocation child(RelativeLocation child) {
+    return Locations.classpath(fixPath(path + "/" + child.getLocation()));
   }
 
   @Override
