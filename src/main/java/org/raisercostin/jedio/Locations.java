@@ -3,6 +3,8 @@ package org.raisercostin.jedio;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import org.raisercostin.jedio.url.UrlLocation;
 import org.raisercostin.util.sugar;
 
 public class Locations {
@@ -77,5 +79,9 @@ public class Locations {
   @sugar
   public static FileLocation existingFile(String path) {
     return existingFile(Paths.get(path));
+  }
+
+  public static UrlLocation url(String url) {
+    return new UrlLocation(url);
   }
 }
