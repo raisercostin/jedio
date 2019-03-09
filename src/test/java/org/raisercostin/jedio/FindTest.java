@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 class FindTest {
   @Test
   void testFindFilesAndDirs() {
-    List<ExistingLocation> all = Locations.current().childDir("src/test/resources").findFilesAndDirs()
-        .collectList().block();
+    List<ExistingLocation> all = Locations.current().childDir("src/test/resources").findFilesAndDirs().collectList()
+        .block();
     assertEquals(8, all.size());
   }
 

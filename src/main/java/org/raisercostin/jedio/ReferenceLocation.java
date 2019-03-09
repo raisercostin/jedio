@@ -8,6 +8,7 @@ import java.util.function.Function;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs;
 import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
+import org.raisercostin.jedio.path.PathLocation;
 import org.raisercostin.util.sugar;
 
 // TODO maybe should contain type <T> of the actual internal instance

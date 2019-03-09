@@ -4,6 +4,8 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.raisercostin.jedio.classpath.ClasspathLocation;
+import org.raisercostin.jedio.path.PathLocation;
 import org.raisercostin.jedio.url.UrlLocation;
 import org.raisercostin.util.sugar;
 

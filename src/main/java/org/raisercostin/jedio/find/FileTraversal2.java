@@ -9,10 +9,10 @@ import reactor.core.publisher.Flux;
 
 /**
  * The traversal has two important filters: - performance/pruning filter - that
- * can cut out entire dirs from final result (you don't need to test that
- * cuts only dirs since this will affect performance. - final filter - to
- * define what is the external result. Files or dirs that are matched by both
- * pruning and filter will not be returned.
+ * can cut out entire dirs from final result (you don't need to test that cuts
+ * only dirs since this will affect performance. - final filter - to define what
+ * is the external result. Files or dirs that are matched by both pruning and
+ * filter will not be returned.
  */
 public interface FileTraversal2 {
   default <T> Flux<T> traverse(Path start, TraversalFilter filter, Function<Path, T> f, boolean recursive) {

@@ -1,4 +1,4 @@
-package org.raisercostin.jedio;
+package org.raisercostin.jedio.classpath;
 
 import io.vavr.control.Option;
 import io.vavr.control.Try;
@@ -10,8 +10,21 @@ import lombok.Data;
 import reactor.core.publisher.Flux;
 
 import org.apache.commons.io.IOUtils;
+import org.raisercostin.jedio.ChangeableLocation;
+import org.raisercostin.jedio.DeleteOptions;
+import org.raisercostin.jedio.DirLocation;
+import org.raisercostin.jedio.ExistingLocation;
+import org.raisercostin.jedio.FileLocation;
+import org.raisercostin.jedio.LinkLocation;
+import org.raisercostin.jedio.Locations;
+import org.raisercostin.jedio.NonExistingLocation;
+import org.raisercostin.jedio.ReadableFileLocation;
+import org.raisercostin.jedio.ReferenceLocation;
+import org.raisercostin.jedio.RelativeLocation;
+import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
+import org.raisercostin.jedio.path.PathLocation;
 
 import com.google.common.base.Preconditions;
 
@@ -204,7 +217,7 @@ public class ClasspathLocation implements DirLocation, ExistingLocation, Referen
   }
 
   @Override
-  public ChangableLocation asChangableLocation() {
+  public ChangeableLocation asChangableLocation() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 

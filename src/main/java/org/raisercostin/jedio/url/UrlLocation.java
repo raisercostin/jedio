@@ -8,13 +8,13 @@ import org.raisercostin.jedio.FileLocation;
 import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.LinkLocation;
 import org.raisercostin.jedio.NonExistingLocation;
-import org.raisercostin.jedio.PathLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
+import org.raisercostin.jedio.path.PathLocation;
 
 import io.vavr.control.Option;
 import lombok.AllArgsConstructor;

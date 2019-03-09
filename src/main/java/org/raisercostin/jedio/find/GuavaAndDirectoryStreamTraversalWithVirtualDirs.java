@@ -40,8 +40,7 @@ public class GuavaAndDirectoryStreamTraversalWithVirtualDirs implements FileTrav
   // private final boolean followLinks;
   private Function1<Path, Boolean> isVirtualDir;
 
-  public GuavaAndDirectoryStreamTraversalWithVirtualDirs(boolean followLinks,
-      Function1<Path, Boolean> isVirtualDir) {
+  public GuavaAndDirectoryStreamTraversalWithVirtualDirs(boolean followLinks, Function1<Path, Boolean> isVirtualDir) {
     this.isVirtualDir = isVirtualDir;
     // this.followLinks = followLinks;
     if (followLinks)

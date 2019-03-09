@@ -11,16 +11,11 @@ public interface DirLocation extends ExistingLocation {
   ReferenceLocation child(RelativeLocation path);
 
   @sugar
-  default ReferenceLocation child(String path) {
-    return child(RelativeLocation.create(path));
-  }
-
-  @sugar
   default DirLocation childDir(String path) {
     return child(path).mkdirIfNecessary();
   }
 
-  ChangableLocation asChangableLocation();
+  ChangeableLocation asChangableLocation();
 
   Flux<ExistingLocation> findFilesAndDirs();
 

@@ -1,4 +1,4 @@
-package org.raisercostin.jedio;
+package org.raisercostin.jedio.path;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -14,12 +14,24 @@ import java.util.function.Function;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.raisercostin.jedio.ChangeableLocation;
+import org.raisercostin.jedio.DeleteOptions;
+import org.raisercostin.jedio.DirLocation;
+import org.raisercostin.jedio.ExistingLocation;
+import org.raisercostin.jedio.FileAltered;
+import org.raisercostin.jedio.FileLocation;
+import org.raisercostin.jedio.LinkLocation;
+import org.raisercostin.jedio.Locations;
+import org.raisercostin.jedio.NonExistingLocation;
+import org.raisercostin.jedio.ReadableFileLocation;
+import org.raisercostin.jedio.ReferenceLocation;
+import org.raisercostin.jedio.RelativeLocation;
+import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.FindFilters;
 import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs;
 import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
 import org.raisercostin.jedio.find.TraversalFilter;
-import org.raisercostin.jedio.impl.PathObservables;
 import org.raisercostin.util.SimpleShell;
 
 import com.google.common.base.Preconditions;
@@ -37,7 +49,7 @@ import reactor.core.publisher.Flux;
  */
 @Data
 public class PathLocation implements DirLocation, NonExistingLocation, ReferenceLocation, ReadableFileLocation,
-    WritableFileLocation, ChangableLocation, LinkLocation {
+    WritableFileLocation, ChangeableLocation, LinkLocation {
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PathLocation.class);
 
   private final Path path;
@@ -58,7 +70,7 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
 
   @Override
   public ReferenceLocation child(String path) {
-    return DirLocation.super.child(path);
+    return ChangeableLocation.super.child(path);
   }
 
   public File toFile() {
@@ -468,7 +480,7 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   }
 
   @Override
-  public ChangableLocation asChangableLocation() {
+  public ChangeableLocation asChangableLocation() {
     return this;
   }
 
