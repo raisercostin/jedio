@@ -17,12 +17,10 @@ import io.vavr.Lazy;
 import reactor.core.publisher.Flux;
 
 /**
- * Reimplemented com.google.common.io.Files.fileTraverser using
- * Files.newDirectoryStream. Use find/gfind like in ``` scoop install gow
- * #https://www.freebsd.org/cgi/man.cgi?query=gfind&manpath=FreeBSD+7.2-RELEASE+and+Ports
- * gfind d:/home/raiser/work/_old-2018-12-31 -printf "%A@ %C@ %d %D %F %G %i %l
- * %m %M %s %y %Y - %h %f %s\n" gfind d:/home/raiser/work/_old-2018-12-31
- * -printf "%10s %y %h %f\n" ls -al ```
+ * Reimplemented com.google.common.io.Files.fileTraverser using Files.newDirectoryStream. Use find/gfind like in ```
+ * scoop install gow #https://www.freebsd.org/cgi/man.cgi?query=gfind&manpath=FreeBSD+7.2-RELEASE+and+Ports gfind
+ * d:/home/raiser/work/_old-2018-12-31 -printf "%A@ %C@ %d %D %F %G %i %l %m %M %s %y %Y - %h %f %s\n" gfind
+ * d:/home/raiser/work/_old-2018-12-31 -printf "%10s %y %h %f\n" ls -al ```
  */
 public class GuavaAndDirectoryStreamTraversal3 implements FileTraversal2 {
   private final LinkOption[] options;

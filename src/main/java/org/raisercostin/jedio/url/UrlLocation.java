@@ -4,8 +4,8 @@ import java.io.InputStream;
 import java.util.function.Function;
 
 import org.raisercostin.jedio.DeleteOptions;
-import org.raisercostin.jedio.FileLocation;
 import org.raisercostin.jedio.DirLocation;
+import org.raisercostin.jedio.FileLocation;
 import org.raisercostin.jedio.LinkLocation;
 import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.ReadableFileLocation;

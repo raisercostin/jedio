@@ -1,15 +1,14 @@
 package org.raisercostin.jedio;
 
-import io.vavr.control.Option;
-import reactor.core.publisher.Flux;
-
 import java.util.function.Function;
 
 import org.raisercostin.jedio.find.FileTraversal2;
-import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs;
 import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
 import org.raisercostin.jedio.path.PathLocation;
 import org.raisercostin.util.sugar;
+
+import io.vavr.control.Option;
+import reactor.core.publisher.Flux;
 
 // TODO maybe should contain type <T> of the actual internal instance
 public interface ReferenceLocation {

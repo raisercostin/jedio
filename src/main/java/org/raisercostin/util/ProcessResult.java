@@ -1,7 +1,5 @@
 package org.raisercostin.util;
 
-import com.google.common.base.Joiner;
-import io.vavr.control.Try;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,13 +10,18 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.output.StringBuilderWriter;
+import org.raisercostin.jedio.DirLocation;
+
+import com.google.common.base.Joiner;
+
+import io.vavr.control.Try;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.io.Charsets;
-import org.apache.commons.io.output.StringBuilderWriter;
-import org.raisercostin.jedio.DirLocation;
 
 @Data
 @Getter(value = AccessLevel.NONE)

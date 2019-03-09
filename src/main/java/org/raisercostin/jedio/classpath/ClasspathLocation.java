@@ -1,13 +1,9 @@
 package org.raisercostin.jedio.classpath;
 
-import io.vavr.control.Option;
-import io.vavr.control.Try;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Function;
-import lombok.Data;
-import reactor.core.publisher.Flux;
 
 import org.apache.commons.io.IOUtils;
 import org.raisercostin.jedio.ChangeableLocation;
@@ -27,6 +23,11 @@ import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDi
 import org.raisercostin.jedio.path.PathLocation;
 
 import com.google.common.base.Preconditions;
+
+import io.vavr.control.Option;
+import io.vavr.control.Try;
+import lombok.Data;
+import reactor.core.publisher.Flux;
 
 /**
  * What is Absolute, Relative and Canonical Path

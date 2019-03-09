@@ -3,7 +3,6 @@ package org.raisercostin.jedio.find;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.util.List;
 
 import com.google.common.base.Splitter;
 

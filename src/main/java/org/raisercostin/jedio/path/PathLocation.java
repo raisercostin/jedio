@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -99,8 +98,7 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
 
   @Override
   /**
-   * Returns a path that is this path with redundant name elements
-   * eliminated. @see java.nio.file.Path.normalize()
+   * Returns a path that is this path with redundant name elements eliminated. @see java.nio.file.Path.normalize()
    */
   public String normalized() {
     return toPath().normalize().toString();
@@ -108,8 +106,7 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
 
   @Override
   /**
-   * A canonical pathname is both absolute and unique. The precise definition of
-   * canonical form is system-dependent.
+   * A canonical pathname is both absolute and unique. The precise definition of canonical form is system-dependent.
    */
   public String canonical() {
     return toPath().normalize().toString();
@@ -487,8 +484,7 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   @Override
   public Flux<FileAltered> watch() {
     /*
-     * Implementation inspired from -
-     * http://blog2.vorburger.ch/2015/04/java-7-watchservice-based.html -
+     * Implementation inspired from - http://blog2.vorburger.ch/2015/04/java-7-watchservice-based.html -
      * https://docs.oracle.com/javase/tutorial/essential/io/notification.html -
      * http://commons.apache.org/proper/commons-io/javadocs/api-release/index.
      * html?org/apache/commons/io/monitor/package -summary.html

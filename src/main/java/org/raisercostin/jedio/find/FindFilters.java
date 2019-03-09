@@ -1,5 +1,10 @@
 package org.raisercostin.jedio.find;
 
+import static org.raisercostin.jedio.find.Filters.NO_PRUNING_PATH_MATCHER;
+import static org.raisercostin.jedio.find.Filters.createAny;
+import static org.raisercostin.jedio.find.Filters.createGlob;
+import static org.raisercostin.jedio.find.Filters.createTotalCommanderExpression;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -13,8 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-
-import static org.raisercostin.jedio.find.Filters.*;
 
 public class FindFilters {
   private final static org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FindFilters.class);

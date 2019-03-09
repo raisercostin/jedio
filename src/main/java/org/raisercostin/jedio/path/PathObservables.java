@@ -35,9 +35,8 @@ public final class PathObservables {
   }
 
   /**
-   * Creates an observable that watches the given directory and all its
-   * subdirectories. Directories that are created after subscription are
-   * watched, too.
+   * Creates an observable that watches the given directory and all its subdirectories. Directories that are created
+   * after subscription are watched, too.
    * 
    * @param path
    *          Root directory to be watched
@@ -49,8 +48,7 @@ public final class PathObservables {
   }
 
   /**
-   * Creates an observable that watches the given path but not its
-   * subdirectories.
+   * Creates an observable that watches the given path but not its subdirectories.
    * 
    * @param path
    *          Path to be watched

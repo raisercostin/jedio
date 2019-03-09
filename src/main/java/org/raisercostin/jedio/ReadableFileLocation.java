@@ -1,7 +1,8 @@
 package org.raisercostin.jedio;
 
-import io.vavr.control.Option;
 import java.io.InputStream;
+
+import io.vavr.control.Option;
 
 public interface ReadableFileLocation extends FileLocation {
   long length();
