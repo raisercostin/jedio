@@ -115,7 +115,7 @@ public class ProcessResult {
     }
   }
 
-  private static void copy(final InputStream input, final OutputStream output) throws IOException {
+  private static void copy(final InputStream input, final OutputStream output) {
     // final InputStreamReader in = new InputStreamReader(input,
     // Charsets.toCharset(inputEncoding));
     copyLarge1(input, output, new byte[DEFAULT_BUFFER_SIZE]);

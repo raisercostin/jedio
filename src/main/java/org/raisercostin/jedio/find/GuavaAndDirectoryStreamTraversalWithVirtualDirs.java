@@ -145,7 +145,7 @@ public class GuavaAndDirectoryStreamTraversalWithVirtualDirs implements FileTrav
     Preconditions.checkArgument(pdfFile.toString().toLowerCase().endsWith(".pdf"));
     return new DirectoryStream<Path>() {
       @Override
-      public void close() throws IOException {
+      public void close() {
         throw new RuntimeException("Not implemented yet!!!");
       }
 

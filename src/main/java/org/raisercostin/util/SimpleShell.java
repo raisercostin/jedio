@@ -15,6 +15,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import org.raisercostin.jedio.DeleteOptions;
 import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.Locations;
+import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
 
@@ -145,7 +146,7 @@ public class SimpleShell implements Shell {
   }
 
   public void mkdir(RelativeLocation path) {
-    child(path).existingOrElse(x -> x.mkdir());
+    child(path).existingOrElse(NonExistingLocation::mkdir);
   }
 
   public ReferenceLocation child(RelativeLocation path) {

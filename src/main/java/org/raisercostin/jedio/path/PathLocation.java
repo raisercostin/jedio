@@ -401,16 +401,10 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   }
 
   private void createJunction(Path symlink, Path target) {
-    try {
-      if (SystemUtils.IS_OS_WINDOWS)
-        createWindowsJunction(symlink, symlink, target);
-      else
-        createLinuxSymlink(symlink, symlink.toFile().getAbsolutePath(), target.toFile().getAbsolutePath());
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    if (SystemUtils.IS_OS_WINDOWS)
+      createWindowsJunction(symlink, symlink, target);
+    else
+      createLinuxSymlink(symlink, symlink.toFile().getAbsolutePath(), target.toFile().getAbsolutePath());
   }
 
   private void createWindowsJunction(Path place, Path symlink, Path target) {
@@ -419,26 +413,18 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   }
 
   private void createSymlink(Path symlink, Path target) {
-    try {
-      if (SystemUtils.IS_OS_WINDOWS)
-        createWindowsSymlink(symlink, symlink.toFile().getAbsolutePath(), target.toFile().getName());
-      else
-        createLinuxSymlink(symlink, symlink.toFile().getAbsolutePath(), target.toFile().getAbsolutePath());
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    if (SystemUtils.IS_OS_WINDOWS)
+      createWindowsSymlink(symlink, symlink.toFile().getAbsolutePath(), target.toFile().getName());
+    else
+      createLinuxSymlink(symlink, symlink.toFile().getAbsolutePath(), target.toFile().getAbsolutePath());
   }
 
-  private void createWindowsSymlink(Path place, String symlink, String targetName)
-      throws InterruptedException, IOException {
+  private void createWindowsSymlink(Path place, String symlink, String targetName) {
     new SimpleShell(place.getParent())
         .execute("cmd /C sudo cmd /C mklink /D \"" + symlink + "\" \"" + targetName + "\"");
   }
 
-  private void createLinuxSymlink(Path place, String symlink, String targetPath)
-      throws InterruptedException, IOException {
+  private void createLinuxSymlink(Path place, String symlink, String targetPath) {
     new SimpleShell(place.getParent()).execute("ln -sr " + targetPath + " " + symlink);
   }
 

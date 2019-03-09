@@ -111,7 +111,7 @@ public class FindFilters {
     }
   }
 
-  private static boolean isBinaryFile(Path p) throws IOException {
+  private static boolean isBinaryFile(Path p) {
     String mimeType = allMimeTypes.getContentType(p.toFile());
     if (mimeType.equals("application/octet-stream") || mimeType.equals("application/pdf"))
       return true;

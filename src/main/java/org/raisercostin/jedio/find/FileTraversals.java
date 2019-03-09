@@ -92,7 +92,7 @@ public class FileTraversals {
       Iterable<File> a = () -> FileUtils.iterateFilesAndDirs(start.toFile(), TrueFileFilter.INSTANCE,
           getFilter(ignoreCase));
       // lesAndDirs(start.toFile(), null, null);
-      return Flux.fromStream(StreamSupport.stream(a.spliterator(), false).map(x -> x.toPath()));
+      return Flux.fromStream(StreamSupport.stream(a.spliterator(), false).map(File::toPath));
     }
 
     private IOFileFilter getFilter(boolean ignoreCase) {
@@ -150,7 +150,7 @@ public class FileTraversals {
     public Flux<Path> traverse(Path start, boolean ignoreCase) {
       Iterable<File> iterable = com.google.common.io.Files.fileTraverser().depthFirstPreOrder(start.toFile());
       Stream<File> stream = StreamSupport.stream(iterable.spliterator(), false);
-      return Flux.fromStream(stream.map(x -> x.toPath()));
+      return Flux.fromStream(stream.map(File::toPath));
     }
   }
 

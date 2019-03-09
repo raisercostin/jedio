@@ -38,7 +38,7 @@ public class HttpUtils {
 
         } };
 
-        SSLContext sslcontext = SSLContext.getInstance("SSL");
+        SSLContext sslcontext = SSLContext.getInstance("TLS");
         sslcontext.init(null, trustAllCerts, new java.security.SecureRandom());
         HttpsURLConnection.setDefaultSSLSocketFactory(sslcontext.getSocketFactory());
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext);

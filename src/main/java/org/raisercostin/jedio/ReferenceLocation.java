@@ -75,7 +75,7 @@ public interface ReferenceLocation {
 
   @sugar
   default DirLocation mkdirIfNecessary() {
-    return existingOrElse(x -> x.mkdir());
+    return existingOrElse(NonExistingLocation::mkdir);
   }
 
   Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore);
