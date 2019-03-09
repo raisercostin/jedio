@@ -8,7 +8,7 @@
   </parent>
   <groupId>org.raisercostin</groupId>
   <artifactId>jedio</artifactId>
-  <version>0.12-SNAPSHOT</version>
+  <version>0.12</version>
   <name>jedio</name>
   <description>Uniform, fluent access to files, urls and other resources API for java, kotlin and scala.</description>
   <url>${git.url}</url>
@@ -20,7 +20,7 @@
     <connection>scm:git:${git.url}.git</connection>
     <developerConnection>scm:git:${git.url}.git</developerConnection>
     <url>${git.url}</url>
-    <tag>${project.artifactId}-${project.version}</tag>
+    <tag>jedio-0.12</tag>
   </scm>
   <distributionManagement>
     <repository>
@@ -309,7 +309,8 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.0</version><!--$NO-MVN-MAN-VER$-->
+        <version>3.8.0</version>
+        <!--$NO-MVN-MAN-VER$-->
         <configuration>
           <source>${source.java.version}</source>
           <target>${target.java.version}</target>
@@ -350,7 +351,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore />
+                  <ignore/>
                 </action>
               </pluginExecution>
               <pluginExecution>
@@ -363,7 +364,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore />
+                  <ignore/>
                 </action>
               </pluginExecution>
             </pluginExecutions>
@@ -386,7 +387,8 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.6</version><!--$NO-MVN-MAN-VER$-->
+        <version>2.6</version>
+        <!--$NO-MVN-MAN-VER$-->
         <executions>
           <execution>
             <id>make-assembly</id>
