@@ -3,6 +3,9 @@ package org.raisercostin.jedio.classpath;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.Function;
 
 import org.apache.commons.io.IOUtils;
@@ -88,7 +91,15 @@ public class ClasspathLocation implements DirLocation, ExistingLocation, Referen
 
   @Override
   public String absoluteAndNormalized() {
-    throw new RuntimeException("Not implemented yet!!!");
+    return Locations.existingFile(toPath()).absoluteAndNormalized();
+  }
+
+  private Path toPath() {
+    try {
+      return Paths.get(ClasspathLocation.class.getClassLoader().getResource(this.path).toURI());
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
