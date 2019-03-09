@@ -8,15 +8,15 @@ import org.junit.jupiter.api.Test;
 
 class FindTest {
   @Test
-  void testFindFilesAndFolders() {
-    List<ExistingLocation> all = Locations.current().childFolder("src/test/resources").findFilesAndFolders()
+  void testFindFilesAndDirs() {
+    List<ExistingLocation> all = Locations.current().childDir("src/test/resources").findFilesAndDirs()
         .collectList().block();
     assertEquals(8, all.size());
   }
 
   @Test
   void testFindFiles() {
-    List<FileLocation> all = Locations.current().childFolder("src/test/resources").findFiles().collectList().block();
+    List<FileLocation> all = Locations.current().childDir("src/test/resources").findFiles().collectList().block();
     System.out.println(all);
     assertEquals(6, all.size());
   }

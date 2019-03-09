@@ -3,15 +3,15 @@ package org.raisercostin.jedio.find;
 import java.nio.file.Path;
 import java.util.function.Function;
 
-import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualFolders.PathWithAttributes;
+import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
 
 import reactor.core.publisher.Flux;
 
 /**
  * The traversal has two important filters: - performance/pruning filter - that
- * can cut out entire folders from final result (you don't need to test that
- * cuts only folders since this will affect performance. - final filter - to
- * define what is the external result. Files or folders that are matched by both
+ * can cut out entire dirs from final result (you don't need to test that
+ * cuts only dirs since this will affect performance. - final filter - to
+ * define what is the external result. Files or dirs that are matched by both
  * pruning and filter will not be returned.
  */
 public interface FileTraversal2 {

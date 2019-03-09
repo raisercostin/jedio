@@ -35,14 +35,14 @@ import reactor.core.publisher.Flux;
  * %m %M %s %y %Y - %h %f %s\n" gfind d:/home/raiser/work/_old-2018-12-31
  * -printf "%10s %y %h %f\n" ls -al ```
  */
-public class GuavaAndDirectoryStreamTraversalWithVirtualFolders implements FileTraversal2 {
+public class GuavaAndDirectoryStreamTraversalWithVirtualDirs implements FileTraversal2 {
   private final LinkOption[] options;
   // private final boolean followLinks;
-  private Function1<Path, Boolean> isVirtualFolder;
+  private Function1<Path, Boolean> isVirtualDir;
 
-  public GuavaAndDirectoryStreamTraversalWithVirtualFolders(boolean followLinks,
-      Function1<Path, Boolean> isVirtualFolder) {
-    this.isVirtualFolder = isVirtualFolder;
+  public GuavaAndDirectoryStreamTraversalWithVirtualDirs(boolean followLinks,
+      Function1<Path, Boolean> isVirtualDir) {
+    this.isVirtualDir = isVirtualDir;
     // this.followLinks = followLinks;
     if (followLinks)
       options = new LinkOption[0];
@@ -78,12 +78,12 @@ public class GuavaAndDirectoryStreamTraversalWithVirtualFolders implements FileT
     }
 
     private boolean isInsideVirtualDirectory() {
-      // TODO fix this (this allows only one level virtual folder)
+      // TODO fix this (this allows only one level virtual dir)
       return path.getParent().toString().toLowerCase().endsWith(".pdf");
     }
 
     public boolean isVirtualDirectory() {
-      return GuavaAndDirectoryStreamTraversalWithVirtualFolders.this.isVirtualFolder.apply(path);
+      return GuavaAndDirectoryStreamTraversalWithVirtualDirs.this.isVirtualDir.apply(path);
     }
   }
 
@@ -128,7 +128,7 @@ public class GuavaAndDirectoryStreamTraversalWithVirtualFolders implements FileT
       Iterable<Path> iterable = recursive ? fileTraverser(createFilter(all)).depthFirstPreOrder(start)
           : newVirtualDirectoryStream(start, createFilter(all));
       return Flux.fromIterable(iterable).map(x -> new PathWithAttributes(x)).filter(path -> filter.matches(path.path))
-          .sort(foldersFirst());
+          .sort(dirsFirst());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -152,7 +152,7 @@ public class GuavaAndDirectoryStreamTraversalWithVirtualFolders implements FileT
 
       @Override
       public Iterator<Path> iterator() {
-        try (val is = Locations.folder(pdfFile).asReadableFile().unsafeInputStream()) {
+        try (val is = Locations.dir(pdfFile).asReadableFile().unsafeInputStream()) {
           val doc = PDDocument.load(is);
           return List.ofAll(doc.getPages()).zipWithIndex().map(pageWithIndex -> toPath(pdfFile, pageWithIndex))
               .iterator();
@@ -171,7 +171,7 @@ public class GuavaAndDirectoryStreamTraversalWithVirtualFolders implements FileT
     return traverse2(start, filter, false).map(x -> x.path);
   }
 
-  private Comparator<? super PathWithAttributes> foldersFirst() {
+  private Comparator<? super PathWithAttributes> dirsFirst() {
     return (x, y) -> Boolean.compare(y.isDirectory(), x.isDirectory());
   }
 

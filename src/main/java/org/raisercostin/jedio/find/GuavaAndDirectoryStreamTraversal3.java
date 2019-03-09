@@ -90,7 +90,7 @@ public class GuavaAndDirectoryStreamTraversal3 implements FileTraversal2 {
       Iterable<Path> iterable = recursive ? fileTraverser(createFilter(all)).depthFirstPreOrder(start)
           : Files.newDirectoryStream(start, createFilter(all));
       return Flux.fromIterable(iterable).map(x -> new PathWithAttributes(x)).filter(path -> filter.matches(path.path))
-          .sort(foldersFirst());
+          .sort(dirsFirst());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -100,7 +100,7 @@ public class GuavaAndDirectoryStreamTraversal3 implements FileTraversal2 {
     return traverse(start, filter, false).map(x -> x.path);
   }
 
-  private Comparator<? super PathWithAttributes> foldersFirst() {
+  private Comparator<? super PathWithAttributes> dirsFirst() {
     return (x, y) -> Boolean.compare(y.attrs.get().isDirectory(), x.attrs.get().isDirectory());
   }
 

@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 import org.raisercostin.jedio.DeleteOptions;
 import org.raisercostin.jedio.FileLocation;
-import org.raisercostin.jedio.FolderLocation;
+import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.LinkLocation;
 import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.PathLocation;
@@ -14,7 +14,7 @@ import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
-import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualFolders.PathWithAttributes;
+import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
 
 import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
@@ -66,7 +66,7 @@ public class UrlLocation implements ReferenceLocation, ReadableFileLocation {
   }
 
   @Override
-  public Option<RelativeLocation> stripAncestor(FolderLocation x) {
+  public Option<RelativeLocation> stripAncestor(DirLocation x) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -86,7 +86,7 @@ public class UrlLocation implements ReferenceLocation, ReadableFileLocation {
   }
 
   @Override
-  public Option<FolderLocation> existing() {
+  public Option<DirLocation> existing() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -96,12 +96,12 @@ public class UrlLocation implements ReferenceLocation, ReadableFileLocation {
   }
 
   @Override
-  public NonExistingLocation nonExistingOrElse(Function<FolderLocation, NonExistingLocation> fn) {
+  public NonExistingLocation nonExistingOrElse(Function<DirLocation, NonExistingLocation> fn) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public FolderLocation existingOrElse(Function<NonExistingLocation, FolderLocation> fn) {
+  public DirLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -121,7 +121,7 @@ public class UrlLocation implements ReferenceLocation, ReadableFileLocation {
   }
 
   @Override
-  public boolean isFolder() {
+  public boolean isDir() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 

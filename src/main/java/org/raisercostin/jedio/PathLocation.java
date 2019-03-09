@@ -16,8 +16,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.FindFilters;
-import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualFolders;
-import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualFolders.PathWithAttributes;
+import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs;
+import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
 import org.raisercostin.jedio.find.TraversalFilter;
 import org.raisercostin.jedio.impl.PathObservables;
 import org.raisercostin.util.SimpleShell;
@@ -36,7 +36,7 @@ import reactor.core.publisher.Flux;
  * @author raiser
  */
 @Data
-public class PathLocation implements FolderLocation, NonExistingLocation, ReferenceLocation, ReadableFileLocation,
+public class PathLocation implements DirLocation, NonExistingLocation, ReferenceLocation, ReadableFileLocation,
     WritableFileLocation, ChangableLocation, LinkLocation {
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PathLocation.class);
 
@@ -49,7 +49,7 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
 
   @Override
   public ReferenceLocation child(RelativeLocation child) {
-    return Locations.folder(fixPath(path.resolve(child.getLocation())));
+    return Locations.dir(fixPath(path.resolve(child.getLocation())));
   }
 
   private Path fixPath(Path path) {
@@ -58,7 +58,7 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
 
   @Override
   public ReferenceLocation child(String path) {
-    return FolderLocation.super.child(path);
+    return DirLocation.super.child(path);
   }
 
   public File toFile() {
@@ -70,7 +70,7 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
   }
 
   @Override
-  public FolderLocation mkdir() {
+  public DirLocation mkdir() {
     try {
       FileUtils.forceMkdir(toFile());
     } catch (IOException e) {
@@ -118,15 +118,15 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
   }
 
   @Override
-  public NonExistingLocation deleteFolder(DeleteOptions options) {
+  public NonExistingLocation deleteDir(DeleteOptions options) {
     if (options.deleteByRename)
-      deleteFolderByRename();
+      deleteDirByRename();
     else
-      deleteFolderPermanently();
+      deleteDirPermanently();
     return this;
   }
 
-  private void deleteFolderPermanently() {
+  private void deleteDirPermanently() {
     try {
       FileUtils.deleteDirectory(toFile());
     } catch (IOException e) {
@@ -134,7 +134,7 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
     }
   }
 
-  private void deleteFolderByRename() {
+  private void deleteDirByRename() {
     File dest = duplicate(toFile());
     try {
       FileUtils.moveDirectory(toFile(), dest);
@@ -173,8 +173,8 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
 
   @Override
   public NonExistingLocation delete(DeleteOptions options) {
-    if (isFolder())
-      deleteFolder(options);
+    if (isDir())
+      deleteDir(options);
     else
       deleteFile(options);
     return this;
@@ -191,7 +191,7 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
   }
 
   @Override
-  public Option<FolderLocation> existing() {
+  public Option<DirLocation> existing() {
     if (Files.exists(path))
       return Option.of(this);
     else
@@ -207,7 +207,7 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
   }
 
   @Override
-  public NonExistingLocation nonExistingOrElse(Function<FolderLocation, NonExistingLocation> fn) {
+  public NonExistingLocation nonExistingOrElse(Function<DirLocation, NonExistingLocation> fn) {
     if (exists())
       return fn.apply(this);
     else
@@ -219,7 +219,7 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
   }
 
   @Override
-  public FolderLocation existingOrElse(Function<NonExistingLocation, FolderLocation> fn) {
+  public DirLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
     if (!exists())
       return fn.apply(this);
     else
@@ -228,7 +228,7 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
 
   @Override
   public WritableFileLocation asWritableFile() {
-    // TODO check folder exists and file doesn't
+    // TODO check dir exists and file doesn't
     return this;
   }
 
@@ -305,7 +305,7 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
   }
 
   @Override
-  public boolean isFolder() {
+  public boolean isDir() {
     return Files.isDirectory(toPath());
   }
 
@@ -319,8 +319,8 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
     try {
       Path src = toPath();
       Path dest = destLocation.asPathLocation().toPath();
-      if (isFolder()) {
-        logger.info("rename folder " + src + " to " + destLocation);
+      if (isDir()) {
+        logger.info("rename dir " + src + " to " + destLocation);
         makeDirOnParentIfNeeded();
         Files.move(src, dest);
       } else {
@@ -367,12 +367,12 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
     return new PathLocation(x);
   }
 
-  public Option<RelativeLocation> relativize(FolderLocation ancestor) {
+  public Option<RelativeLocation> relativize(DirLocation ancestor) {
     return stripAncestor(ancestor);
   }
 
   @Override
-  public Option<RelativeLocation> stripAncestor(FolderLocation ancestor) {
+  public Option<RelativeLocation> stripAncestor(DirLocation ancestor) {
     String pathAncestor = ancestor.absoluteAndNormalized();
     String pathChild = absoluteAndNormalized();
     if (pathChild.startsWith(pathAncestor))
@@ -685,14 +685,14 @@ public class PathLocation implements FolderLocation, NonExistingLocation, Refere
   // }
   // };
 
-  static GuavaAndDirectoryStreamTraversalWithVirtualFolders traversal = new GuavaAndDirectoryStreamTraversalWithVirtualFolders(
+  static GuavaAndDirectoryStreamTraversalWithVirtualDirs traversal = new GuavaAndDirectoryStreamTraversalWithVirtualDirs(
       true, x -> false);
 
   @Override
-  public Flux<ExistingLocation> findFilesAndFolders() {
+  public Flux<ExistingLocation> findFilesAndDirs() {
     return find(traversal, "", true, "").map(x -> {
       if (x.isDirectory())
-        return Locations.existingFolder(x.path);
+        return Locations.existingDir(x.path);
       else
         return Locations.existingFile(x.path);
     });

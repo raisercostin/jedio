@@ -6,8 +6,8 @@ import reactor.core.publisher.Flux;
 import java.util.function.Function;
 
 import org.raisercostin.jedio.find.FileTraversal2;
-import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualFolders;
-import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualFolders.PathWithAttributes;
+import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs;
+import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
 import org.raisercostin.util.sugar;
 
 // TODO maybe should contain type <T> of the actual internal instance
@@ -38,7 +38,7 @@ public interface ReferenceLocation {
 
   String getName();
 
-  Option<RelativeLocation> stripAncestor(FolderLocation x);
+  Option<RelativeLocation> stripAncestor(DirLocation x);
 
   Option<ReferenceLocation> findAncestor(Function<ReferenceLocation, Boolean> fn);
 
@@ -46,13 +46,13 @@ public interface ReferenceLocation {
 
   Option<? extends ReferenceLocation> parent();
 
-  Option<FolderLocation> existing();
+  Option<DirLocation> existing();
 
   Option<NonExistingLocation> nonExisting();
 
-  NonExistingLocation nonExistingOrElse(Function<FolderLocation, NonExistingLocation> fn);
+  NonExistingLocation nonExistingOrElse(Function<DirLocation, NonExistingLocation> fn);
 
-  FolderLocation existingOrElse(Function<NonExistingLocation, FolderLocation> fn);
+  DirLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn);
 
   boolean exists();
 
@@ -61,7 +61,7 @@ public interface ReferenceLocation {
 
   ReadableFileLocation asReadableFile();
 
-  boolean isFolder();
+  boolean isDir();
 
   boolean isFile();
 
@@ -74,7 +74,7 @@ public interface ReferenceLocation {
   boolean isSymlink();
 
   @sugar
-  default FolderLocation mkdirIfNecessary() {
+  default DirLocation mkdirIfNecessary() {
     return existingOrElse(x -> x.mkdir());
   }
 

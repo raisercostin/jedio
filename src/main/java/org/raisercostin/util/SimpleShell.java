@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import org.raisercostin.jedio.DeleteOptions;
-import org.raisercostin.jedio.FolderLocation;
+import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.Locations;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
@@ -25,38 +25,38 @@ import com.google.common.collect.Maps;
 @NotThreadSafe
 public class SimpleShell implements Shell {
   private static final Pattern SPLIT_PARAMS_PATTERN = Pattern.compile("\"([^\"]*)\"|(\\S+)");
-  private Stack<FolderLocation> dirs = new Stack<FolderLocation>();
-  private FolderLocation current;
+  private Stack<DirLocation> dirs = new Stack<DirLocation>();
+  private DirLocation current;
   private final Map<String, String> env;
   private Pattern sensibleRegex;
   private final DeleteOptions deleteOptions;
 
   @sugar
   public SimpleShell(String path) {
-    this(Locations.existingFolder(path), DeleteOptions.deleteByRename());
+    this(Locations.existingDir(path), DeleteOptions.deleteByRename());
   }
 
   @sugar
   public SimpleShell(Path path) {
-    this(Locations.existingFolder(path), DeleteOptions.deleteByRename());
+    this(Locations.existingDir(path), DeleteOptions.deleteByRename());
   }
 
   @sugar
   public SimpleShell() {
-    this(Locations.existingFolder("."), DeleteOptions.deleteByRename());
+    this(Locations.existingDir("."), DeleteOptions.deleteByRename());
   }
 
   @sugar
   public SimpleShell(DeleteOptions deleteOptions) {
-    this(Locations.existingFolder("."), deleteOptions);
+    this(Locations.existingDir("."), deleteOptions);
   }
 
   @sugar
-  public SimpleShell(FolderLocation path) {
+  public SimpleShell(DirLocation path) {
     this(path, DeleteOptions.deleteByRename());
   }
 
-  private SimpleShell(FolderLocation path, DeleteOptions deleteOptions) {
+  private SimpleShell(DirLocation path, DeleteOptions deleteOptions) {
     this.deleteOptions = deleteOptions;
     env = Maps.newHashMap();
     current = path;
@@ -81,7 +81,7 @@ public class SimpleShell implements Shell {
   // https://zeroturnaround.com/rebellabs/why-we-created-yaplj-yet-another-process-library-for-java/
   // -
   // https://stackoverflow.com/questions/193166/good-java-process-control-library
-  private ProcessResult executeInternal(FolderLocation path, List<String> commandAndParams) {
+  private ProcessResult executeInternal(DirLocation path, List<String> commandAndParams) {
     try {
       // File input = File.createTempFile("restfs", ".input");
       // TODO splitting command should work for "aaa bbbb" as argument
@@ -116,32 +116,32 @@ public class SimpleShell implements Shell {
     return result;
   }
 
-  public FolderLocation pwd() {
+  public DirLocation pwd() {
     return current;
   }
 
-  public FolderLocation cd(RelativeLocation path) {
+  public DirLocation cd(RelativeLocation path) {
     return internalCd(child(path).existing().get());
   }
 
-  public FolderLocation pushd(FolderLocation url) {
+  public DirLocation pushd(DirLocation url) {
     dirs.push(current);
     return internalCd(url);
   }
 
-  public FolderLocation pushd(RelativeLocation path) {
+  public DirLocation pushd(RelativeLocation path) {
     dirs.push(current);
     return internalCd(child(path).existing().get());
   }
 
-  public FolderLocation popd() {
+  public DirLocation popd() {
     return internalCd(dirs.pop());
   }
 
-  private FolderLocation internalCd(FolderLocation folder) {
-    current = folder;
-    folder.mkdirIfNecessary();
-    return folder;
+  private DirLocation internalCd(DirLocation dir) {
+    current = dir;
+    dir.mkdirIfNecessary();
+    return dir;
   }
 
   public void mkdir(RelativeLocation path) {
@@ -158,7 +158,7 @@ public class SimpleShell implements Shell {
   }
 
   @sugar
-  public FolderLocation pushd(String path) {
+  public DirLocation pushd(String path) {
     return pushd(Locations.relative(path));
   }
 
@@ -171,7 +171,7 @@ public class SimpleShell implements Shell {
   }
 
   @sugar
-  public FolderLocation mkdirAndPushd(String path) {
+  public DirLocation mkdirAndPushd(String path) {
     mkdir(path);
     return pushd(path);
   }

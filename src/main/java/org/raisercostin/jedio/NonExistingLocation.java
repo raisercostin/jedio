@@ -5,7 +5,7 @@ import org.raisercostin.util.sugar;
 /** Location that is known to exist. */
 public interface NonExistingLocation extends ReferenceLocation {
   // TODO what if mkdir fails?
-  FolderLocation mkdir();
+  DirLocation mkdir();
 
   @sugar
   default NonExistingLocation nonExistingChild(RelativeLocation path) {

@@ -16,7 +16,7 @@ public class FileAltered {
   public final WatchEvent<?> event;
 
   public ReferenceLocation location() {
-    return Locations.folder(dir.resolve((Path) event.context()));
+    return Locations.dir(dir.resolve((Path) event.context()));
   }
 
   public String toString() {

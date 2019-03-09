@@ -20,7 +20,7 @@ public class Pdf2TableMain implements ApplicationRunner {
   @Test
   @Disabled("not actual test")
   void test() {
-    Flux<FileAltered> all = Locations.existingFolder("d:/work/watched").asChangableLocation().watch();
+    Flux<FileAltered> all = Locations.existingDir("d:/work/watched").asChangableLocation().watch();
     all.log("rec").map(x -> {
       if (x.event.kind().name() == "ENTRY_MODIFY")
         if (x.location().getName().endsWith(".pdf"))

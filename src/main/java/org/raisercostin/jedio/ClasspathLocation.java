@@ -11,7 +11,9 @@ import reactor.core.publisher.Flux;
 
 import org.apache.commons.io.IOUtils;
 import org.raisercostin.jedio.find.FileTraversal2;
-import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualFolders.PathWithAttributes;
+import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
+
+import com.google.common.base.Preconditions;
 
 /**
  * What is Absolute, Relative and Canonical Path
@@ -21,7 +23,7 @@ import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualFo
  * @author raiser
  */
 @Data
-public class ClasspathLocation implements FolderLocation, ExistingLocation, ReferenceLocation, ReadableFileLocation {
+public class ClasspathLocation implements DirLocation, ExistingLocation, ReferenceLocation, ReadableFileLocation {
   private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
       .getOrElse(ClassLoader.class.getClassLoader());
 
@@ -86,7 +88,7 @@ public class ClasspathLocation implements FolderLocation, ExistingLocation, Refe
   }
 
   @Override
-  public Option<RelativeLocation> stripAncestor(FolderLocation x) {
+  public Option<RelativeLocation> stripAncestor(DirLocation x) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -106,7 +108,7 @@ public class ClasspathLocation implements FolderLocation, ExistingLocation, Refe
   }
 
   @Override
-  public Option<FolderLocation> existing() {
+  public Option<DirLocation> existing() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -116,12 +118,12 @@ public class ClasspathLocation implements FolderLocation, ExistingLocation, Refe
   }
 
   @Override
-  public NonExistingLocation nonExistingOrElse(Function<FolderLocation, NonExistingLocation> fn) {
+  public NonExistingLocation nonExistingOrElse(Function<DirLocation, NonExistingLocation> fn) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public FolderLocation existingOrElse(Function<NonExistingLocation, FolderLocation> fn) {
+  public DirLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -141,7 +143,7 @@ public class ClasspathLocation implements FolderLocation, ExistingLocation, Refe
   }
 
   @Override
-  public boolean isFolder() {
+  public boolean isDir() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -176,7 +178,7 @@ public class ClasspathLocation implements FolderLocation, ExistingLocation, Refe
   }
 
   @Override
-  public NonExistingLocation deleteFolder(DeleteOptions options) {
+  public NonExistingLocation deleteDir(DeleteOptions options) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -187,7 +189,9 @@ public class ClasspathLocation implements FolderLocation, ExistingLocation, Refe
 
   @Override
   public InputStream unsafeInputStream() {
-    return specialClassLoader.getResourceAsStream(path);
+    final InputStream res = specialClassLoader.getResourceAsStream(path);
+    Preconditions.checkNotNull(res);
+    return res;
   }
 
   public String readContent() {
@@ -205,7 +209,7 @@ public class ClasspathLocation implements FolderLocation, ExistingLocation, Refe
   }
 
   @Override
-  public Flux<ExistingLocation> findFilesAndFolders() {
+  public Flux<ExistingLocation> findFilesAndDirs() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 

@@ -18,7 +18,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.output.StringBuilderWriter;
-import org.raisercostin.jedio.FolderLocation;
+import org.raisercostin.jedio.DirLocation;
 
 @Data
 @Getter(value = AccessLevel.NONE)
@@ -31,7 +31,7 @@ public class ProcessResult {
   public final boolean finished;
   private Process proc;
 
-  public ProcessResult(FolderLocation current, List<String> commandAndParams, Pattern sensibleRegex, Process proc) {
+  public ProcessResult(DirLocation current, List<String> commandAndParams, Pattern sensibleRegex, Process proc) {
     try {
       String command = blurMessage(sensibleRegex, Joiner.on(" ").join(commandAndParams));
       boolean finished = proc.waitFor(10, TimeUnit.SECONDS);
@@ -76,7 +76,7 @@ public class ProcessResult {
     return get().get();
   }
 
-  private void message(FolderLocation current, int exitValue, String command, String output, String error) {
+  private void message(DirLocation current, int exitValue, String command, String output, String error) {
     if (exitValue == 0 && output.isEmpty() && error.isEmpty())
       logger.info(current.toString() + " > [" + command + "]");
     else

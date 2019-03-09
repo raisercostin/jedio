@@ -2,7 +2,7 @@ package org.raisercostin.util;
 
 import java.nio.file.Path;
 
-import org.raisercostin.jedio.FolderLocation;
+import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
 
@@ -11,26 +11,26 @@ public interface Shell {
 
   ReferenceLocation child(String path);
 
-  FolderLocation pwd();
+  DirLocation pwd();
 
   String absolute(String path);
 
-  FolderLocation cd(RelativeLocation path);
+  DirLocation cd(RelativeLocation path);
 
   @sugar
-  FolderLocation pushd(String path);
+  DirLocation pushd(String path);
 
-  FolderLocation pushd(FolderLocation url);
+  DirLocation pushd(DirLocation url);
 
-  FolderLocation pushd(RelativeLocation path);
+  DirLocation pushd(RelativeLocation path);
 
-  FolderLocation popd();
+  DirLocation popd();
 
   void mkdir(RelativeLocation path);
 
   void mkdir(String path);
 
-  FolderLocation mkdirAndPushd(String path);
+  DirLocation mkdirAndPushd(String path);
 
   void deleteIfExists(String path);
 

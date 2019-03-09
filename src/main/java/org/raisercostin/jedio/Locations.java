@@ -19,51 +19,51 @@ public class Locations {
   }
 
   @sugar
-  public static ReferenceLocation folder(String path) {
-    return folder(Paths.get(path));
+  public static ReferenceLocation dir(String path) {
+    return dir(Paths.get(path));
   }
 
   @sugar
-  public static ReferenceLocation folder(File path) {
-    return folder(path.toPath());
+  public static ReferenceLocation dir(File path) {
+    return dir(path.toPath());
   }
 
-  public static ReferenceLocation folder(Path path) {
+  public static ReferenceLocation dir(Path path) {
     // check if absolute?
     return new PathLocation(path);
   }
 
   @sugar
-  public static FolderLocation existingFolder(Path path) {
-    return folder(path).mkdirIfNecessary();
+  public static DirLocation existingDir(Path path) {
+    return dir(path).mkdirIfNecessary();
   }
 
   @sugar
-  public static FolderLocation existingFolder(String path) {
-    return existingFolder(Paths.get(path));
+  public static DirLocation existingDir(String path) {
+    return existingDir(Paths.get(path));
   }
 
   public static ReadableFileLocation classpath(String path) {
     return new ClasspathLocation(path);
   }
 
-  public static FolderLocation classpathFolder(String path) {
+  public static DirLocation classpathDir(String path) {
     return new ClasspathLocation(path);
   }
 
-  public static FolderLocation folderFromRelative(String relativePath) {
-    return folderFromRelative(relative(relativePath));
+  public static DirLocation dirFromRelative(String relativePath) {
+    return dirFromRelative(relative(relativePath));
   }
 
-  public static FolderLocation folderFromRelative(RelativeLocation relative) {
+  public static DirLocation dirFromRelative(RelativeLocation relative) {
     return current().child(relative).mkdirIfNecessary();
   }
 
-  public static FolderLocation current() {
+  public static DirLocation current() {
     return new PathLocation(Paths.get("."));
   }
 
-  public static ExistingLocation existingFolderOrFile(Path x) {
+  public static ExistingLocation existingDirOrFile(Path x) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 

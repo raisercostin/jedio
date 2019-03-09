@@ -21,7 +21,7 @@ public class Filters {
    * Sample gitIgnores:
    * 
    * <pre>
-   *     # for now only folders
+   *     # for now only dirs
    *     target
    *     .git
    *     .mvn
