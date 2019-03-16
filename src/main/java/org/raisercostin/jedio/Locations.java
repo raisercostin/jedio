@@ -83,6 +83,14 @@ public class Locations {
     return existingFile(Paths.get(path));
   }
 
+  public static ReadableFileLocation readableFile(String path) {
+    return existingFile(path).asReadableFile();
+  }
+
+  public static WritableFileLocation writableFile(String path) {
+    return existingFile(path).asWritableFile();
+  }
+
   public static UrlLocation url(String url) {
     return new UrlLocation(url);
   }

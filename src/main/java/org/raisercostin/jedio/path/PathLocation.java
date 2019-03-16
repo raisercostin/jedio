@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.function.Function;
 
@@ -270,7 +271,11 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
 
   @Override
   public long length() {
-    return toFile().length();
+    try {
+      return Files.size(path);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
@@ -370,10 +375,6 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   @Override
   public Option<PathLocation> parent() {
     return Option.of(path.getParent()).map(x -> create(x));
-  }
-
-  public PathLocation create(Path x) {
-    return new PathLocation(x);
   }
 
   public Option<RelativeLocation> relativize(DirLocation ancestor) {
@@ -703,11 +704,35 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   }
 
   @Override
+  public Flux<DirLocation> findDirs() {
+    return find(traversal, "", true, "").flatMap(x -> {
+      if (!x.isDirectory())
+        return Flux.empty();
+      else
+        return Flux.just(Locations.existingDir(x.path));
+    });
+  }
+
+  @Override
   public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore) {
     final TraversalFilter filter2 = FindFilters.createFindFilter(filter, gitIgnore);
     Path parent = toPath();
     logger.info(parent + " traverse");
     Flux<PathWithAttributes> paths = traversal.traverse2(parent, filter2, recursive);
     return paths;
+  }
+
+  public PathLocation create(Path x) {
+    return new PathLocation(x);
+  }
+
+  @Override
+  public PathLocation create(String path) {
+    return create(Paths.get(path));
+  }
+
+  @Override
+  public DirLocation asDir() {
+    return this;
   }
 }

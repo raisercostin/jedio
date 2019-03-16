@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Function;
@@ -24,6 +25,7 @@ import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
 import org.raisercostin.jedio.path.PathLocation;
+import org.raisercostin.jedio.url.UrlLocation;
 
 import com.google.common.base.Preconditions;
 
@@ -244,7 +246,21 @@ public class ClasspathLocation implements DirLocation, ExistingLocation, Referen
   }
 
   @Override
+  public Flux<DirLocation> findDirs() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
   public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore) {
     throw new RuntimeException("Not implemented yet!!!");
+  }
+  @Override
+  public ClasspathLocation create(String path) {
+    return new ClasspathLocation(path);
+  }
+
+  @Override
+  public DirLocation asDir() {
+    return this;
   }
 }

@@ -20,4 +20,6 @@ public interface DirLocation extends ExistingLocation {
   Flux<ExistingLocation> findFilesAndDirs();
 
   Flux<FileLocation> findFiles();
+
+  Flux<DirLocation> findDirs();
 }
