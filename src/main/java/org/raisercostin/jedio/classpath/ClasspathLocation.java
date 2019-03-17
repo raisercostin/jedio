@@ -57,38 +57,8 @@ public class ClasspathLocation implements DirLocation, ExistingLocation, Referen
   }
 
   @Override
-  public NonExistingLocation deleteFile(DeleteOptions options) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public void rename(FileLocation asWritableFile) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public long length() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
   public Option<String> readIfExists() {
     return Try.ofSupplier(() -> readContent()).toOption();
-  }
-
-  @Override
-  public String absolute() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public String normalized() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public String canonical() {
-    throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
@@ -102,6 +72,121 @@ public class ClasspathLocation implements DirLocation, ExistingLocation, Referen
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public boolean exists() {
+    try (InputStream stream = ClasspathLocation.class.getClassLoader().getResourceAsStream(path)) {
+      return stream != null;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public ReferenceLocation child(RelativeLocation child) {
+    return Locations.classpath(fixPath(path + "/" + child.getLocation()));
+  }
+
+  @Override
+  public InputStream unsafeInputStream() {
+    final InputStream res = specialClassLoader.getResourceAsStream(path);
+    Preconditions.checkNotNull(res);
+    return res;
+  }
+
+  public String readContent() {
+    try (BufferedInputStream b = new BufferedInputStream(
+        ClasspathLocation.class.getClassLoader().getResourceAsStream(path))) {
+      return IOUtils.toString(b, "UTF-8");
+    } catch (IOException e) {
+      throw new RuntimeException("Can't read resource [" + path + "]", e);
+    }
+  }
+
+  @Override
+  public ClasspathLocation create(String path) {
+    return new ClasspathLocation(path);
+  }
+
+  @Override
+  public DirLocation asDir() {
+    return this;
+  }
+
+  @Override
+  public ReadableFileLocation asReadableFile() {
+    return this;
+  }
+
+  @Override
+  public WritableFileLocation asWritableFile() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public boolean isDir() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public boolean isFile() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public void symlinkTo(ReferenceLocation parent) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public void junctionTo(ReferenceLocation parent) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public Option<LinkLocation> asSymlink() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public boolean isSymlink() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public NonExistingLocation delete(DeleteOptions options) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public NonExistingLocation deleteDir(DeleteOptions options) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public ChangeableLocation asChangableLocation() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public Flux<ExistingLocation> findFilesAndDirs() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public Flux<FileLocation> findFiles() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public Flux<DirLocation> findDirs() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore) {
+    throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
@@ -155,112 +240,32 @@ public class ClasspathLocation implements DirLocation, ExistingLocation, Referen
   }
 
   @Override
-  public boolean exists() {
+  public String absolute() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public WritableFileLocation asWritableFile() {
+  public String normalized() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public ReadableFileLocation asReadableFile() {
-    return this;
-  }
-
-  @Override
-  public boolean isDir() {
+  public String canonical() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public boolean isFile() {
+  public NonExistingLocation deleteFile(DeleteOptions options) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public void symlinkTo(ReferenceLocation parent) {
+  public void rename(FileLocation asWritableFile) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public void junctionTo(ReferenceLocation parent) {
+  public long length() {
     throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Option<LinkLocation> asSymlink() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public boolean isSymlink() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public NonExistingLocation delete(DeleteOptions options) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public NonExistingLocation deleteDir(DeleteOptions options) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public ReferenceLocation child(RelativeLocation child) {
-    return Locations.classpath(fixPath(path + "/" + child.getLocation()));
-  }
-
-  @Override
-  public InputStream unsafeInputStream() {
-    final InputStream res = specialClassLoader.getResourceAsStream(path);
-    Preconditions.checkNotNull(res);
-    return res;
-  }
-
-  public String readContent() {
-    try (BufferedInputStream b = new BufferedInputStream(
-        ClasspathLocation.class.getClassLoader().getResourceAsStream(path))) {
-      return IOUtils.toString(b, "UTF-8");
-    } catch (IOException e) {
-      throw new RuntimeException("Can't read resource [" + path + "]", e);
-    }
-  }
-
-  @Override
-  public ChangeableLocation asChangableLocation() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Flux<ExistingLocation> findFilesAndDirs() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Flux<FileLocation> findFiles() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Flux<DirLocation> findDirs() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-  @Override
-  public ClasspathLocation create(String path) {
-    return new ClasspathLocation(path);
-  }
-
-  @Override
-  public DirLocation asDir() {
-    return this;
   }
 }

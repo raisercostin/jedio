@@ -190,10 +190,12 @@ public class UrlLocation implements ReferenceLocation, ReadableFileLocation {
   public String readContent() {
     return HttpUtils.getFromURL(url);
   }
+
   @Override
   public UrlLocation create(String path) {
     return new UrlLocation(path);
   }
+
   @Override
   public DirLocation asDir() {
     throw new RuntimeException("Not implemented yet!!!");
