@@ -1,9 +1,21 @@
 package org.raisercostin.jedio.url;
 
 import java.io.InputStream;
-import java.nio.file.Paths;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HeaderElement;
+import org.apache.http.HeaderElementIterator;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ConnectionKeepAliveStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicHeaderElementIterator;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
 import org.raisercostin.jedio.DeleteOptions;
 import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.FileLocation;
@@ -29,8 +41,46 @@ import reactor.core.publisher.Mono;
 // @Setter(lombok.AccessLevel.NONE)
 @AllArgsConstructor
 @ToString
-public class UrlLocation implements ReferenceLocation, ReadableFileLocation {
+public class HighPerfUrlLocation implements ReferenceLocation, ReadableFileLocation {
+  public static CloseableHttpClient createHighPerfHttpClient() {
+    return createHighPerfHttpClient(mgr -> {
+    });
+  }
+
+  public static CloseableHttpClient createHighPerfHttpClient(Consumer<PoolingHttpClientConnectionManager> manager) {
+    ConnectionKeepAliveStrategy myStrategy = new ConnectionKeepAliveStrategy() {
+      @Override
+      public long getKeepAliveDuration(org.apache.http.HttpResponse response, HttpContext context) {
+        HeaderElementIterator it = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+        while (it.hasNext()) {
+          HeaderElement he = it.nextElement();
+          String param = he.getName();
+          String value = he.getValue();
+          if (value != null && param.equalsIgnoreCase("timeout")) {
+            return Long.parseLong(value) * 1000;
+          }
+        }
+        return 5 * 1000;
+      }
+    };
+    PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+    //HttpHost host = new HttpHost("hostname", 80);
+    //HttpRoute route = new HttpRoute(host);
+    // connManager.setSocketConfig(route.getTargetHost(), SocketConfig.custom().setSoTimeout(5000).build());
+    // Set the maximum number of total open connections.
+    connManager.setMaxTotal(1000);
+    // Set the maximum number of concurrent connections per route, which is 2 by default.
+    connManager.setDefaultMaxPerRoute(1000);
+    // Set the total number of concurrent connections to a specific route, which is 2 by default.
+    // connManager.setMaxPerRoute(route, 5);
+    manager.accept(connManager);
+    CloseableHttpClient client = HttpClients.custom().setKeepAliveStrategy(myStrategy).setConnectionManager(connManager)
+        .build();
+    return client;
+  }
+
   public final String url;
+  public final CloseableHttpClient client;
 
   @Override
   public ReferenceLocation child(RelativeLocation path) {
@@ -39,7 +89,7 @@ public class UrlLocation implements ReferenceLocation, ReadableFileLocation {
 
   @Override
   public String absolute() {
-    throw new RuntimeException("Not implemented yet!!!");
+    return url;
   }
 
   @Override
@@ -200,5 +250,23 @@ public class UrlLocation implements ReferenceLocation, ReadableFileLocation {
   @Override
   public DirLocation asDir() {
     throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  public Mono<String> readContentAsync() {
+    HttpGet get1 = new HttpGet(url);
+    return Mono.fromCallable(() -> {
+      try (CloseableHttpResponse response = client.execute(get1)) {
+        return IOUtils.toString(response.getEntity().getContent());
+      }
+    });
+    // response.getEntity().
+    // EntityUtils.Future
+    // <HttpResponse<String>> res = Unirest.get(url)
+    // // .header("User-Agent", USER_AGENT).header("Accept", "*/*")
+    // // .header("Content-Type", "application/json; charset=UTF-8").header("Accept-Encoding", "gzip,deflate,sdch")
+    // // .asStringAsync(callback)();
+    // .asStringAsync();
+    //
+    // return Mono.fromCallable(() -> res.get().getBody());
   }
 }

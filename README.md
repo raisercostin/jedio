@@ -9,8 +9,9 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
 
 ## Usage
 
-## Maven
-### Dependency
+### Maven
+
+#### Dependency
 
 ```
 <dependency>
@@ -20,7 +21,7 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
 </dependency>
 ```
 
-### Repository
+#### Repository
 ```
 <repository>
   <id>raisercostin-bintray</id>
@@ -29,6 +30,10 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
   <snapshots><enabled>false</enabled></snapshots>
 </repository>
 ```
+
+## Other libraries
+- scala - https://ammonite.io/#Ammonite-Ops
+
 ## Development
 
 - To release `mvn release:prepare release:perform -DskipTests=true -Prelease -Darguments="-DskipTests=true -Prelease"`
