@@ -16,7 +16,7 @@ public interface ReadableFileLocation extends FileLocation {
 
   @Deprecated
   String readContent();
-  
+
   default Mono<String> readContentAsync() {
     return Mono.fromSupplier(() -> readContent());
   }

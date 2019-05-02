@@ -64,8 +64,8 @@ public class HighPerfUrlLocation implements ReferenceLocation, ReadableFileLocat
       }
     };
     PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
-    //HttpHost host = new HttpHost("hostname", 80);
-    //HttpRoute route = new HttpRoute(host);
+    // HttpHost host = new HttpHost("hostname", 80);
+    // HttpRoute route = new HttpRoute(host);
     // connManager.setSocketConfig(route.getTargetHost(), SocketConfig.custom().setSoTimeout(5000).build());
     // Set the maximum number of total open connections.
     connManager.setMaxTotal(1000);

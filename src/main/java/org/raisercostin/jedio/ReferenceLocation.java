@@ -13,7 +13,7 @@ import lombok.val;
 import reactor.core.publisher.Flux;
 
 // TODO maybe should contain type <T> of the actual internal instance
-public interface ReferenceLocation {
+public interface ReferenceLocation extends Location{
   ReferenceLocation child(RelativeLocation path);
 
   @sugar

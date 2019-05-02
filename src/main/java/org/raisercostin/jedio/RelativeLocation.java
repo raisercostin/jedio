@@ -3,7 +3,7 @@ package org.raisercostin.jedio;
 import lombok.Data;
 
 @Data
-public class RelativeLocation {
+public class RelativeLocation implements Location{
   private final String location;
 
   public static RelativeLocation create(String path) {
