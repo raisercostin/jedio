@@ -35,25 +35,25 @@ public class FindFilters {
   }
 
   public static TraversalFilter globFilter(String matcher, String prunningMatcher, boolean ignoreCase,
-      boolean dirsFirst, boolean recursive) {
-    return filter(createGlob(matcher), createGlob(prunningMatcher), ignoreCase, dirsFirst, recursive);
+      boolean dirsFirstInRecursive, boolean recursive) {
+    return filter(createGlob(matcher), createGlob(prunningMatcher), ignoreCase, dirsFirstInRecursive, recursive);
   }
 
   public static TraversalFilter anyFilter(String matcher, String prunningMatcher, boolean ignoreCase,
-      boolean dirsFirst, boolean recursive) {
-    return filter(createAny(matcher), createAny(prunningMatcher), ignoreCase, dirsFirst, recursive);
+      boolean dirsFirstInRecursive, boolean recursive) {
+    return filter(createAny(matcher), createAny(prunningMatcher), ignoreCase, dirsFirstInRecursive, recursive);
   }
 
-  public static TraversalFilter anyFilterNoPruning(String matcher, boolean ignoreCase, boolean dirsFirst, boolean recursive) {
-    return filter(createAny(matcher), NO_PRUNING_PATH_MATCHER, ignoreCase, dirsFirst, recursive);
+  public static TraversalFilter anyFilterNoPruning(String matcher, boolean ignoreCase, boolean dirsFirstInRecursive, boolean recursive) {
+    return filter(createAny(matcher), NO_PRUNING_PATH_MATCHER, ignoreCase, dirsFirstInRecursive, recursive);
   }
 
   public static TraversalFilter filter2(PathMatcher matcher, PathMatcher pruningMatcher, boolean ignoreCase, boolean recursive) {
-    return filter(matcher, pruningMatcher, ignoreCase, true, recursive);
+    return filter(matcher, pruningMatcher, ignoreCase, false, recursive);
   }
 
   public static TraversalFilter filter(PathMatcher matcher, PathMatcher pruningMatcher, boolean ignoreCase,
-      boolean dirsFirst, boolean recursive) {
+      boolean dirsFirstInRecursive, boolean recursive) {
     return new TraversalFilter() {
       @Override
       public PathMatcher matcher() {
@@ -71,8 +71,8 @@ public class FindFilters {
       }
 
       @Override
-      public boolean dirsFirst() {
-        return dirsFirst;
+      public boolean dirsFirstInRecursive() {
+        return dirsFirstInRecursive;
       }
 
       @Override

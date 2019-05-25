@@ -126,7 +126,7 @@ public class GuavaAndDirectoryStreamTraversalWithVirtualDirs implements FileTrav
           : newVirtualDirectoryStream(start, createFilter(all));
       final Flux<PathWithAttributes> all2 = Flux.fromIterable(iterable).map(x -> new PathWithAttributes(x))
           .filter(path -> filter.matches(path.path));
-      if (filter.dirsFirst())
+      if (filter.dirsFirstInRecursive())
         return all2.sort(dirsFirst());
       else
         return all2;

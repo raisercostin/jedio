@@ -26,9 +26,11 @@ class FindTest {
 
   @Test
   void testFindFilesGradually() {
-    //assertTimeoutPreemptively(Duration.ofSeconds(2), () -> {
-      DirLocation all = Locations.existingDir("e:/work/electrica").findDirs().doOnNext(x->System.out.println(x)).blockFirst(Duration.ofSeconds(1));
+    assertTimeoutPreemptively(Duration.ofSeconds(2), () -> {
+      DirLocation all = Locations.existingDir("e:/work/electrica").findDirs().doOnNext(x -> System.out.println(x))
+          .blockFirst(Duration.ofSeconds(1));
+      // .blockLast();
       System.out.println(all);
-    //});
+    });
   }
 }

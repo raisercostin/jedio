@@ -684,7 +684,7 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
       true, x -> false);
 
   private TraversalFilter createFilter() {
-    return FindFilters.createFindFilter("", "", true, true);
+    return FindFilters.createFindFilter("", "", false, true);
   }
 
   @Override
@@ -718,8 +718,8 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   }
 
   @Override
-  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore, boolean dirsFirst) {
-    return find(traversal, FindFilters.createFindFilter(filter, gitIgnore, dirsFirst, recursive));
+  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore, boolean dirsFirstInRecursive) {
+    return find(traversal, FindFilters.createFindFilter(filter, gitIgnore, dirsFirstInRecursive, recursive));
   }
 
 

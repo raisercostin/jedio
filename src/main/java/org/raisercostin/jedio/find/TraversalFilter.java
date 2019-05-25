@@ -20,6 +20,6 @@ public interface TraversalFilter {
   }
 
   //If dirs are first the traversal needs to first traverse everything. 
-  boolean dirsFirst();
+  boolean dirsFirstInRecursive();
   boolean recursive();
 }
