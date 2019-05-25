@@ -13,7 +13,7 @@ import lombok.val;
 import reactor.core.publisher.Flux;
 
 // TODO maybe should contain type <T> of the actual internal instance
-public interface ReferenceLocation extends Location{
+public interface ReferenceLocation extends Location {
   ReferenceLocation child(RelativeLocation path);
 
   @sugar
@@ -80,7 +80,11 @@ public interface ReferenceLocation extends Location{
     return existingOrElse(NonExistingLocation::mkdir);
   }
 
-  Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore);
+  default Flux<PathWithAttributes> find2(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore){
+    return find(traversal,filter,recursive,gitIgnore,true);    
+  }
+
+  Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore, boolean dirsFirst);
 
   ReferenceLocation create(String path);
 

@@ -186,7 +186,7 @@ public class ClasspathLocation implements DirLocation, ExistingLocation, Referen
   }
 
   @Override
-  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore) {
+  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore, boolean dirsFirst) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 

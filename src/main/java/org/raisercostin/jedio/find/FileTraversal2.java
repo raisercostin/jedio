@@ -13,13 +13,13 @@ import reactor.core.publisher.Flux;
  * what is the external result. Files or dirs that are matched by both pruning and filter will not be returned.
  */
 public interface FileTraversal2 {
-  default <T> Flux<T> traverse(Path start, TraversalFilter filter, Function<Path, T> f, boolean recursive) {
+  default <T> Flux<T> traverse(Path start, TraversalFilter filter, Function<Path, T> f) {
     return traverse(start, filter).map(x -> f.apply(x));
   }
 
   Flux<Path> traverse(Path start, TraversalFilter filter);
 
-  default Flux<PathWithAttributes> traverse2(Path start, TraversalFilter filter, boolean recursive) {
+  default Flux<PathWithAttributes> traverse2(Path start, TraversalFilter filter) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 }

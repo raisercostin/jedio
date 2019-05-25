@@ -683,9 +683,13 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   static GuavaAndDirectoryStreamTraversalWithVirtualDirs traversal = new GuavaAndDirectoryStreamTraversalWithVirtualDirs(
       true, x -> false);
 
+  private TraversalFilter createFilter() {
+    return FindFilters.createFindFilter("", "", true, true);
+  }
+
   @Override
   public Flux<ExistingLocation> findFilesAndDirs() {
-    return find(traversal, "", true, "").map(x -> {
+    return find(createFilter()).map(x -> {
       if (x.isDirectory())
         return Locations.existingDir(x.path);
       else
@@ -695,7 +699,7 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
 
   @Override
   public Flux<FileLocation> findFiles() {
-    return find(traversal, "", true, "").flatMap(x -> {
+    return find(createFilter()).flatMap(x -> {
       if (x.isDirectory())
         return Flux.empty();
       else
@@ -705,7 +709,7 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
 
   @Override
   public Flux<DirLocation> findDirs() {
-    return find(traversal, "", true, "").flatMap(x -> {
+    return find(createFilter()).flatMap(x -> {
       if (!x.isDirectory())
         return Flux.empty();
       else
@@ -714,12 +718,17 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   }
 
   @Override
-  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore) {
-    final TraversalFilter filter2 = FindFilters.createFindFilter(filter, gitIgnore);
-    Path parent = toPath();
-    logger.info(parent + " traverse");
-    Flux<PathWithAttributes> paths = traversal.traverse2(parent, filter2, recursive);
-    return paths;
+  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore, boolean dirsFirst) {
+    return find(traversal, FindFilters.createFindFilter(filter, gitIgnore, dirsFirst, recursive));
+  }
+
+
+  public Flux<PathWithAttributes> find(final TraversalFilter filter) {
+    return find(traversal,filter);
+  }
+  public Flux<PathWithAttributes> find(FileTraversal2 traversal, final TraversalFilter filter) {
+    logger.info("traverse "+this);
+    return traversal.traverse2(toPath(), filter);
   }
 
   public PathLocation create(Path x) {

@@ -153,7 +153,7 @@ public class UrlLocation implements ReferenceLocation, ReadableFileLocation {
   }
 
   @Override
-  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore) {
+  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore, boolean dirsFirst) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 

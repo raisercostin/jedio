@@ -23,7 +23,7 @@ public class FindFilters {
   private final static org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FindFilters.class);
   private static final MimetypesFileTypeMap allMimeTypes = new javax.activation.MimetypesFileTypeMap();
 
-  public static TraversalFilter createTotalCommanderFilter(String totalCommanderFilter) {
+  public static TraversalFilter createTotalCommanderFilter(String totalCommanderFilter, boolean recursive) {
     List<String> list = Splitter.on("|").splitToList(totalCommanderFilter);
     String first = list.get(0);
     String second = "";
@@ -31,22 +31,29 @@ public class FindFilters {
       second = list.get(1);
     if (list.size() > 2)
       throw new IllegalArgumentException("Strange split for " + totalCommanderFilter);
-    return filter(createTotalCommanderExpression(first), createTotalCommanderExpression(second), true);
+    return filter(createTotalCommanderExpression(first), createTotalCommanderExpression(second), true, false, recursive);
   }
 
-  public static TraversalFilter globFilter(String matcher, String prunningMatcher, boolean ignoreCase) {
-    return filter(createGlob(matcher), createGlob(prunningMatcher), ignoreCase);
+  public static TraversalFilter globFilter(String matcher, String prunningMatcher, boolean ignoreCase,
+      boolean dirsFirst, boolean recursive) {
+    return filter(createGlob(matcher), createGlob(prunningMatcher), ignoreCase, dirsFirst, recursive);
   }
 
-  public static TraversalFilter anyFilter(String matcher, String prunningMatcher, boolean ignoreCase) {
-    return filter(createAny(matcher), createAny(prunningMatcher), ignoreCase);
+  public static TraversalFilter anyFilter(String matcher, String prunningMatcher, boolean ignoreCase,
+      boolean dirsFirst, boolean recursive) {
+    return filter(createAny(matcher), createAny(prunningMatcher), ignoreCase, dirsFirst, recursive);
   }
 
-  public static TraversalFilter anyFilterNoPruning(String matcher, boolean ignoreCase) {
-    return filter(createAny(matcher), NO_PRUNING_PATH_MATCHER, ignoreCase);
+  public static TraversalFilter anyFilterNoPruning(String matcher, boolean ignoreCase, boolean dirsFirst, boolean recursive) {
+    return filter(createAny(matcher), NO_PRUNING_PATH_MATCHER, ignoreCase, dirsFirst, recursive);
   }
 
-  public static TraversalFilter filter(PathMatcher matcher, PathMatcher pruningMatcher, boolean ignoreCase) {
+  public static TraversalFilter filter2(PathMatcher matcher, PathMatcher pruningMatcher, boolean ignoreCase, boolean recursive) {
+    return filter(matcher, pruningMatcher, ignoreCase, true, recursive);
+  }
+
+  public static TraversalFilter filter(PathMatcher matcher, PathMatcher pruningMatcher, boolean ignoreCase,
+      boolean dirsFirst, boolean recursive) {
     return new TraversalFilter() {
       @Override
       public PathMatcher matcher() {
@@ -62,10 +69,20 @@ public class FindFilters {
       public boolean ignoreCase() {
         return ignoreCase;
       }
+
+      @Override
+      public boolean dirsFirst() {
+        return dirsFirst;
+      }
+
+      @Override
+      public boolean recursive() {
+        return recursive;
+      }
     };
   }
 
-  public static TraversalFilter createFindFilter(String filter, String gitIgnore) {
+  public static TraversalFilter createFindFilter(String filter, String gitIgnore, boolean dirsFirst, boolean recursive) {
     PathMatcher matcher;
     if (filter.startsWith("glob:"))
       matcher = Filters.createAny(filter);
@@ -77,7 +94,7 @@ public class FindFilters {
       matcher = Filters.createGlob("**/*" + filter + "*");
     boolean ignoreCase = true;
     final TraversalFilter filter2 = FindFilters.filter(matcher, Filters.createGitFilter(gitIgnore, ignoreCase),
-        ignoreCase);
+        ignoreCase, dirsFirst, recursive);
     return filter2;
   }
 

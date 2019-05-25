@@ -18,4 +18,8 @@ public interface TraversalFilter {
   default boolean matches(Path path) {
     return matcher().matches(path);
   }
+
+  //If dirs are first the traversal needs to first traverse everything. 
+  boolean dirsFirst();
+  boolean recursive();
 }

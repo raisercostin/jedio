@@ -106,7 +106,7 @@ public class GuavaAndDirectoryStreamTraversalWithVirtualDirs implements FileTrav
   // TODO If symlink should resolve destination and list without following
   // symlinks and resolve using toFile().isDirectory
   // .toRealPath()
-  public Flux<PathWithAttributes> traverse2(Path start, TraversalFilter filter, boolean recursive) {
+  public Flux<PathWithAttributes> traverse2(Path start, TraversalFilter filter) {
     try {
       PathMatcher all = new PathMatcher() {
         @Override
@@ -122,10 +122,14 @@ public class GuavaAndDirectoryStreamTraversalWithVirtualDirs implements FileTrav
           return readAttrs(path).isDirectory();
         }
       };
-      Iterable<Path> iterable = recursive ? fileTraverser(createFilter(all)).depthFirstPreOrder(start)
+      Iterable<Path> iterable = filter.recursive() ? fileTraverser(createFilter(all)).depthFirstPreOrder(start)
           : newVirtualDirectoryStream(start, createFilter(all));
-      return Flux.fromIterable(iterable).map(x -> new PathWithAttributes(x)).filter(path -> filter.matches(path.path))
-          .sort(dirsFirst());
+      final Flux<PathWithAttributes> all2 = Flux.fromIterable(iterable).map(x -> new PathWithAttributes(x))
+          .filter(path -> filter.matches(path.path));
+      if (filter.dirsFirst())
+        return all2.sort(dirsFirst());
+      else
+        return all2;
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -165,7 +169,7 @@ public class GuavaAndDirectoryStreamTraversalWithVirtualDirs implements FileTrav
   }
 
   public Flux<Path> traverse(Path start, TraversalFilter filter) {
-    return traverse2(start, filter, false).map(x -> x.path);
+    return traverse2(start, filter).map(x -> x.path);
   }
 
   private Comparator<? super PathWithAttributes> dirsFirst() {
