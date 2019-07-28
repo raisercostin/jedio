@@ -15,7 +15,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.raisercostin.jedio.ChangeableLocation;
-import org.raisercostin.jedio.DeleteOptions;
 import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.ExistingLocation;
 import org.raisercostin.jedio.FileAltered;
@@ -31,6 +30,8 @@ import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.FindFilters;
 import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs;
 import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
+import org.raisercostin.jedio.op.CopyOptions;
+import org.raisercostin.jedio.op.DeleteOptions;
 import org.raisercostin.jedio.find.TraversalFilter;
 import org.raisercostin.util.SimpleShell;
 
@@ -48,8 +49,8 @@ import reactor.core.publisher.Flux;
  * @author raiser
  */
 @Data
-public class PathLocation implements DirLocation, NonExistingLocation, ReferenceLocation, ReadableFileLocation,
-    WritableFileLocation, ChangeableLocation, LinkLocation {
+public class PathLocation implements DirLocation, NonExistingLocation, ReferenceLocation, ReadableFileLocation, WritableFileLocation,
+    ChangeableLocation, LinkLocation {
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PathLocation.class);
 
   private final Path path;
@@ -129,7 +130,7 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
 
   @Override
   public NonExistingLocation deleteDir(DeleteOptions options) {
-    if (options.deleteByRename)
+    if (options.deleteByRename())
       deleteDirByRename();
     else
       deleteDirPermanently();
@@ -156,7 +157,7 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
 
   @Override
   public NonExistingLocation deleteFile(DeleteOptions options) {
-    if (options.deleteByRename)
+    if (options.deleteByRename())
       deleteFileByRename();
     else
       deleteFilePermanently();
@@ -304,18 +305,17 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   }
 
   @Override
-  public WritableFileLocation copyFrom(InputStream inputStream) {
-    storeFile(inputStream);
+  public WritableFileLocation copyFrom(ReadableFileLocation source, CopyOptions options) {
+    if (options.makeDirIfNeeded())
+      makeDirOnParentIfNeeded();
+    source.usingInputStream(inputStream -> {
+      if(options.replaceExisting())
+        Files.copy(inputStream, toPath(), StandardCopyOption.REPLACE_EXISTING);
+      else
+        Files.copy(inputStream, toPath());
+      return null;
+    });
     return this;
-  }
-
-  private void storeFile(InputStream inputStream) {
-    makeDirOnParentIfNeeded();
-    try {
-      Files.copy(inputStream, toPath(), StandardCopyOption.REPLACE_EXISTING);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   @Override
@@ -409,8 +409,7 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   }
 
   private void createWindowsJunction(Path place, Path symlink, Path target) {
-    new SimpleShell(place.getParent())
-        .execute("cmd /C mklink /J \"" + symlink + "\" \"" + target.toFile().getName() + "\"");
+    new SimpleShell(place.getParent()).execute("cmd /C mklink /J \"" + symlink + "\" \"" + target.toFile().getName() + "\"");
   }
 
   private void createSymlink(Path symlink, Path target) {
@@ -421,8 +420,7 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   }
 
   private void createWindowsSymlink(Path place, String symlink, String targetName) {
-    new SimpleShell(place.getParent())
-        .execute("cmd /C sudo cmd /C mklink /D \"" + symlink + "\" \"" + targetName + "\"");
+    new SimpleShell(place.getParent()).execute("cmd /C sudo cmd /C mklink /D \"" + symlink + "\" \"" + targetName + "\"");
   }
 
   private void createLinuxSymlink(Path place, String symlink, String targetPath) {
@@ -680,8 +678,7 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   // }
   // };
 
-  static GuavaAndDirectoryStreamTraversalWithVirtualDirs traversal = new GuavaAndDirectoryStreamTraversalWithVirtualDirs(
-      true, x -> false);
+  static GuavaAndDirectoryStreamTraversalWithVirtualDirs traversal = new GuavaAndDirectoryStreamTraversalWithVirtualDirs(true, x -> false);
 
   private TraversalFilter createFilter() {
     return FindFilters.createFindFilter("", "", false, true);
@@ -718,16 +715,17 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   }
 
   @Override
-  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore, boolean dirsFirstInRecursive) {
+  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore,
+      boolean dirsFirstInRecursive) {
     return find(traversal, FindFilters.createFindFilter(filter, gitIgnore, dirsFirstInRecursive, recursive));
   }
 
-
   public Flux<PathWithAttributes> find(final TraversalFilter filter) {
-    return find(traversal,filter);
+    return find(traversal, filter);
   }
+
   public Flux<PathWithAttributes> find(FileTraversal2 traversal, final TraversalFilter filter) {
-    logger.info("traverse "+this);
+    logger.info("traverse " + this);
     return traversal.traverse2(toPath(), filter);
   }
 

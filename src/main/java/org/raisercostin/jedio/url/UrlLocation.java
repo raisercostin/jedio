@@ -1,10 +1,12 @@
 package org.raisercostin.jedio.url;
 
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.function.Function;
 
-import org.raisercostin.jedio.DeleteOptions;
+import io.vavr.control.Option;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.ToString;
 import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.FileLocation;
 import org.raisercostin.jedio.LinkLocation;
@@ -15,14 +17,9 @@ import org.raisercostin.jedio.RelativeLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
+import org.raisercostin.jedio.op.DeleteOptions;
 import org.raisercostin.jedio.path.PathLocation;
-
-import io.vavr.control.Option;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.ToString;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Data
 // @Getter(lombok.AccessLevel.NONE)
@@ -153,7 +150,8 @@ public class UrlLocation implements ReferenceLocation, ReadableFileLocation {
   }
 
   @Override
-  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore, boolean dirsFirst) {
+  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore,
+      boolean dirsFirst) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 

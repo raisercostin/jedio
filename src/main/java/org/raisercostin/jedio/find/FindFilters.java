@@ -31,7 +31,8 @@ public class FindFilters {
       second = list.get(1);
     if (list.size() > 2)
       throw new IllegalArgumentException("Strange split for " + totalCommanderFilter);
-    return filter(createTotalCommanderExpression(first), createTotalCommanderExpression(second), true, false, recursive);
+    return filter(createTotalCommanderExpression(first), createTotalCommanderExpression(second), true, false,
+        recursive);
   }
 
   public static TraversalFilter globFilter(String matcher, String prunningMatcher, boolean ignoreCase,
@@ -44,11 +45,13 @@ public class FindFilters {
     return filter(createAny(matcher), createAny(prunningMatcher), ignoreCase, dirsFirstInRecursive, recursive);
   }
 
-  public static TraversalFilter anyFilterNoPruning(String matcher, boolean ignoreCase, boolean dirsFirstInRecursive, boolean recursive) {
+  public static TraversalFilter anyFilterNoPruning(String matcher, boolean ignoreCase, boolean dirsFirstInRecursive,
+      boolean recursive) {
     return filter(createAny(matcher), NO_PRUNING_PATH_MATCHER, ignoreCase, dirsFirstInRecursive, recursive);
   }
 
-  public static TraversalFilter filter2(PathMatcher matcher, PathMatcher pruningMatcher, boolean ignoreCase, boolean recursive) {
+  public static TraversalFilter filter2(PathMatcher matcher, PathMatcher pruningMatcher, boolean ignoreCase,
+      boolean recursive) {
     return filter(matcher, pruningMatcher, ignoreCase, false, recursive);
   }
 
@@ -82,7 +85,8 @@ public class FindFilters {
     };
   }
 
-  public static TraversalFilter createFindFilter(String filter, String gitIgnore, boolean dirsFirst, boolean recursive) {
+  public static TraversalFilter createFindFilter(String filter, String gitIgnore, boolean dirsFirst,
+      boolean recursive) {
     PathMatcher matcher;
     if (filter.startsWith("glob:"))
       matcher = Filters.createAny(filter);

@@ -1,10 +1,12 @@
 package org.raisercostin.jedio;
 
 import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.raisercostin.jedio.classpath.ClasspathLocation;
+import org.raisercostin.jedio.fs.stream.InputStreamLocation;
 import org.raisercostin.jedio.path.PathLocation;
 import org.raisercostin.jedio.url.UrlLocation;
 import org.raisercostin.util.sugar;
@@ -93,5 +95,9 @@ public class Locations {
 
   public static UrlLocation url(String url) {
     return new UrlLocation(url);
+  }
+
+  public static InputStreamLocation stream(InputStream inputStream) {
+    return new InputStreamLocation(inputStream);
   }
 }

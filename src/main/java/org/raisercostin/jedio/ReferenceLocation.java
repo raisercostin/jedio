@@ -80,11 +80,12 @@ public interface ReferenceLocation extends Location {
     return existingOrElse(NonExistingLocation::mkdir);
   }
 
-  default Flux<PathWithAttributes> find2(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore){
-    return find(traversal,filter,recursive,gitIgnore,true);    
+  default Flux<PathWithAttributes> find2(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore) {
+    return find(traversal, filter, recursive, gitIgnore, true);
   }
 
-  Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore, boolean dirsFirst);
+  Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore,
+      boolean dirsFirst);
 
   ReferenceLocation create(String path);
 

@@ -12,13 +12,12 @@ import java.util.regex.Pattern;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.raisercostin.jedio.DeleteOptions;
 import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.Locations;
 import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
-
+import org.raisercostin.jedio.op.DeleteOptions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -34,17 +33,17 @@ public class SimpleShell implements Shell {
 
   @sugar
   public SimpleShell(String path) {
-    this(Locations.existingDir(path), DeleteOptions.deleteByRename());
+    this(Locations.existingDir(path), DeleteOptions.deleteByRenameOption());
   }
 
   @sugar
   public SimpleShell(Path path) {
-    this(Locations.existingDir(path), DeleteOptions.deleteByRename());
+    this(Locations.existingDir(path), DeleteOptions.deleteByRenameOption());
   }
 
   @sugar
   public SimpleShell() {
-    this(Locations.existingDir("."), DeleteOptions.deleteByRename());
+    this(Locations.existingDir("."), DeleteOptions.deleteByRenameOption());
   }
 
   @sugar
@@ -54,7 +53,7 @@ public class SimpleShell implements Shell {
 
   @sugar
   public SimpleShell(DirLocation path) {
-    this(path, DeleteOptions.deleteByRename());
+    this(path, DeleteOptions.deleteByRenameOption());
   }
 
   private SimpleShell(DirLocation path, DeleteOptions deleteOptions) {

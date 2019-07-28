@@ -1,5 +1,6 @@
 package org.raisercostin.jedio;
 
+import org.raisercostin.jedio.op.DeleteOptions;
 import org.raisercostin.util.sugar;
 
 import reactor.core.publisher.Flux;
