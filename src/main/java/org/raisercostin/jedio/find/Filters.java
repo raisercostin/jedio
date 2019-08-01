@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 
 import com.google.common.base.Splitter;
-
 import io.vavr.collection.Stream;
 
 public class Filters {

@@ -12,14 +12,14 @@ import java.util.regex.Pattern;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.Locations;
 import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
 import org.raisercostin.jedio.op.DeleteOptions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 // An instance must be created when is needed as is not thread safe.
 @NotThreadSafe

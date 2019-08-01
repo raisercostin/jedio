@@ -2,7 +2,6 @@ package org.raisercostin.jedio;
 
 import org.raisercostin.jedio.op.DeleteOptions;
 import org.raisercostin.util.sugar;
-
 import reactor.core.publisher.Flux;
 
 /** Location that is known to exist and that can have child locations. */

@@ -4,6 +4,10 @@ import java.io.InputStream;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import io.vavr.control.Option;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.ToString;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
@@ -25,14 +29,9 @@ import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
-import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
+import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.op.DeleteOptions;
 import org.raisercostin.jedio.path.PathLocation;
-
-import io.vavr.control.Option;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.ToString;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

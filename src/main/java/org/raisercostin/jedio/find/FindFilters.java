@@ -14,10 +14,9 @@ import java.util.List;
 
 import javax.activation.MimetypesFileTypeMap;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 
 public class FindFilters {
   private final static org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FindFilters.class);

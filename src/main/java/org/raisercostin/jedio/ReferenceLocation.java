@@ -2,14 +2,13 @@ package org.raisercostin.jedio;
 
 import java.util.function.Function;
 
-import org.apache.commons.io.FilenameUtils;
-import org.raisercostin.jedio.find.FileTraversal2;
-import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
-import org.raisercostin.jedio.path.PathLocation;
-import org.raisercostin.util.sugar;
-
 import io.vavr.control.Option;
 import lombok.val;
+import org.apache.commons.io.FilenameUtils;
+import org.raisercostin.jedio.find.FileTraversal2;
+import org.raisercostin.jedio.find.PathWithAttributes;
+import org.raisercostin.jedio.path.PathLocation;
+import org.raisercostin.util.sugar;
 import reactor.core.publisher.Flux;
 
 // TODO maybe should contain type <T> of the actual internal instance

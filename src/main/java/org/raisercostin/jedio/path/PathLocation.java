@@ -11,6 +11,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.function.Function;
 
+import com.google.common.base.Preconditions;
+import io.vavr.control.Option;
+import lombok.Data;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -29,16 +32,11 @@ import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.FindFilters;
 import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs;
-import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
+import org.raisercostin.jedio.find.PathWithAttributes;
+import org.raisercostin.jedio.find.TraversalFilter;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.DeleteOptions;
-import org.raisercostin.jedio.find.TraversalFilter;
 import org.raisercostin.util.SimpleShell;
-
-import com.google.common.base.Preconditions;
-
-import io.vavr.control.Option;
-import lombok.Data;
 import reactor.core.publisher.Flux;
 
 /**

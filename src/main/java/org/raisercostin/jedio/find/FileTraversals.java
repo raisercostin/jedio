@@ -23,16 +23,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Streams;
+import com.google.common.graph.Traverser;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.OrFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
-
-import com.google.common.base.Splitter;
-import com.google.common.collect.Streams;
-import com.google.common.graph.Traverser;
-
 import reactor.core.publisher.Flux;
 
 public class FileTraversals {

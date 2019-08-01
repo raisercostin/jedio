@@ -3,8 +3,6 @@ package org.raisercostin.jedio.find;
 import java.nio.file.Path;
 import java.util.function.Function;
 
-import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs.PathWithAttributes;
-
 import reactor.core.publisher.Flux;
 
 /**

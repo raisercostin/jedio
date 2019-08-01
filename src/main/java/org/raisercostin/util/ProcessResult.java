@@ -9,16 +9,14 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.Charsets;
-import org.raisercostin.jedio.DirLocation;
-
 import com.google.common.base.Joiner;
-
 import io.vavr.control.Try;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.io.Charsets;
+import org.raisercostin.jedio.DirLocation;
 
 @Data
 @Getter(value = AccessLevel.NONE)

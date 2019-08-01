@@ -12,8 +12,6 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import com.google.common.graph.Traverser;
-
-import io.vavr.Lazy;
 import reactor.core.publisher.Flux;
 
 /**
@@ -34,18 +32,6 @@ public class GuavaAndDirectoryStreamTraversal3 implements FileTraversal2 {
       options = new LinkOption[] { LinkOption.NOFOLLOW_LINKS };
   }
 
-  // TODO add lombok
-  public static class PathWithAttributes {
-    public final Path path;
-    // The attributes are not read except if needed
-    public final Lazy<BasicFileAttributes> attrs;
-
-    public PathWithAttributes(Path path) {
-      this.path = path;
-      this.attrs = Lazy.of(() -> readAttrs(path));
-    }
-
-  }
 
   // could be cached?
   public static BasicFileAttributes readAttrs(Path path) {
