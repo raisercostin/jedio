@@ -36,7 +36,6 @@ public interface ReadableFileLocation extends FileLocation {
     }
   }
 
-
   @Deprecated
   String readContent();
 

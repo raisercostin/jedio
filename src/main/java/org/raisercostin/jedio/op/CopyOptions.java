@@ -8,6 +8,7 @@ import lombok.Setter;
 
 public interface CopyOptions {
   boolean replaceExisting();
+
   default boolean makeDirIfNeeded() {
     return true;
   }
@@ -16,7 +17,7 @@ public interface CopyOptions {
   @Getter(value = AccessLevel.NONE)
   @Setter(value = AccessLevel.NONE)
   @Builder
-  public class SimpleCopyOptions implements CopyOptions{
+  public class SimpleCopyOptions implements CopyOptions {
     public final boolean replaceExisting;
 
     @Override

@@ -43,7 +43,7 @@ public class PathWithAttributes {
 
   public boolean isVirtualDirectory() {
     return path.toString().toLowerCase().endsWith(".pdf");
-    //return GuavaAndDirectoryStreamTraversalWithVirtualDirs.this.isVirtualDir.apply(path);
+    // return GuavaAndDirectoryStreamTraversalWithVirtualDirs.this.isVirtualDir.apply(path);
   }
 
   // could be cached?

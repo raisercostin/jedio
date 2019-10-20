@@ -28,7 +28,8 @@ import org.raisercostin.jedio.fs.stream.AbstractLocation;
  * @author raiser
  */
 @Data
-public class ClasspathLocation extends AbstractLocation implements DirLocation, ExistingLocation, ReferenceLocation, ReadableFileLocation {
+public class ClasspathLocation extends AbstractLocation
+    implements DirLocation, ExistingLocation, ReferenceLocation, ReadableFileLocation {
   private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
       .getOrElse(ClassLoader.class.getClassLoader());
 

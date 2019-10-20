@@ -32,7 +32,6 @@ public class GuavaAndDirectoryStreamTraversal3 implements FileTraversal2 {
       options = new LinkOption[] { LinkOption.NOFOLLOW_LINKS };
   }
 
-
   // could be cached?
   public static BasicFileAttributes readAttrs(Path path) {
     try {

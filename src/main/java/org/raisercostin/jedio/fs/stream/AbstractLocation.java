@@ -20,7 +20,8 @@ import org.raisercostin.jedio.op.DeleteOptions;
 import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 
-public abstract class AbstractLocation implements DirLocation, ExistingLocation, ReferenceLocation, ReadableFileLocation {
+public abstract class AbstractLocation
+    implements DirLocation, ExistingLocation, ReferenceLocation, ReadableFileLocation {
   @Override
   public NonExistingLocation deleteFile(DeleteOptions options) {
     throw new RuntimeException("Not implemented yet!!!");
@@ -157,7 +158,8 @@ public abstract class AbstractLocation implements DirLocation, ExistingLocation,
   }
 
   @Override
-  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore, boolean dirsFirst) {
+  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore,
+      boolean dirsFirst) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 

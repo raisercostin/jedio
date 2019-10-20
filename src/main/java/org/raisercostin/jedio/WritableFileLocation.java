@@ -13,9 +13,10 @@ public interface WritableFileLocation extends FileLocation {
   default WritableFileLocation copyFrom(InputStream inputStream) {
     return copyFrom(inputStream, CopyOptions.copyDefault());
   }
+
   @sugar
   default WritableFileLocation copyFrom(InputStream inputStream, CopyOptions options) {
-    return copyFrom(Locations.stream(inputStream),options);
+    return copyFrom(Locations.stream(inputStream), options);
   }
 
   WritableFileLocation copyFrom(ReadableFileLocation source, CopyOptions options);

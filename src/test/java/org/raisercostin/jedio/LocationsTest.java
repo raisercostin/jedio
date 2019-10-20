@@ -15,16 +15,19 @@ class LocationsTest {
     assertEquals("PathLocation(path=" + Paths.get(".").toAbsolutePath().normalize() + ")",
         Locations.current().toString());
   }
+
   @Test
   void testCopyTo() {
-    assertEquals(346622,Locations.classpath("a b.jpg").copyTo(Locations.writableFile("target/ab-copied.jpg")).length());
+    assertEquals(346622,
+        Locations.classpath("a b.jpg").copyTo(Locations.writableFile("target/ab-copied.jpg")).length());
   }
+
   @Test
   void testCopyToDontOverwrite() {
     final ReadableFileLocation src = Locations.classpath("a b.jpg");
     final WritableFileLocation dest = Locations.writableFile("target/ab-copied.jpg");
     dest.deleteFile();
-    assertEquals(346622,src.copyTo(dest).length());
+    assertEquals(346622, src.copyTo(dest).length());
     assertThrows(FileAlreadyExistsException.class, () -> {
       src.copyTo(dest, CopyOptions.copyDoNotOverwrite());
     });

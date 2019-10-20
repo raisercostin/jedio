@@ -47,8 +47,8 @@ import reactor.core.publisher.Flux;
  * @author raiser
  */
 @Data
-public class PathLocation implements DirLocation, NonExistingLocation, ReferenceLocation, ReadableFileLocation, WritableFileLocation,
-    ChangeableLocation, LinkLocation {
+public class PathLocation implements DirLocation, NonExistingLocation, ReferenceLocation, ReadableFileLocation,
+    WritableFileLocation, ChangeableLocation, LinkLocation {
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PathLocation.class);
 
   private final Path path;
@@ -307,7 +307,7 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
     if (options.makeDirIfNeeded())
       makeDirOnParentIfNeeded();
     source.usingInputStream(inputStream -> {
-      if(options.replaceExisting())
+      if (options.replaceExisting())
         Files.copy(inputStream, toPath(), StandardCopyOption.REPLACE_EXISTING);
       else
         Files.copy(inputStream, toPath());
@@ -407,7 +407,8 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   }
 
   private void createWindowsJunction(Path place, Path symlink, Path target) {
-    new SimpleShell(place.getParent()).execute("cmd /C mklink /J \"" + symlink + "\" \"" + target.toFile().getName() + "\"");
+    new SimpleShell(place.getParent())
+        .execute("cmd /C mklink /J \"" + symlink + "\" \"" + target.toFile().getName() + "\"");
   }
 
   private void createSymlink(Path symlink, Path target) {
@@ -418,7 +419,8 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   }
 
   private void createWindowsSymlink(Path place, String symlink, String targetName) {
-    new SimpleShell(place.getParent()).execute("cmd /C sudo cmd /C mklink /D \"" + symlink + "\" \"" + targetName + "\"");
+    new SimpleShell(place.getParent())
+        .execute("cmd /C sudo cmd /C mklink /D \"" + symlink + "\" \"" + targetName + "\"");
   }
 
   private void createLinuxSymlink(Path place, String symlink, String targetPath) {
@@ -676,7 +678,8 @@ public class PathLocation implements DirLocation, NonExistingLocation, Reference
   // }
   // };
 
-  static GuavaAndDirectoryStreamTraversalWithVirtualDirs traversal = new GuavaAndDirectoryStreamTraversalWithVirtualDirs(true, x -> false);
+  static GuavaAndDirectoryStreamTraversalWithVirtualDirs traversal = new GuavaAndDirectoryStreamTraversalWithVirtualDirs(
+      true, x -> false);
 
   private TraversalFilter createFilter() {
     return FindFilters.createFindFilter("", "", false, true);

@@ -8,6 +8,7 @@ import lombok.Setter;
 
 public interface DeleteOptions {
   boolean deleteByRename();
+
   @Data
   @Getter(value = AccessLevel.NONE)
   @Setter(value = AccessLevel.NONE)

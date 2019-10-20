@@ -27,8 +27,6 @@
       <id>bintray</id>
       <url>https://api.bintray.com/maven/${bintray.user}/${bintray.repo}/${bintray.package}/;publish=1</url>
     </repository>
-    <!-- <snapshotRepository> <id>${org}-private-maven2-snapshots</id> <url>${dist.snapshot.url}</url> <uniqueVersion>false</uniqueVersion> </snapshotRepository> 
-			<site> <id>${org}-private-maven2-sites</id> <url>${dist.site.url}</url> </site> -->
   </distributionManagement>
   <properties>
     <git.userOrGroup>raisercostin</git.userOrGroup>
@@ -169,7 +167,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.9.8</version>
+      <version>2.9.10</version>
     </dependency>
     <!-- utilities -->
     <dependency>

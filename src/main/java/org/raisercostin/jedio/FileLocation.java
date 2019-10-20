@@ -8,6 +8,7 @@ public interface FileLocation extends ExistingLocation {
   default NonExistingLocation deleteFile() {
     return deleteFile(DeleteOptions.deleteDefault());
   }
+
   NonExistingLocation deleteFile(DeleteOptions options);
 
   void rename(FileLocation asWritableFile);
