@@ -12,10 +12,6 @@
   <name>jedio</name>
   <description>Uniform, fluent access to files, urls and other resources API for java, kotlin and scala.</description>
   <url>${git.url}</url>
-  <issueManagement>
-    <system>Github</system>
-    <url>https://github.com/raisercostin/${project.artifactId}/issues</url>
-  </issueManagement>
   <scm>
     <connection>scm:git:${git.url}.git</connection>
     <developerConnection>scm:git:${git.url}.git</developerConnection>
@@ -28,12 +24,16 @@
       <url>https://api.bintray.com/maven/${bintray.user}/${bintray.repo}/${bintray.package}/;publish=1</url>
     </repository>
   </distributionManagement>
+  <issueManagement>
+    <system>Github</system>
+    <url>https://github.com/raisercostin/${project.artifactId}/issues</url>
+  </issueManagement>
   <properties>
     <git.userOrGroup>raisercostin</git.userOrGroup>
     <git.repo>${project.artifactId}</git.repo>
     <git.host>github.com</git.host>
     <git.url>https://${git.host}/${git.userOrGroup}/${git.repo}</git.url>
-    <org>raisercostin</org>
+
     <bintray.user>raisercostin</bintray.user>
     <bintray.repo>maven</bintray.repo>
     <bintray.package>${project.artifactId}</bintray.package>
@@ -43,6 +43,18 @@
     <dist.snapshot.url>${dist.url}/snapshots/</dist.snapshot.url>
     <dist.site.url>${dist.url}/sites/${project.groupId}-${project.artifactId}-${project.version}</dist.site.url>
     <createChecksum>false</createChecksum>
+    <!--http://mapstruct.org/documentation/ide-support/ : automatically run annotation processors within the incremental compilation -->
+    <m2e.apt.activation>jdt_apt</m2e.apt.activation>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+
+    <java.version>1.8</java.version>
+    <target.java.version>1.8</target.java.version>
+    <source.java.version>1.8</source.java.version>
+    <target.jvm.version>1.8</target.jvm.version>
+
+
     <maven.test.skip>false</maven.test.skip>
     <!--<docker.image.prefix>registry.gitlab.com/dcsi/all/docker/custom</docker.image.prefix> -->
     <docker.image.prefix>com.revomatico</docker.image.prefix>
@@ -54,15 +66,9 @@
     <logback.version>1.2.3</logback.version>
     <reactor.version>3.2.5.RELEASE</reactor.version>
     <spring.version>5.1.4.RELEASE</spring.version>
-    <!--http://mapstruct.org/documentation/ide-support/ : automatically run annotation processors within the incremental compilation -->
-    <m2e.apt.activation>jdt_apt</m2e.apt.activation>
     <spring.boot.version>2.1.1.RELEASE</spring.boot.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.version>1.8</java.version>
-    <target.java.version>1.8</target.java.version>
-    <source.java.version>1.8</source.java.version>
-    <target.jvm.version>1.8</target.jvm.version>
+
+
     <kotlin.version>1.2.71</kotlin.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <experimentalCoroutines>enable</experimentalCoroutines>
