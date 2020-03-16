@@ -51,7 +51,7 @@ public class Locations {
     return new ClasspathLocation(path);
   }
 
-  public static DirLocation classpathDir(String path) {
+  public static ReadableDirLocation classpathDir(String path) {
     return new ClasspathLocation(path);
   }
 

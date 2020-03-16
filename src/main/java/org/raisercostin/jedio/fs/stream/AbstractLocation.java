@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.function.Function;
 
 import io.vavr.control.Option;
+import org.raisercostin.jedio.BasicDirLocation;
 import org.raisercostin.jedio.ChangeableLocation;
 import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.ExistingLocation;
@@ -21,7 +22,7 @@ import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 
 public abstract class AbstractLocation
-    implements DirLocation, ExistingLocation, ReferenceLocation, ReadableFileLocation {
+    implements ExistingLocation, ReferenceLocation, ReadableFileLocation {
   @Override
   public NonExistingLocation deleteFile(DeleteOptions options) {
     throw new RuntimeException("Not implemented yet!!!");
@@ -69,11 +70,6 @@ public abstract class AbstractLocation
 
   @Override
   public String getName() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Option<RelativeLocation> stripAncestor(DirLocation x) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -169,11 +165,6 @@ public abstract class AbstractLocation
   }
 
   @Override
-  public DirLocation asDir() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
   public long length() {
     throw new RuntimeException("Not implemented yet!!!");
   }
@@ -190,31 +181,6 @@ public abstract class AbstractLocation
 
   @Override
   public String readContent() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public NonExistingLocation deleteDir(DeleteOptions options) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public ChangeableLocation asChangableLocation() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Flux<ExistingLocation> findFilesAndDirs() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Flux<FileLocation> findFiles() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Flux<DirLocation> findDirs() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 }

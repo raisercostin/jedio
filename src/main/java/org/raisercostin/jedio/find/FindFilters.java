@@ -84,6 +84,8 @@ public class FindFilters {
     };
   }
 
+  //TODO filesFirst too, if both are true, or both false whatever.
+  //TODO current folder?
   public static TraversalFilter createFindFilter(String filter, String gitIgnore, boolean dirsFirst,
       boolean recursive) {
     PathMatcher matcher;

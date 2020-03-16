@@ -20,10 +20,6 @@ public interface ReferenceLocation extends Location {
     return child(RelativeLocation.create(path));
   }
 
-  default PathLocation asPathLocation() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
   @Deprecated
   String absolute();
 
@@ -39,7 +35,18 @@ public interface ReferenceLocation extends Location {
 
   String getName();
 
-  Option<RelativeLocation> stripAncestor(DirLocation x);
+  default Option<RelativeLocation> stripAncestor(BasicDirLocation x) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  /**
+   * Returns a new location inside `to` with the same relative path as the current item is inside `from`. For example
+   * file `Location.file("c:\a\b\c.txt").relative("c:\","c:\x") equals Location.file("c:\x\a\b\c.txt")`
+   */
+  default Option<ReferenceLocation> relative(BasicDirLocation from, BasicDirLocation to) {
+    Option<RelativeLocation> relative = stripAncestor(from);
+    return relative.map(x -> to.child(x));
+  }
 
   Option<ReferenceLocation> findAncestor(Function<ReferenceLocation, Boolean> fn);
 
@@ -56,11 +63,6 @@ public interface ReferenceLocation extends Location {
   DirLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn);
 
   boolean exists();
-
-  // maybe option?
-  WritableFileLocation asWritableFile();
-
-  ReadableFileLocation asReadableFile();
 
   boolean isDir();
 
@@ -83,8 +85,7 @@ public interface ReferenceLocation extends Location {
     return find(traversal, filter, recursive, gitIgnore, true);
   }
 
-  Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore,
-      boolean dirsFirst);
+  Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore, boolean dirsFirst);
 
   ReferenceLocation create(String path);
 
@@ -98,11 +99,8 @@ public interface ReferenceLocation extends Location {
 
   default ReferenceLocation withName(Function<String, String> newName) {
     val fullName = absoluteAndNormalized();
-    return create(
-        FilenameUtils.concat(FilenameUtils.getFullPath(fullName), newName.apply(FilenameUtils.getName(fullName))));
+    return create(FilenameUtils.concat(FilenameUtils.getFullPath(fullName), newName.apply(FilenameUtils.getName(fullName))));
   }
-
-  DirLocation asDir();
 
   default boolean hasExtension(String extension) {
     return getName().endsWith("." + extension);
@@ -113,4 +111,25 @@ public interface ReferenceLocation extends Location {
   }
 
   long length();
+
+  // various forced conversions
+
+  default WritableFileLocation asWritableFile() {
+    return (WritableFileLocation) this;
+  }
+  default ReadableFileLocation asReadableFile() {
+    return (ReadableFileLocation) this;
+  }
+  default DirLocation asDir() {
+    return (DirLocation) this;
+  }
+  default ReadableDirLocation asReadableDir() {
+    return (ReadableDirLocation) this;
+  }
+  default WritableDirLocation asWritableDir() {
+    return (WritableDirLocation) this;
+  }
+  default PathLocation asPathLocation() {
+    return (PathLocation) this;
+  }
 }

@@ -40,7 +40,7 @@ import reactor.core.publisher.Mono;
 // @Setter(lombok.AccessLevel.NONE)
 @AllArgsConstructor
 @ToString
-public class HighPerfUrlLocation implements ReferenceLocation, ReadableFileLocation {
+public class HighPerfUrlLocation implements ReadableFileLocation {
   public static CloseableHttpClient createHighPerfHttpClient() {
     return createHighPerfHttpClient(mgr -> {
     });
@@ -113,11 +113,6 @@ public class HighPerfUrlLocation implements ReferenceLocation, ReadableFileLocat
 
   @Override
   public String getName() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Option<RelativeLocation> stripAncestor(DirLocation x) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 

@@ -12,13 +12,18 @@ import io.vavr.control.Option;
 import io.vavr.control.Try;
 import lombok.Data;
 import org.apache.commons.io.IOUtils;
+import org.raisercostin.jedio.ChangeableLocation;
 import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.ExistingLocation;
+import org.raisercostin.jedio.FileLocation;
 import org.raisercostin.jedio.Locations;
+import org.raisercostin.jedio.ReadableDirLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
 import org.raisercostin.jedio.fs.stream.AbstractLocation;
+import org.raisercostin.jedio.path.PathLocation;
+import reactor.core.publisher.Flux;
 
 /**
  * What is Absolute, Relative and Canonical Path
@@ -28,8 +33,7 @@ import org.raisercostin.jedio.fs.stream.AbstractLocation;
  * @author raiser
  */
 @Data
-public class ClasspathLocation extends AbstractLocation
-    implements DirLocation, ExistingLocation, ReferenceLocation, ReadableFileLocation {
+public class ClasspathLocation extends AbstractLocation implements ReadableDirLocation, ExistingLocation, ReadableFileLocation {
   private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
       .getOrElse(ClassLoader.class.getClassLoader());
 
@@ -51,6 +55,10 @@ public class ClasspathLocation extends AbstractLocation
   @Override
   public String absoluteAndNormalized() {
     return Locations.existingFile(toPath()).absoluteAndNormalized();
+  }
+
+  private PathLocation toPathLocation() {
+    return new PathLocation(toPath());
   }
 
   private Path toPath() {
@@ -83,8 +91,7 @@ public class ClasspathLocation extends AbstractLocation
   }
 
   public String readContent() {
-    try (BufferedInputStream b = new BufferedInputStream(
-        ClasspathLocation.class.getClassLoader().getResourceAsStream(path))) {
+    try (BufferedInputStream b = new BufferedInputStream(ClasspathLocation.class.getClassLoader().getResourceAsStream(path))) {
       return IOUtils.toString(b, "UTF-8");
     } catch (IOException e) {
       throw new RuntimeException("Can't read resource [" + path + "]", e);
@@ -97,12 +104,17 @@ public class ClasspathLocation extends AbstractLocation
   }
 
   @Override
-  public DirLocation asDir() {
+  public ReadableFileLocation asReadableFile() {
     return this;
   }
 
   @Override
-  public ReadableFileLocation asReadableFile() {
-    return this;
+  public ChangeableLocation asChangableLocation() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public Flux<ExistingLocation> findFilesAndDirs(boolean recursive) {
+    return toPathLocation().findFilesAndDirs(recursive);
   }
 }

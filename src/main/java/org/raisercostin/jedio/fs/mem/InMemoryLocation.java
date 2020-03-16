@@ -18,7 +18,7 @@ public class InMemoryLocation extends AbstractLocation implements ReadableFileLo
   public InputStream unsafeInputStream() {
     return IOUtils.toInputStream(data, Charsets.UTF_8);
   }
-  
+
   @Override
   public String readContent() {
     return data;

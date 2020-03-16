@@ -1,12 +1,15 @@
-package org.raisercostin.jedio.url;
+package org.raisercostin.jedio.memory;
 
 import java.io.InputStream;
 import java.util.function.Function;
 
+import io.vavr.Function1;
 import io.vavr.control.Option;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.ToString;
+import lombok.Getter;
+import lombok.Setter;
 import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.FileLocation;
 import org.raisercostin.jedio.LinkLocation;
@@ -20,14 +23,60 @@ import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.op.DeleteOptions;
 import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Data
-// @Getter(lombok.AccessLevel.NONE)
-// @Setter(lombok.AccessLevel.NONE)
-@AllArgsConstructor
-@ToString
-public class UrlLocation implements ReadableFileLocation {
-  public final String url;
+@Getter(value = AccessLevel.NONE)
+@Setter(value = AccessLevel.NONE)
+public class DiskCachedLocation implements ReadableFileLocation {
+
+  @Data
+  @Getter(value = AccessLevel.NONE)
+  @Setter(value = AccessLevel.NONE)
+  @AllArgsConstructor
+  public static class Root {
+    public DirLocation dir;
+    public Function1<String, String> transformer;
+
+    public DiskCachedLocation cached(ReadableFileLocation x) {
+      return new DiskCachedLocation(this, x);
+    }
+
+    private String slug(ReadableFileLocation location) {
+      return location.absoluteAndNormalized().replaceAll("[:\\\\/#?.&]", "-");
+    }
+
+    public ReferenceLocation locationFor(ReadableFileLocation location) {
+      return dir.child(slug(location));
+    }
+  }
+
+  public static Root cacheAt(DirLocation dir, Function1<String, String> transformer) {
+    return new Root(dir, transformer);
+  }
+
+  private final Root cache;
+  private final ReadableFileLocation location;
+
+  public DiskCachedLocation(Root cache, ReadableFileLocation location) {
+    this.cache = cache;
+    this.location = location;
+  }
+
+  @Override
+  public NonExistingLocation deleteFile(DeleteOptions options) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public void rename(FileLocation asWritableFile) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public NonExistingLocation delete(DeleteOptions options) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
   @Override
   public ReferenceLocation child(RelativeLocation path) {
@@ -101,7 +150,7 @@ public class UrlLocation implements ReadableFileLocation {
 
   @Override
   public boolean exists() {
-    throw new RuntimeException("Not implemented yet!!!");
+    return true;
   }
 
   @Override
@@ -116,12 +165,12 @@ public class UrlLocation implements ReadableFileLocation {
 
   @Override
   public boolean isDir() {
-    throw new RuntimeException("Not implemented yet!!!");
+    return false;
   }
 
   @Override
   public boolean isFile() {
-    throw new RuntimeException("Not implemented yet!!!");
+    return true;
   }
 
   @Override
@@ -136,43 +185,38 @@ public class UrlLocation implements ReadableFileLocation {
 
   @Override
   public Option<LinkLocation> asSymlink() {
-    throw new RuntimeException("Not implemented yet!!!");
+    return Option.none();
   }
 
   @Override
   public boolean isSymlink() {
+    return false;
+  }
+
+  @Override
+  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore, boolean dirsFirst) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore,
-      boolean dirsFirst) {
+  public ReferenceLocation create(String path) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public NonExistingLocation deleteFile(DeleteOptions options) {
+  public DirLocation asDir() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
-  @Override
-  public void rename(FileLocation asWritableFile) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public NonExistingLocation delete(DeleteOptions options) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
+  // length in chars or bytes????
   @Override
   public long length() {
-    throw new RuntimeException("Not implemented yet!!!");
+    return readContent().length();
   }
 
   @Override
   public Option<String> readIfExists() {
-    throw new RuntimeException("Not implemented yet!!!");
+    return Option.of(readContent());
   }
 
   @Override
@@ -182,16 +226,26 @@ public class UrlLocation implements ReadableFileLocation {
 
   @Override
   public String readContent() {
-    return HttpUtils.getFromURL(url);
+    ReferenceLocation cached = cache.locationFor(location);
+    if (cached.exists()) {
+      return cached.asReadableFile().readContent();
+    } else {
+      String content = location.readContent();
+      cached.asWritableFile().write(cache.transformer.apply(content));
+      return content;
+    }
   }
 
   @Override
-  public UrlLocation create(String path) {
-    return new UrlLocation(path);
-  }
-
-  @Override
-  public DirLocation asDir() {
-    throw new RuntimeException("Not implemented yet!!!");
+  public Mono<String> readContentAsync() {
+    ReferenceLocation cached = cache.locationFor(location);
+    if (cached.exists()) {
+      return cached.asReadableFile().readContentAsync();
+    } else {
+      return location.readContentAsync().map(content -> {
+        cached.asWritableFile().write(cache.transformer.apply(content));
+        return content;
+      });
+    }
   }
 }
