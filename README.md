@@ -33,6 +33,7 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
 
 ## Other libraries
 - scala - https://ammonite.io/#Ammonite-Ops
+- https://golb.hplar.ch/2017/09/Pluggable-file-systems-in-Java.html
 
 ## Development
 

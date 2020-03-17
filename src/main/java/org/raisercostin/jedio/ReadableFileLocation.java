@@ -3,8 +3,8 @@ package org.raisercostin.jedio;
 import java.io.InputStream;
 
 import io.vavr.control.Option;
+import org.jedio.ExceptionUtils;
 import org.raisercostin.jedio.op.CopyOptions;
-import org.raisercostin.util.ExceptionUtils;
 import org.raisercostin.util.functions.JedioFunction;
 import org.raisercostin.util.functions.JedioProcedure;
 import org.raisercostin.util.sugar;

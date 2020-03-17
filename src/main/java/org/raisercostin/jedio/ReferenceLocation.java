@@ -85,7 +85,8 @@ public interface ReferenceLocation extends Location {
     return find(traversal, filter, recursive, gitIgnore, true);
   }
 
-  Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore, boolean dirsFirst);
+  Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore,
+      boolean dirsFirst);
 
   ReferenceLocation create(String path);
 
@@ -99,7 +100,8 @@ public interface ReferenceLocation extends Location {
 
   default ReferenceLocation withName(Function<String, String> newName) {
     val fullName = absoluteAndNormalized();
-    return create(FilenameUtils.concat(FilenameUtils.getFullPath(fullName), newName.apply(FilenameUtils.getName(fullName))));
+    return create(
+        FilenameUtils.concat(FilenameUtils.getFullPath(fullName), newName.apply(FilenameUtils.getName(fullName))));
   }
 
   default boolean hasExtension(String extension) {
@@ -117,18 +119,23 @@ public interface ReferenceLocation extends Location {
   default WritableFileLocation asWritableFile() {
     return (WritableFileLocation) this;
   }
+
   default ReadableFileLocation asReadableFile() {
     return (ReadableFileLocation) this;
   }
+
   default DirLocation asDir() {
     return (DirLocation) this;
   }
+
   default ReadableDirLocation asReadableDir() {
     return (ReadableDirLocation) this;
   }
+
   default WritableDirLocation asWritableDir() {
     return (WritableDirLocation) this;
   }
+
   default PathLocation asPathLocation() {
     return (PathLocation) this;
   }

@@ -21,8 +21,7 @@ import org.raisercostin.jedio.op.DeleteOptions;
 import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 
-public abstract class AbstractLocation
-    implements ExistingLocation, ReferenceLocation, ReadableFileLocation {
+public abstract class AbstractLocation implements ExistingLocation, ReferenceLocation, ReadableFileLocation {
   @Override
   public NonExistingLocation deleteFile(DeleteOptions options) {
     throw new RuntimeException("Not implemented yet!!!");

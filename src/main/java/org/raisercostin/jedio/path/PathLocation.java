@@ -50,8 +50,8 @@ import reactor.core.publisher.Flux;
  * @author raiser
  */
 @Data
-public class PathLocation implements ReadableDirLocation, WritableDirLocation, NonExistingLocation, ReadableFileLocation,
-    WritableFileLocation, ChangeableLocation, LinkLocation {
+public class PathLocation implements ReadableDirLocation, WritableDirLocation, NonExistingLocation,
+    ReadableFileLocation, WritableFileLocation, ChangeableLocation, LinkLocation {
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PathLocation.class);
 
   public static DirLocation efficientExistingDir(Path path) {
@@ -435,7 +435,8 @@ public class PathLocation implements ReadableDirLocation, WritableDirLocation, N
   }
 
   private void createWindowsJunction(Path place, Path symlink, Path target) {
-    new SimpleShell(place.getParent()).execute("cmd /C mklink /J \"" + symlink + "\" \"" + target.toFile().getName() + "\"");
+    new SimpleShell(place.getParent())
+        .execute("cmd /C mklink /J \"" + symlink + "\" \"" + target.toFile().getName() + "\"");
   }
 
   private void createSymlink(Path symlink, Path target) {
@@ -446,7 +447,8 @@ public class PathLocation implements ReadableDirLocation, WritableDirLocation, N
   }
 
   private void createWindowsSymlink(Path place, String symlink, String targetName) {
-    new SimpleShell(place.getParent()).execute("cmd /C sudo cmd /C mklink /D \"" + symlink + "\" \"" + targetName + "\"");
+    new SimpleShell(place.getParent())
+        .execute("cmd /C sudo cmd /C mklink /D \"" + symlink + "\" \"" + targetName + "\"");
   }
 
   private void createLinuxSymlink(Path place, String symlink, String targetPath) {
@@ -704,7 +706,8 @@ public class PathLocation implements ReadableDirLocation, WritableDirLocation, N
   // }
   // };
 
-  static GuavaAndDirectoryStreamTraversalWithVirtualDirs traversal = new GuavaAndDirectoryStreamTraversalWithVirtualDirs(true, x -> false);
+  static GuavaAndDirectoryStreamTraversalWithVirtualDirs traversal = new GuavaAndDirectoryStreamTraversalWithVirtualDirs(
+      true, x -> false);
 
   private TraversalFilter createFilter(boolean recursive) {
     return FindFilters.createFindFilter("", "", false, recursive);

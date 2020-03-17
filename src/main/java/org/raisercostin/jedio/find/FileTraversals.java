@@ -128,6 +128,9 @@ public class FileTraversals {
 
     @Override
     public boolean matches(Path path) {
+      if(path.getClass().getName().equals("com.sun.nio.zipfs.ZipPath")) {
+        return true;
+      }
       return filter.accept(path.toFile());
     }
   }
