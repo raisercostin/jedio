@@ -1,5 +1,6 @@
 package org.raisercostin.jedio.memory;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.function.Function;
 
@@ -14,13 +15,14 @@ import org.raisercostin.jedio.RelativeLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
+import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.DeleteOptions;
 import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public class StringLocation implements ReadableFileLocation {
-  public final String content;
+public class StringLocation implements ReadableFileLocation, WritableFileLocation, NonExistingLocation {
+  public String content;
 
   public StringLocation(String content) {
     this.content = content;
@@ -28,7 +30,8 @@ public class StringLocation implements ReadableFileLocation {
 
   @Override
   public NonExistingLocation deleteFile(DeleteOptions options) {
-    throw new RuntimeException("Not implemented yet!!!");
+    this.content = null;
+    return this;
   }
 
   @Override
@@ -38,7 +41,8 @@ public class StringLocation implements ReadableFileLocation {
 
   @Override
   public NonExistingLocation delete(DeleteOptions options) {
-    throw new RuntimeException("Not implemented yet!!!");
+    this.content = null;
+    return this;
   }
 
   @Override
@@ -113,12 +117,12 @@ public class StringLocation implements ReadableFileLocation {
 
   @Override
   public boolean exists() {
-    return true;
+    return content != null;
   }
 
   @Override
   public WritableFileLocation asWritableFile() {
-    throw new RuntimeException("Not implemented yet!!!");
+    return this;
   }
 
   @Override
@@ -185,7 +189,7 @@ public class StringLocation implements ReadableFileLocation {
 
   @Override
   public InputStream unsafeInputStream() {
-    throw new RuntimeException("Not implemented yet!!!");
+    return new ByteArrayInputStream(content.getBytes());
   }
 
   @Override
@@ -196,5 +200,25 @@ public class StringLocation implements ReadableFileLocation {
   @Override
   public Mono<String> readContentAsync() {
     return Mono.just(content);
+  }
+
+  @Override
+  public WritableFileLocation write(String content, String encoding) {
+    this.content = content;
+    return this;
+  }
+
+  @Override
+  public WritableFileLocation copyFrom(ReadableFileLocation source, CopyOptions options) {
+    if (this.content != null && !options.replaceExisting()) {
+      throw new RuntimeException("Cannot overwrite [" + this + "] with content from " + source);
+    }
+    this.content = source.readContent();
+    return this;
+  }
+
+  @Override
+  public DirLocation mkdir() {
+    throw new RuntimeException("Not implemented yet!!!");
   }
 }

@@ -42,7 +42,8 @@ import reactor.core.publisher.Flux;
  * @author raiser
  */
 @Data
-public class ClasspathLocation extends AbstractLocation implements ReadableDirLocation, ExistingLocation, ReadableFileLocation {
+public class ClasspathLocation extends AbstractLocation
+    implements ReadableDirLocation, ExistingLocation, ReadableFileLocation {
   private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
       .getOrElse(ClassLoader.class.getClassLoader());
 

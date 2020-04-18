@@ -58,7 +58,8 @@ public class ExceptionUtils {
   @SuppressWarnings("unchecked")
   // DEV-NOTE: we do not plan to expose this as public API
   // claim that the typeErasure invocation throws a RuntimeException
-  private static <R, T extends Throwable> R sneakyThrow(final Throwable throwable, String format, Object... args) throws T {
+  private static <R, T extends Throwable> R sneakyThrow(final Throwable throwable, String format, Object... args)
+      throws T {
     if (format != null)
       throwable.addSuppressed(new RuntimeException(String.format(format, args)));
     throw (T) throwable;

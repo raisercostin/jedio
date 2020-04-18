@@ -46,14 +46,15 @@
     <m2e.apt.activation>jdt_apt</m2e.apt.activation>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.version>1.8</java.version>
-    <target.java.version>1.8</target.java.version>
-    <source.java.version>1.8</source.java.version>
-    <target.jvm.version>1.8</target.jvm.version>
+    <myJavaVersion>1.8</myJavaVersion>
+    <target.java.version>${myJavaVersion}</target.java.version>
+    <source.java.version>${myJavaVersion}</source.java.version>
+    <target.jvm.version>${myJavaVersion}</target.jvm.version>
+    <java.version>${myJavaVersion}</java.version>
     <maven.test.skip>false</maven.test.skip>
     <!--<docker.image.prefix>registry.gitlab.com/dcsi/all/docker/custom</docker.image.prefix> -->
     <docker.image.prefix>com.revomatico</docker.image.prefix>
-    <org.mapstruct.version>1.2.0.Final</org.mapstruct.version>
+    <org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
     <lombok.version>1.18.10</lombok.version>
     <junit-jupiter.version>5.4.2</junit-jupiter.version>
     <junit-platform.version>1.4.2</junit-platform.version>
@@ -61,7 +62,7 @@
     <logback.version>1.2.3</logback.version>
     <reactor.version>3.2.5.RELEASE</reactor.version>
     <spring.version>5.1.4.RELEASE</spring.version>
-    <spring.boot.version>2.1.1.RELEASE</spring.boot.version>
+    <spring.boot.version>2.2.1.RELEASE</spring.boot.version>
     <kotlin.version>1.2.71</kotlin.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <experimentalCoroutines>enable</experimentalCoroutines>
