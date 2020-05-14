@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+>
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.raisercostin.utils</groupId>
-    <artifactId>maven-defaults</artifactId>
-    <version>6</version>
+    <groupId>org.raisercostin</groupId>
+    <artifactId>maven-defaults-raisercostin</artifactId>
+    <version>1.5</version>
   </parent>
-  <groupId>org.raisercostin</groupId>
   <artifactId>jedio</artifactId>
   <version>0.24-SNAPSHOT</version>
   <name>jedio</name>
@@ -42,24 +45,9 @@
     <dist.snapshot.url>${dist.url}/snapshots/</dist.snapshot.url>
     <dist.site.url>${dist.url}/sites/${project.groupId}-${project.artifactId}-${project.version}</dist.site.url>
     <createChecksum>false</createChecksum>
-    <!--http://mapstruct.org/documentation/ide-support/ : automatically run annotation processors within the incremental compilation -->
-    <m2e.apt.activation>jdt_apt</m2e.apt.activation>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <myJavaVersion>1.8</myJavaVersion>
-    <target.java.version>${myJavaVersion}</target.java.version>
-    <source.java.version>${myJavaVersion}</source.java.version>
-    <target.jvm.version>${myJavaVersion}</target.jvm.version>
-    <java.version>${myJavaVersion}</java.version>
     <maven.test.skip>false</maven.test.skip>
     <!--<docker.image.prefix>registry.gitlab.com/dcsi/all/docker/custom</docker.image.prefix> -->
     <docker.image.prefix>com.revomatico</docker.image.prefix>
-    <org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
-    <lombok.version>1.18.10</lombok.version>
-    <junit-jupiter.version>5.4.2</junit-jupiter.version>
-    <junit-platform.version>1.4.2</junit-platform.version>
-    <slf4j.version>1.7.25</slf4j.version>
-    <logback.version>1.2.3</logback.version>
     <reactor.version>3.2.5.RELEASE</reactor.version>
     <spring.version>5.1.4.RELEASE</spring.version>
     <spring.boot.version>2.2.1.RELEASE</spring.boot.version>
@@ -88,7 +76,6 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-devtools</artifactId>
-      <version>${spring.boot.version}</version>
       <scope>runtime</scope>
     </dependency>
     <!-- <dependency> <groupId>org.jetbrains.kotlin</groupId> <artifactId>kotlin-stdlib</artifactId> <version>${kotlin.version}</version> </dependency> 
@@ -97,12 +84,10 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
-      <version>${spring.version}</version>
     </dependency>
     <dependency>
       <groupId>io.projectreactor</groupId>
       <artifactId>reactor-core</artifactId>
-      <version>${reactor.version}</version>
     </dependency>
     <!-- https://github.com/TooTallNate/Java-WebSocket -->
     <dependency>
@@ -110,83 +95,61 @@
       <artifactId>Java-WebSocket</artifactId>
       <version>1.5.0</version>
     </dependency>
-    <!-- <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-jersey</artifactId> <version>${spring.version}</version> 
-			</dependency> <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-web</artifactId> <version>${spring.version}</version> 
-			</dependency> <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-websocket</artifactId> <version>${spring.version}</version> 
-			</dependency> <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-devtools</artifactId> <version>${spring.version}</version> 
-			</dependency> <dependency> <groupId>io.springfox</groupId> <artifactId>springfox-swagger2</artifactId> <version>2.9.2</version> </dependency> 
-			<dependency> <groupId>io.springfox</groupId> <artifactId>springfox-swagger-ui</artifactId> <version>2.9.2</version> </dependency> <dependency> 
-			<groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-actuator</artifactId> </dependency> <dependency> <groupId>org.springframework.boot</groupId> 
-			<artifactId>spring-boot-starter-amqp</artifactId> <version>${spring.version}</version> </dependency> <dependency> <groupId>org.springframework.boot</groupId> 
-			<artifactId>spring-boot-starter-webflux</artifactId> <version>${spring.version}</version> </dependency> <dependency> <groupId>org.springframework.boot</groupId> 
-			<artifactId>spring-boot-configuration-processor</artifactId> <optional>true</optional> <version>${spring.version}</version> </dependency> -->
-    <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.8.5</version>
     </dependency>
     <!-- testing -->
     <!-- Not test as we might use asserts in test clients main classes. -->
     <!-- <dependency> <groupId>junit</groupId> <artifactId>junit</artifactId> <version>4.12</version> <type>jar</type> </dependency> -->
-    <dependency>
+<!--     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>${junit-jupiter.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
-      <version>${junit-jupiter.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
-      <version>${junit-jupiter.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-runner</artifactId>
-      <version>${junit-platform.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>2.23.4</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-junit-jupiter</artifactId>
-      <version>2.23.4</version>
       <scope>test</scope>
     </dependency>
-    <!-- <dependency> <groupId>org.junit.platform</groupId> <artifactId>junit-platform-launcher</artifactId> <version>1.1.0</version> <scope>test</scope> 
+ -->    <!-- <dependency> <groupId>org.junit.platform</groupId> <artifactId>junit-platform-launcher</artifactId> <version>1.1.0</version> <scope>test</scope> 
 			</dependency> -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.9.10.1</version>
     </dependency>
     <!-- utilities -->
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.6</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.8</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>27.1-jre</version>
     </dependency>
     <dependency>
       <groupId>com.mashape.unirest</groupId>
@@ -202,18 +165,15 @@
     <dependency>
       <groupId>io.vavr</groupId>
       <artifactId>vavr</artifactId>
-      <version>0.10.0</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>${lombok.version}</version>
     </dependency>
     <!-- <dependency> <groupId>io.reactivex.rxjava2</groupId> <artifactId>rxjava</artifactId> <version>2.2.4</version> </dependency> -->
     <dependency>
       <groupId>com.typesafe</groupId>
       <artifactId>config</artifactId>
-      <version>1.3.0</version>
     </dependency>
     <dependency>
       <groupId>org.raisercostin</groupId>
@@ -224,45 +184,39 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
-      <version>${slf4j.version}</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>${logback.version}</version>
       <optional>true</optional>
     </dependency>
     <!-- tests -->
+    <!-- 
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
-      <version>${spring.boot.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-test</artifactId>
-      <version>${spring.boot.version}</version>
       <type>jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
-      <version>5.1.3.RELEASE</version>
       <type>jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.projectreactor</groupId>
       <artifactId>reactor-test</artifactId>
-      <version>${reactor.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -271,6 +225,7 @@
       <version>1.5.0</version>
       <scope>test</scope>
     </dependency>
+     -->
     <!-- <dependency> <groupId>org.mapstruct</groupId> <artifactId>mapstruct-jdk8</artifactId> <version>${org.mapstruct.version}</version> </dependency> -->
     <!-- <dependency> <groupId>org.mapstruct</groupId> <artifactId>mapstruct-processor</artifactId> <version>${org.mapstruct.version}</version> 
 			</dependency> -->
@@ -304,7 +259,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.0</version>
         <!--$NO-MVN-MAN-VER$ -->
         <configuration>
           <source>${source.java.version}</source>
@@ -342,7 +296,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore/>
+                  <ignore />
                 </action>
               </pluginExecution>
               <pluginExecution>
@@ -355,7 +309,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore/>
+                  <ignore />
                 </action>
               </pluginExecution>
             </pluginExecutions>
@@ -365,7 +319,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <!-- <version>2.6</version> -->
         <configuration>
           <archive>
             <manifest>
@@ -378,7 +331,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.6</version>
         <!--$NO-MVN-MAN-VER$ -->
         <executions>
           <execution>
@@ -557,7 +509,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore/>
+                    <ignore />
                   </action>
                 </pluginExecution>
               </pluginExecutions>
