@@ -27,11 +27,9 @@ import org.raisercostin.jedio.ExistingLocation;
 import org.raisercostin.jedio.Locations;
 import org.raisercostin.jedio.ReadableDirLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
-import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
 import org.raisercostin.jedio.fs.stream.AbstractLocation;
 import org.raisercostin.jedio.path.PathLocation;
-import org.raisercostin.utils.ClassPathInputLocation;
 import reactor.core.publisher.Flux;
 
 /**
@@ -42,10 +40,11 @@ import reactor.core.publisher.Flux;
  * @author raiser
  */
 @Data
-public class ClasspathLocation extends AbstractLocation
-    implements ReadableDirLocation, ExistingLocation, ReadableFileLocation {
+public class ClasspathLocation extends AbstractLocation<ClasspathLocation>
+    implements ReadableDirLocation<ClasspathLocation, ClasspathLocation>, ExistingLocation<ClasspathLocation>,
+    ReadableFileLocation<ClasspathLocation> {
   private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
-      .getOrElse(ClassLoader.class.getClassLoader());
+    .getOrElse(ClassLoader.class.getClassLoader());
 
   private static URL toUrl(String resourcePath) {
     URL res = specialClassLoader.getResource(resourcePath);
@@ -75,13 +74,14 @@ public class ClasspathLocation extends AbstractLocation
   public String absoluteAndNormalized() {
     URL url = resourceUrl;
     String x = url.toURI().getPath();
-    if (x == null)
+    if (x == null) {
       return url.toURI().toString();
-    else if (SystemUtils.IS_OS_WINDOWS)
+    } else if (SystemUtils.IS_OS_WINDOWS) {
       return StringUtils.removeStart(x, "/");
-    else
+    } else {
       return x;
-    // return Locations.existingFile(toUrl()).absoluteAndNormalized();
+      // return Locations.existingFile(toUrl()).absoluteAndNormalized();
+    }
   }
 
   private PathLocation toPathLocation() {
@@ -121,7 +121,7 @@ public class ClasspathLocation extends AbstractLocation
   }
 
   @Override
-  public ReferenceLocation child(RelativeLocation child) {
+  public ClasspathLocation child(RelativeLocation child) {
     return Locations.classpath(fixPath(resourcePath + "/" + child.getLocation()));
   }
   //
@@ -136,6 +136,7 @@ public class ClasspathLocation extends AbstractLocation
     return res;
   }
 
+  @Override
   public String readContent() {
     try (BufferedInputStream b = new BufferedInputStream(unsafeInputStream())) {
       return IOUtils.toString(b, "UTF-8");
@@ -160,7 +161,8 @@ public class ClasspathLocation extends AbstractLocation
   }
 
   @Override
-  public Flux<ExistingLocation> findFilesAndDirs(boolean recursive) {
-    return toPathLocation().findFilesAndDirs(recursive);
+  public Flux<ClasspathLocation> findFilesAndDirs(boolean recursive) {
+    //return toPathLocation().findFilesAndDirs(recursive);
+    throw new RuntimeException("Not implemented yet!!!");
   }
 }

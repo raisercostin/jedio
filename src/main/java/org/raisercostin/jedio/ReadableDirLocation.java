@@ -6,41 +6,45 @@ import org.raisercostin.util.sugar;
 import reactor.core.publisher.Flux;
 
 /** ReadableDir means you can find children (you can list). */
-public interface ReadableDirLocation extends BasicDirLocation {
+public interface ReadableDirLocation<SELF extends ReadableDirLocation<SELF, FileSELF>, FileSELF extends ReadableFileLocation<FileSELF>>
+    extends BasicDirLocation<SELF> {
   @Deprecated // @deprecated to reimplement in a efficient way
-  default Flux<FileLocation> findFilesAsFlux(boolean recursive) {
-    return findFilesAndDirs(recursive).filter(x -> x.isFile()).map(x -> (FileLocation) x);
+  default Flux<FileSELF> findFilesAsFlux(boolean recursive) {
+    return findFilesAndDirs(recursive).filter(x -> x.isFile()).map(x -> (FileSELF) x);
   }
 
   @sugar
-  default Iterator<FileLocation> findFiles(boolean recursive) {
+  default Iterator<FileSELF> findFiles(boolean recursive) {
     return Iterator.ofAll(findFilesAsFlux(recursive).toIterable());
   }
 
   @Deprecated // @deprecated to reimplement in a efficient way
-  default Flux<DirLocation> findDirs(boolean recursive) {
+  default Flux<DirLocation<?, ?>> findDirs(boolean recursive) {
     return findFilesAndDirs(recursive).filter(x -> x.isDir()).map(x -> (DirLocation) x);
   }
 
-  default Iterator<ExistingLocation> ls() {
+  default Iterator<SELF> ls() {
     return ls(false);
   }
 
   @sugar
-  default Iterator<ExistingLocation> ls(boolean recursive) {
+  default Iterator<SELF> ls(boolean recursive) {
     return Iterator.ofAll(findFilesAndDirs(recursive).toIterable());
   }
 
-  Flux<ExistingLocation> findFilesAndDirs(boolean recursive);
+  Flux<SELF> findFilesAndDirs(boolean recursive);
 
-  default void copyTo(DirLocation dir, CopyOptions copyOptions) {
+  default void copyTo(DirLocation<?, ?> dir, CopyOptions copyOptions) {
     findFilesAsFlux(true).doOnSubscribe(s -> copyOptions.reportOperationEvent("copyDirStart", this))
-        // .filter(item -> !item.equals(dir))
-        .map(item -> {
-          WritableFileLocation copied = item.asReadableFile().copyTo(item.relative(this, dir).get().asWritableFile(),
-              copyOptions);
-          return copied;
-        }).timeout(copyOptions.timeoutOnItem()).doOnComplete(() -> copyOptions.reportOperationEvent("copyDirEnd", this))
-        .blockLast(copyOptions.timeoutTotal());
+      // .filter(item -> !item.equals(dir))
+      .map(item -> {
+        WritableFileLocation<?> copied = item.asReadableFile()
+          .copyTo(item.relative(this, dir).get().asWritableFile(),
+            copyOptions);
+        return copied;
+      })
+      .timeout(copyOptions.timeoutOnItem())
+      .doOnComplete(() -> copyOptions.reportOperationEvent("copyDirEnd", this))
+      .blockLast(copyOptions.timeoutTotal());
   }
 }

@@ -17,11 +17,11 @@ import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.DeleteOptions;
-import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public class StringLocation implements ReadableFileLocation, WritableFileLocation, NonExistingLocation {
+public class StringLocation<SELF extends StringLocation<SELF>>
+    implements ReadableFileLocation<SELF>, WritableFileLocation<SELF>, NonExistingLocation<SELF> {
   public String content;
 
   public StringLocation(String content) {
@@ -35,7 +35,7 @@ public class StringLocation implements ReadableFileLocation, WritableFileLocatio
   }
 
   @Override
-  public void rename(FileLocation asWritableFile) {
+  public void rename(FileLocation<?> asWritableFile) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -46,7 +46,7 @@ public class StringLocation implements ReadableFileLocation, WritableFileLocatio
   }
 
   @Override
-  public ReferenceLocation child(RelativeLocation path) {
+  public SELF child(RelativeLocation path) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -79,29 +79,29 @@ public class StringLocation implements ReadableFileLocation, WritableFileLocatio
   public String getName() {
     throw new RuntimeException("Not implemented yet!!!");
   }
+  //
+  //  @Override
+  //  public Option<SELF> findAncestor(Function<ReferenceLocation<?>, Boolean> fn) {
+  //    throw new RuntimeException("Not implemented yet!!!");
+  //  }
 
   @Override
-  public Option<ReferenceLocation> findAncestor(Function<ReferenceLocation, Boolean> fn) {
+  public SELF makeDirOnParentIfNeeded() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public PathLocation makeDirOnParentIfNeeded() {
+  public Option<SELF> parent() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public Option<? extends ReferenceLocation> parent() {
+  public Option<SELF> existing() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public Option<DirLocation> existing() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Option<NonExistingLocation> nonExisting() {
+  public Option<NonExistingLocation<?>> nonExisting() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -111,7 +111,7 @@ public class StringLocation implements ReadableFileLocation, WritableFileLocatio
   }
 
   @Override
-  public DirLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
+  public SELF existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -167,7 +167,7 @@ public class StringLocation implements ReadableFileLocation, WritableFileLocatio
   }
 
   @Override
-  public ReferenceLocation create(String path) {
+  public SELF create(String path) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -203,18 +203,18 @@ public class StringLocation implements ReadableFileLocation, WritableFileLocatio
   }
 
   @Override
-  public WritableFileLocation write(String content, String encoding) {
+  public SELF write(String content, String encoding) {
     this.content = content;
-    return this;
+    return (SELF) this;
   }
 
   @Override
-  public WritableFileLocation copyFrom(ReadableFileLocation source, CopyOptions options) {
+  public SELF copyFrom(ReadableFileLocation source, CopyOptions options) {
     if (this.content != null && !options.replaceExisting()) {
       throw new RuntimeException("Cannot overwrite [" + this + "] with content from " + source);
     }
     this.content = source.readContent();
-    return this;
+    return (SELF) this;
   }
 
   @Override

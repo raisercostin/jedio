@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import io.vavr.control.Option;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
 import org.apache.commons.io.IOUtils;
@@ -19,7 +18,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.protocol.HttpContext;
 import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.FileLocation;
 import org.raisercostin.jedio.LinkLocation;
@@ -31,36 +29,31 @@ import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.op.DeleteOptions;
-import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Data
 // @Getter(lombok.AccessLevel.NONE)
 // @Setter(lombok.AccessLevel.NONE)
-@AllArgsConstructor
 @ToString
-public class HighPerfUrlLocation implements ReadableFileLocation {
+public class HighPerfUrlLocation<SELF extends HighPerfUrlLocation<SELF>> implements ReadableFileLocation<SELF> {
   public static CloseableHttpClient createHighPerfHttpClient() {
     return createHighPerfHttpClient(mgr -> {
     });
   }
 
   public static CloseableHttpClient createHighPerfHttpClient(Consumer<PoolingHttpClientConnectionManager> manager) {
-    ConnectionKeepAliveStrategy myStrategy = new ConnectionKeepAliveStrategy() {
-      @Override
-      public long getKeepAliveDuration(org.apache.http.HttpResponse response, HttpContext context) {
-        HeaderElementIterator it = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
-        while (it.hasNext()) {
-          HeaderElement he = it.nextElement();
-          String param = he.getName();
-          String value = he.getValue();
-          if (value != null && param.equalsIgnoreCase("timeout")) {
-            return Long.parseLong(value) * 1000;
-          }
+    ConnectionKeepAliveStrategy myStrategy = (response, context) -> {
+      HeaderElementIterator it = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+      while (it.hasNext()) {
+        HeaderElement he = it.nextElement();
+        String param = he.getName();
+        String value = he.getValue();
+        if (value != null && param.equalsIgnoreCase("timeout")) {
+          return Long.parseLong(value) * 1000;
         }
-        return 5 * 1000;
       }
+      return 5 * 1000;
     };
     PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
     // HttpHost host = new HttpHost("hostname", 80);
@@ -73,16 +66,23 @@ public class HighPerfUrlLocation implements ReadableFileLocation {
     // Set the total number of concurrent connections to a specific route, which is 2 by default.
     // connManager.setMaxPerRoute(route, 5);
     manager.accept(connManager);
-    CloseableHttpClient client = HttpClients.custom().setKeepAliveStrategy(myStrategy).setConnectionManager(connManager)
-        .build();
+    CloseableHttpClient client = HttpClients.custom()
+      .setKeepAliveStrategy(myStrategy)
+      .setConnectionManager(connManager)
+      .build();
     return client;
   }
 
   public final String url;
   public final CloseableHttpClient client;
 
+  public HighPerfUrlLocation(String url, CloseableHttpClient client) {
+    this.url = url;
+    this.client = client;
+  }
+
   @Override
-  public ReferenceLocation child(RelativeLocation path) {
+  public SELF child(RelativeLocation path) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -117,27 +117,22 @@ public class HighPerfUrlLocation implements ReadableFileLocation {
   }
 
   @Override
-  public Option<ReferenceLocation> findAncestor(Function<ReferenceLocation, Boolean> fn) {
+  public SELF makeDirOnParentIfNeeded() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public PathLocation makeDirOnParentIfNeeded() {
+  public Option<SELF> parent() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public Option<? extends ReferenceLocation> parent() {
+  public Option<SELF> existing() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public Option<DirLocation> existing() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Option<NonExistingLocation> nonExisting() {
+  public Option<NonExistingLocation<?>> nonExisting() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -147,7 +142,7 @@ public class HighPerfUrlLocation implements ReadableFileLocation {
   }
 
   @Override
-  public DirLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
+  public SELF existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -237,9 +232,11 @@ public class HighPerfUrlLocation implements ReadableFileLocation {
     return HttpUtils.getFromURL(url);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public UrlLocation create(String path) {
-    return new UrlLocation(path);
+  public SELF create(String path) {
+    HighPerfUrlLocation<?> result = new HighPerfUrlLocation<>(path, client);
+    return (SELF) result;
   }
 
   @Override
@@ -247,6 +244,7 @@ public class HighPerfUrlLocation implements ReadableFileLocation {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
+  @Override
   public Mono<String> readContentAsync() {
     HttpGet get1 = new HttpGet(url);
     return Mono.fromCallable(() -> {

@@ -3,17 +3,19 @@ package org.raisercostin.jedio;
 import org.raisercostin.util.sugar;
 
 /** Location that is known to exist. */
-public interface NonExistingLocation extends ReferenceLocation {
+public interface NonExistingLocation<SELF extends NonExistingLocation<SELF>> extends ReferenceLocation<SELF> {
   // TODO what if mkdir fails?
   DirLocation mkdir();
 
+  @SuppressWarnings("unchecked")
   @sugar
-  default NonExistingLocation nonExistingChild(RelativeLocation path) {
-    return child(path).nonExisting().get();
+  default SELF nonExistingChild(RelativeLocation path) {
+    return (SELF) child(path).nonExisting().get();
   }
 
+  @SuppressWarnings("unchecked")
   @sugar
-  default NonExistingLocation nonExistingChild(String path) {
-    return child(RelativeLocation.create(path)).nonExisting().get();
+  default SELF nonExistingChild(String path) {
+    return (SELF) child(RelativeLocation.create(path)).nonExisting().get();
   }
 }

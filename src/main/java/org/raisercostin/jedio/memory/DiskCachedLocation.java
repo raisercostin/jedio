@@ -21,32 +21,31 @@ import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.op.DeleteOptions;
-import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Data
 @Getter(value = AccessLevel.NONE)
 @Setter(value = AccessLevel.NONE)
-public class DiskCachedLocation implements ReadableFileLocation {
+public class DiskCachedLocation<SELF extends DiskCachedLocation<SELF>> implements ReadableFileLocation<SELF> {
 
   @Data
   @Getter(value = AccessLevel.NONE)
   @Setter(value = AccessLevel.NONE)
   @AllArgsConstructor
-  public static class Root {
-    public DirLocation dir;
+  private static class Root {
+    public DirLocation<?, ?> dir;
     public Function1<String, String> transformer;
 
-    public DiskCachedLocation cached(ReadableFileLocation x) {
-      return new DiskCachedLocation(this, x);
+    public DiskCachedLocation<?> cached(ReadableFileLocation<?> x) {
+      return new DiskCachedLocation<>(this, x);
     }
 
-    private String slug(ReadableFileLocation location) {
+    private String slug(ReadableFileLocation<?> location) {
       return location.absoluteAndNormalized().replaceAll("[:\\\\/#?.&]", "-");
     }
 
-    public ReferenceLocation locationFor(ReadableFileLocation location) {
+    public ReferenceLocation<?> locationFor(ReadableFileLocation<?> location) {
       return dir.child(slug(location));
     }
   }
@@ -56,9 +55,9 @@ public class DiskCachedLocation implements ReadableFileLocation {
   }
 
   private final Root cache;
-  private final ReadableFileLocation location;
+  private final ReadableFileLocation<?> location;
 
-  public DiskCachedLocation(Root cache, ReadableFileLocation location) {
+  public DiskCachedLocation(Root cache, ReadableFileLocation<?> location) {
     this.cache = cache;
     this.location = location;
   }
@@ -69,7 +68,7 @@ public class DiskCachedLocation implements ReadableFileLocation {
   }
 
   @Override
-  public void rename(FileLocation asWritableFile) {
+  public void rename(FileLocation<?> asWritableFile) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -79,7 +78,7 @@ public class DiskCachedLocation implements ReadableFileLocation {
   }
 
   @Override
-  public ReferenceLocation child(RelativeLocation path) {
+  public SELF child(RelativeLocation path) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -114,27 +113,27 @@ public class DiskCachedLocation implements ReadableFileLocation {
   }
 
   @Override
-  public Option<ReferenceLocation> findAncestor(Function<ReferenceLocation, Boolean> fn) {
+  public Option<SELF> findAncestor(Function<ReferenceLocation<?>, Boolean> fn) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public PathLocation makeDirOnParentIfNeeded() {
+  public SELF makeDirOnParentIfNeeded() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public Option<? extends ReferenceLocation> parent() {
+  public Option<SELF> parent() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public Option<DirLocation> existing() {
+  public Option<SELF> existing() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public Option<NonExistingLocation> nonExisting() {
+  public Option<NonExistingLocation<?>> nonExisting() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -144,7 +143,7 @@ public class DiskCachedLocation implements ReadableFileLocation {
   }
 
   @Override
-  public DirLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
+  public SELF existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -174,12 +173,12 @@ public class DiskCachedLocation implements ReadableFileLocation {
   }
 
   @Override
-  public void symlinkTo(ReferenceLocation parent) {
+  public void symlinkTo(ReferenceLocation<?> parent) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public void junctionTo(ReferenceLocation parent) {
+  public void junctionTo(ReferenceLocation<?> parent) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -200,7 +199,7 @@ public class DiskCachedLocation implements ReadableFileLocation {
   }
 
   @Override
-  public ReferenceLocation create(String path) {
+  public SELF create(String path) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 

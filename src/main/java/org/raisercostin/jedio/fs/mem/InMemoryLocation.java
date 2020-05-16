@@ -7,7 +7,8 @@ import org.apache.commons.io.IOUtils;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.fs.stream.AbstractLocation;
 
-public class InMemoryLocation extends AbstractLocation implements ReadableFileLocation {
+public class InMemoryLocation<SELF extends InMemoryLocation<SELF>> extends AbstractLocation<SELF>
+    implements ReadableFileLocation<SELF> {
   private String data;
 
   public InMemoryLocation(String data) {

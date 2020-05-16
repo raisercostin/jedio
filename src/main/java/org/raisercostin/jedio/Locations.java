@@ -32,7 +32,7 @@ public class Locations {
     return dir(path.toPath());
   }
 
-  public static ReferenceLocation dir(Path path) {
+  public static PathLocation dir(Path path) {
     // check if absolute?
     return new PathLocation(path);
   }
@@ -47,11 +47,11 @@ public class Locations {
     return existingDir(Paths.get(path));
   }
 
-  public static ReadableFileLocation classpath(String path) {
+  public static ClasspathLocation classpath(String path) {
     return new ClasspathLocation(path);
   }
 
-  public static ReadableDirLocation classpathDir(String path) {
+  public static ClasspathLocation classpathDir(String path) {
     return new ClasspathLocation(path);
   }
 
@@ -63,7 +63,7 @@ public class Locations {
     return current().child(relative).mkdirIfNecessary();
   }
 
-  public static DirLocation current() {
+  public static PathLocation current() {
     return new PathLocation(Paths.get("."));
   }
 
@@ -99,5 +99,9 @@ public class Locations {
 
   public static InputStreamLocation stream(InputStream inputStream) {
     return new InputStreamLocation(inputStream);
+  }
+
+  public static WebLocation web(String webAddress) {
+    return new WebLocation(webAddress);
   }
 }

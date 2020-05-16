@@ -11,6 +11,6 @@ package org.raisercostin.jedio;
  * <li>shortcut (windows)
  * <li>redirect? etc.
  */
-public interface LinkLocation extends ReferenceLocation {
-  ReferenceLocation getTarget();
+public interface LinkLocation<SELF extends LinkLocation<SELF>> extends ReferenceLocation<SELF> {
+  SELF getTarget();
 }

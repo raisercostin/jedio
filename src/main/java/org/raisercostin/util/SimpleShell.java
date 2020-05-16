@@ -25,8 +25,8 @@ import org.raisercostin.jedio.op.DeleteOptions;
 @NotThreadSafe
 public class SimpleShell implements Shell {
   private static final Pattern SPLIT_PARAMS_PATTERN = Pattern.compile("\"([^\"]*)\"|(\\S+)");
-  private Stack<DirLocation> dirs = new Stack<DirLocation>();
-  private DirLocation current;
+  private Stack<DirLocation<?, ?>> dirs = new Stack<>();
+  private DirLocation<?, ?> current;
   private final Map<String, String> env;
   private Pattern sensibleRegex;
   private final DeleteOptions deleteOptions;
@@ -52,16 +52,17 @@ public class SimpleShell implements Shell {
   }
 
   @sugar
-  public SimpleShell(DirLocation path) {
+  public SimpleShell(DirLocation<?, ?> path) {
     this(path, DeleteOptions.deleteByRenameOption());
   }
 
-  private SimpleShell(DirLocation path, DeleteOptions deleteOptions) {
+  private SimpleShell(DirLocation<?, ?> path, DeleteOptions deleteOptions) {
     this.deleteOptions = deleteOptions;
     env = Maps.newHashMap();
     current = path;
   }
 
+  @Override
   public void execute(String command) {
     executeInternal(current, split(command)).valid();
   }
@@ -81,14 +82,14 @@ public class SimpleShell implements Shell {
   // https://zeroturnaround.com/rebellabs/why-we-created-yaplj-yet-another-process-library-for-java/
   // -
   // https://stackoverflow.com/questions/193166/good-java-process-control-library
-  private ProcessResult executeInternal(DirLocation path, List<String> commandAndParams) {
+  private ProcessResult executeInternal(DirLocation<?, ?> path, List<String> commandAndParams) {
     try {
       // File input = File.createTempFile("restfs", ".input");
       // TODO splitting command should work for "aaa bbbb" as argument
       ProcessBuilder builder = new ProcessBuilder(commandAndParams).redirectOutput(Redirect.PIPE)
-          .redirectError(Redirect.PIPE)
-          // .redirectInput(input)
-          .directory(path.asPathLocation().toFile());
+        .redirectError(Redirect.PIPE)
+        // .redirectInput(input)
+        .directory(path.asPathLocation().toFile());
       // .inheritIO();
       Map<String, String> currentEnvironment = builder.environment();
       currentEnvironment.putAll(env);
@@ -116,66 +117,79 @@ public class SimpleShell implements Shell {
     return result;
   }
 
-  public DirLocation pwd() {
+  @Override
+  public DirLocation<?, ?> pwd() {
     return current;
   }
 
-  public DirLocation cd(RelativeLocation path) {
-    return internalCd(child(path).existing().get());
+  @Override
+  public DirLocation<?, ?> cd(RelativeLocation path) {
+    return internalCd(child(path).existing().get().asDir());
   }
 
-  public DirLocation pushd(DirLocation url) {
+  @Override
+  public DirLocation<?, ?> pushd(DirLocation<?, ?> url) {
     dirs.push(current);
     return internalCd(url);
   }
 
-  public DirLocation pushd(RelativeLocation path) {
+  @Override
+  public DirLocation<?, ?> pushd(RelativeLocation path) {
     dirs.push(current);
-    return internalCd(child(path).existing().get());
+    return internalCd(child(path).existing().get().asDir());
   }
 
-  public DirLocation popd() {
+  @Override
+  public DirLocation<?, ?> popd() {
     return internalCd(dirs.pop());
   }
 
-  private DirLocation internalCd(DirLocation dir) {
+  private DirLocation<?, ?> internalCd(DirLocation<?, ?> dir) {
     current = dir;
     dir.mkdirIfNecessary();
     return dir;
   }
 
+  @Override
   public void mkdir(RelativeLocation path) {
     child(path).existingOrElse(NonExistingLocation::mkdir);
   }
 
-  public ReferenceLocation child(RelativeLocation path) {
+  @Override
+  public ReferenceLocation<?> child(RelativeLocation path) {
     return pwd().child(path);
   }
 
+  @Override
   @sugar
-  public ReferenceLocation child(String path) {
+  public ReferenceLocation<?> child(String path) {
     return child(Locations.relative(path));
   }
 
+  @Override
   @sugar
-  public DirLocation pushd(String path) {
+  public DirLocation<?, ?> pushd(String path) {
     return pushd(Locations.relative(path));
   }
 
+  @Override
   public void mkdir(String path) {
     mkdir(Locations.relative(path));
   }
 
+  @Override
   public String absolute(String path) {
     return child(path).absoluteAndNormalized();
   }
 
+  @Override
   @sugar
-  public DirLocation mkdirAndPushd(String path) {
+  public DirLocation<?, ?> mkdirAndPushd(String path) {
     mkdir(path);
     return pushd(path);
   }
 
+  @Override
   public void deleteIfExists(String path) {
     child(path).nonExistingOrElse(x -> x.delete(deleteOptions));
   }

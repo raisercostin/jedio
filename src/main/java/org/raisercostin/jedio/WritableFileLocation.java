@@ -6,23 +6,23 @@ import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.util.sugar;
 
 /** Writable by me or others? */
-public interface WritableFileLocation extends FileLocation {
-  WritableFileLocation write(String content, String encoding);
+public interface WritableFileLocation<SELF extends WritableFileLocation<SELF>> extends FileLocation<SELF> {
+  SELF write(String content, String encoding);
 
   @sugar
-  default WritableFileLocation copyFrom(InputStream inputStream) {
+  default SELF copyFrom(InputStream inputStream) {
     return copyFrom(inputStream, CopyOptions.copyDefault());
   }
 
   @sugar
-  default WritableFileLocation copyFrom(InputStream inputStream, CopyOptions options) {
+  default SELF copyFrom(InputStream inputStream, CopyOptions options) {
     return copyFrom(Locations.stream(inputStream), options);
   }
 
-  WritableFileLocation copyFrom(ReadableFileLocation source, CopyOptions options);
+  SELF copyFrom(ReadableFileLocation<?> source, CopyOptions options);
 
   @sugar
-  default WritableFileLocation write(String content) {
+  default SELF write(String content) {
     return write(content, "UTF-8");
   }
 }

@@ -19,18 +19,17 @@ import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.op.DeleteOptions;
-import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Data
 @Getter(value = AccessLevel.NONE)
 @Setter(value = AccessLevel.NONE)
-public class MemoizedLocation implements ReadableFileLocation {
-  private final ReadableFileLocation location;
+public class MemoizedLocation<SELF extends MemoizedLocation<SELF>> implements ReadableFileLocation<SELF> {
+  private final ReadableFileLocation<?> location;
   private String content;
 
-  public MemoizedLocation(ReadableFileLocation location) {
+  public MemoizedLocation(ReadableFileLocation<?> location) {
     this.location = location;
   }
 
@@ -40,7 +39,7 @@ public class MemoizedLocation implements ReadableFileLocation {
   }
 
   @Override
-  public void rename(FileLocation asWritableFile) {
+  public void rename(FileLocation<?> asWritableFile) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -50,7 +49,7 @@ public class MemoizedLocation implements ReadableFileLocation {
   }
 
   @Override
-  public ReferenceLocation child(RelativeLocation path) {
+  public SELF child(RelativeLocation path) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -85,27 +84,27 @@ public class MemoizedLocation implements ReadableFileLocation {
   }
 
   @Override
-  public Option<ReferenceLocation> findAncestor(Function<ReferenceLocation, Boolean> fn) {
+  public Option<SELF> findAncestor(Function<ReferenceLocation<?>, Boolean> fn) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public PathLocation makeDirOnParentIfNeeded() {
+  public SELF makeDirOnParentIfNeeded() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public Option<? extends ReferenceLocation> parent() {
+  public Option<SELF> parent() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public Option<DirLocation> existing() {
+  public Option<SELF> existing() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public Option<NonExistingLocation> nonExisting() {
+  public Option<NonExistingLocation<?>> nonExisting() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -115,7 +114,7 @@ public class MemoizedLocation implements ReadableFileLocation {
   }
 
   @Override
-  public DirLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
+  public SELF existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -171,7 +170,7 @@ public class MemoizedLocation implements ReadableFileLocation {
   }
 
   @Override
-  public ReferenceLocation create(String path) {
+  public SELF create(String path) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -206,9 +205,10 @@ public class MemoizedLocation implements ReadableFileLocation {
 
   @Override
   public Mono<String> readContentAsync() {
-    if (content == null)
+    if (content == null) {
       return location.readContentAsync().map(x -> content = x);
-    else
+    } else {
       return Mono.just(content);
+    }
   }
 }

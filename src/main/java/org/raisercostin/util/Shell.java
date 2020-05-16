@@ -7,30 +7,30 @@ import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
 
 public interface Shell {
-  ReferenceLocation child(RelativeLocation path);
+  ReferenceLocation<?> child(RelativeLocation path);
 
-  ReferenceLocation child(String path);
+  ReferenceLocation<?> child(String path);
 
-  DirLocation pwd();
+  DirLocation<?, ?> pwd();
 
   String absolute(String path);
 
-  DirLocation cd(RelativeLocation path);
+  DirLocation<?, ?> cd(RelativeLocation path);
 
   @sugar
-  DirLocation pushd(String path);
+  DirLocation<?, ?> pushd(String path);
 
-  DirLocation pushd(DirLocation url);
+  DirLocation<?, ?> pushd(DirLocation<?, ?> url);
 
-  DirLocation pushd(RelativeLocation path);
+  DirLocation<?, ?> pushd(RelativeLocation path);
 
-  DirLocation popd();
+  DirLocation<?, ?> popd();
 
   void mkdir(RelativeLocation path);
 
   void mkdir(String path);
 
-  DirLocation mkdirAndPushd(String path);
+  DirLocation<?, ?> mkdirAndPushd(String path);
 
   void deleteIfExists(String path);
 

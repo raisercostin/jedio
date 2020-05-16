@@ -10,7 +10,8 @@ import org.raisercostin.util.functions.JedioProcedure;
 import org.raisercostin.util.sugar;
 import reactor.core.publisher.Mono;
 
-public interface ReadableFileLocation extends FileLocation {
+public interface ReadableFileLocation<SELF extends ReadableFileLocation<SELF>> extends FileLocation<SELF> {
+  @Override
   long length();
 
   Option<String> readIfExists();

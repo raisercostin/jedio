@@ -1,44 +1,46 @@
-package org.raisercostin.jedio.url;
+package org.raisercostin.jedio;
 
-import java.io.InputStream;
-import java.net.URL;
 import java.util.function.Function;
 
+import io.vavr.API;
+import io.vavr.collection.Seq;
 import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.SneakyThrows;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
-import org.raisercostin.jedio.DirLocation;
-import org.raisercostin.jedio.FileLocation;
-import org.raisercostin.jedio.LinkLocation;
-import org.raisercostin.jedio.NonExistingLocation;
-import org.raisercostin.jedio.ReadableFileLocation;
-import org.raisercostin.jedio.ReferenceLocation;
-import org.raisercostin.jedio.RelativeLocation;
-import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.op.DeleteOptions;
+import org.raisercostin.jedio.url.UrlLocation;
 import reactor.core.publisher.Flux;
 
+/**A location that is generic: a web address `raisercostin.org` has the following children:
+ * - http://raisercostin.org
+ * - https://raisercostin.org
+ * - (http|https)://(wwww)?\.raisercostin\.org(/(favicon.ico|robots.txt|sitemap.xml|sitemap.xml.gz|sitemap.gz))?
+ */
 @Data
-// @Getter(lombok.AccessLevel.NONE)
-// @Setter(lombok.AccessLevel.NONE)
+@Getter(lombok.AccessLevel.NONE)
+@Setter(lombok.AccessLevel.NONE)
 @AllArgsConstructor
 @ToString
-public class UrlLocation implements ReadableFileLocation<UrlLocation> {
-  public final URL url;
+public class WebLocation implements ReadableDirLocation<WebLocation, WebLocation>, Location<WebLocation> {
+  public final String webAddress;
 
-  @SneakyThrows
-  public UrlLocation(String url) {
-    //    URL url = new URL(request.getUrl());
-    //    URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), URLDecoder.decode(url.getPath(), "UTF-8"), "", url.getRef());
-    this.url = new URL(url);
+  @Override
+  public WebLocation child(RelativeLocation path) {
+    throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public UrlLocation child(RelativeLocation path) {
+  public ChangeableLocation asChangableLocation() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  public NonExistingLocation delete(DeleteOptions options) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -73,17 +75,17 @@ public class UrlLocation implements ReadableFileLocation<UrlLocation> {
   }
 
   @Override
-  public UrlLocation makeDirOnParentIfNeeded() {
+  public WebLocation makeDirOnParentIfNeeded() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public Option<UrlLocation> parent() {
+  public Option<WebLocation> parent() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public Option<UrlLocation> existing() {
+  public Option<WebLocation> existing() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -98,23 +100,13 @@ public class UrlLocation implements ReadableFileLocation<UrlLocation> {
   }
 
   @Override
-  public UrlLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
+  public WebLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
   public boolean exists() {
     throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public WritableFileLocation asWritableFile() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public ReadableFileLocation asReadableFile() {
-    return this;
   }
 
   @Override
@@ -154,17 +146,7 @@ public class UrlLocation implements ReadableFileLocation<UrlLocation> {
   }
 
   @Override
-  public NonExistingLocation deleteFile(DeleteOptions options) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public void rename(FileLocation asWritableFile) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public NonExistingLocation delete(DeleteOptions options) {
+  public WebLocation create(String path) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -173,33 +155,18 @@ public class UrlLocation implements ReadableFileLocation<UrlLocation> {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
+  private final Seq<String> prefixes = API.Seq("http://", "https://");
+  private final Seq<String> suffixes = API.Seq("", "/", "/favicon.ico", "/robots.txt", "/sitemap.xml",
+    "/sitemap.xml.gz", "/sitemap.gz");
+
+  //(http|https)://(wwww)?\.raisercostin\.org(/(favicon.ico|robots.txt|sitemap.xml|sitemap.xml.gz|sitemap.gz))?
   @Override
-  public Option<String> readIfExists() {
+  public Flux<WebLocation> findFilesAndDirs(boolean recursive) {
+    //Flux.fromI
     throw new RuntimeException("Not implemented yet!!!");
   }
 
-  @Override
-  public InputStream unsafeInputStream() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public String readContent() {
-    return HttpUtils.getFromURL(url.toExternalForm());
-  }
-
-  @Override
-  public UrlLocation create(String path) {
-    return new UrlLocation(path);
-  }
-
-  @Override
-  public DirLocation asDir() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public String toExternalForm() {
-    return url.toExternalForm();
+  public UrlLocation asUrlLocation() {
+    return new UrlLocation(webAddress);
   }
 }

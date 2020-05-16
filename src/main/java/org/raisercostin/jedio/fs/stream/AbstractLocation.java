@@ -4,8 +4,6 @@ import java.io.InputStream;
 import java.util.function.Function;
 
 import io.vavr.control.Option;
-import org.raisercostin.jedio.BasicDirLocation;
-import org.raisercostin.jedio.ChangeableLocation;
 import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.ExistingLocation;
 import org.raisercostin.jedio.FileLocation;
@@ -18,17 +16,17 @@ import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.op.DeleteOptions;
-import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 
-public abstract class AbstractLocation implements ExistingLocation, ReferenceLocation, ReadableFileLocation {
+public abstract class AbstractLocation<SELF extends AbstractLocation<SELF>>
+    implements ExistingLocation<SELF>, ReferenceLocation<SELF>, ReadableFileLocation<SELF> {
   @Override
   public NonExistingLocation deleteFile(DeleteOptions options) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public void rename(FileLocation asWritableFile) {
+  public void rename(FileLocation<?> asWritableFile) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -38,7 +36,7 @@ public abstract class AbstractLocation implements ExistingLocation, ReferenceLoc
   }
 
   @Override
-  public ReferenceLocation child(RelativeLocation path) {
+  public SELF child(RelativeLocation path) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -73,27 +71,27 @@ public abstract class AbstractLocation implements ExistingLocation, ReferenceLoc
   }
 
   @Override
-  public Option<ReferenceLocation> findAncestor(Function<ReferenceLocation, Boolean> fn) {
+  public Option<SELF> findAncestor(Function<ReferenceLocation<?>, Boolean> fn) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public PathLocation makeDirOnParentIfNeeded() {
+  public SELF makeDirOnParentIfNeeded() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public Option<? extends ReferenceLocation> parent() {
+  public Option<SELF> parent() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public Option<DirLocation> existing() {
+  public Option<SELF> existing() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  public Option<NonExistingLocation> nonExisting() {
+  public Option<NonExistingLocation<?>> nonExisting() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -103,7 +101,7 @@ public abstract class AbstractLocation implements ExistingLocation, ReferenceLoc
   }
 
   @Override
-  public DirLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
+  public SELF existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -159,7 +157,7 @@ public abstract class AbstractLocation implements ExistingLocation, ReferenceLoc
   }
 
   @Override
-  public ReferenceLocation create(String path) {
+  public SELF create(String path) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 

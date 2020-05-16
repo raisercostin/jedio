@@ -12,11 +12,11 @@ import org.raisercostin.util.sugar;
 import reactor.core.publisher.Flux;
 
 // TODO maybe should contain type <T> of the actual internal instance
-public interface ReferenceLocation extends Location {
-  ReferenceLocation child(RelativeLocation path);
+public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends Location<SELF> {
+  SELF child(RelativeLocation path);
 
   @sugar
-  default ReferenceLocation child(String path) {
+  default SELF child(String path) {
     return child(RelativeLocation.create(path));
   }
 
@@ -35,7 +35,12 @@ public interface ReferenceLocation extends Location {
 
   String getName();
 
-  default Option<RelativeLocation> stripAncestor(BasicDirLocation x) {
+  /**A form that is parsable back to the same type. Usually contains the schema/protocol.*/
+  default String toExternalForm() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  default Option<RelativeLocation> stripAncestor(BasicDirLocation<?> x) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -43,24 +48,27 @@ public interface ReferenceLocation extends Location {
    * Returns a new location inside `to` with the same relative path as the current item is inside `from`. For example
    * file `Location.file("c:\a\b\c.txt").relative("c:\","c:\x") equals Location.file("c:\x\a\b\c.txt")`
    */
-  default Option<ReferenceLocation> relative(BasicDirLocation from, BasicDirLocation to) {
+  @SuppressWarnings("unchecked")
+  default Option<SELF> relative(BasicDirLocation<?> from, BasicDirLocation<?> to) {
     Option<RelativeLocation> relative = stripAncestor(from);
-    return relative.map(x -> to.child(x));
+    return relative.map(x -> (SELF) to.child(x));
   }
 
-  Option<ReferenceLocation> findAncestor(Function<ReferenceLocation, Boolean> fn);
+  default Option<SELF> findAncestor(Function<ReferenceLocation<?>, Boolean> fn) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  PathLocation makeDirOnParentIfNeeded();
+  SELF makeDirOnParentIfNeeded();
 
-  Option<? extends ReferenceLocation> parent();
+  Option<? extends SELF> parent();
 
-  Option<DirLocation> existing();
+  Option<SELF> existing();
 
-  Option<NonExistingLocation> nonExisting();
+  Option<NonExistingLocation<?>> nonExisting();
 
-  NonExistingLocation nonExistingOrElse(Function<DirLocation, NonExistingLocation> fn);
+  NonExistingLocation<?> nonExistingOrElse(Function<DirLocation, NonExistingLocation> fn);
 
-  DirLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn);
+  SELF existingOrElse(Function<NonExistingLocation, DirLocation> fn);
 
   boolean exists();
 
@@ -68,16 +76,16 @@ public interface ReferenceLocation extends Location {
 
   boolean isFile();
 
-  void symlinkTo(ReferenceLocation parent);
+  void symlinkTo(ReferenceLocation<?> parent);
 
-  void junctionTo(ReferenceLocation parent);
+  void junctionTo(ReferenceLocation<?> parent);
 
   Option<LinkLocation> asSymlink();
 
   boolean isSymlink();
 
   @sugar
-  default DirLocation mkdirIfNecessary() {
+  default SELF mkdirIfNecessary() {
     return existingOrElse(NonExistingLocation::mkdir);
   }
 
@@ -88,20 +96,20 @@ public interface ReferenceLocation extends Location {
   Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore,
       boolean dirsFirst);
 
-  ReferenceLocation create(String path);
+  SELF create(String path);
 
-  default ReferenceLocation withExtension(String extension) {
+  default SELF withExtension(String extension) {
     return create(FilenameUtils.removeExtension(absoluteAndNormalized()) + "." + extension);
   }
 
-  default ReferenceLocation withName(String name) {
+  default SELF withName(String name) {
     return create(FilenameUtils.concat(FilenameUtils.getFullPath(absoluteAndNormalized()), name));
   }
 
-  default ReferenceLocation withName(Function<String, String> newName) {
+  default SELF withName(Function<String, String> newName) {
     val fullName = absoluteAndNormalized();
     return create(
-        FilenameUtils.concat(FilenameUtils.getFullPath(fullName), newName.apply(FilenameUtils.getName(fullName))));
+      FilenameUtils.concat(FilenameUtils.getFullPath(fullName), newName.apply(FilenameUtils.getName(fullName))));
   }
 
   default boolean hasExtension(String extension) {
@@ -120,16 +128,16 @@ public interface ReferenceLocation extends Location {
     return (WritableFileLocation) this;
   }
 
-  default ReadableFileLocation asReadableFile() {
-    return (ReadableFileLocation) this;
+  default ReadableFileLocation<?> asReadableFile() {
+    return (ReadableFileLocation<?>) this;
   }
 
   default DirLocation asDir() {
     return (DirLocation) this;
   }
 
-  default ReadableDirLocation asReadableDir() {
-    return (ReadableDirLocation) this;
+  default ReadableDirLocation<?, ?> asReadableDir() {
+    return (ReadableDirLocation<?, ?>) this;
   }
 
   default WritableDirLocation asWritableDir() {
