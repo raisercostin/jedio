@@ -1,6 +1,7 @@
 package org.raisercostin.jedio.find;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Files;
@@ -16,7 +17,6 @@ import com.google.common.graph.Traverser;
 import io.vavr.Function1;
 import io.vavr.Tuple2;
 import io.vavr.collection.List;
-import lombok.val;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.raisercostin.jedio.Locations;
@@ -36,40 +36,47 @@ public class GuavaAndDirectoryStreamTraversalWithVirtualDirs implements FileTrav
   public GuavaAndDirectoryStreamTraversalWithVirtualDirs(boolean followLinks, Function1<Path, Boolean> isVirtualDir) {
     this.isVirtualDir = isVirtualDir;
     // this.followLinks = followLinks;
-    if (followLinks)
+    if (followLinks) {
       options = new LinkOption[0];
-    else
+    } else {
       options = new LinkOption[] { LinkOption.NOFOLLOW_LINKS };
+    }
   }
 
   // TODO should return Path and attributes since they are already read.
   // TODO If symlink should resolve destination and list without following
   // symlinks and resolve using toFile().isDirectory
   // .toRealPath()
+  @Override
   public Flux<PathWithAttributes> traverse2(Path start, TraversalFilter filter) {
     try {
-      PathMatcher all = new PathMatcher() {
-        @Override
-        public boolean matches(Path path) {
-          if (filter.shouldPrune(path))
-            return false;
-          if (isDirectory(path))
-            return true;
-          return filter.matches(path);
-        }
+      PathMatcher all = new PathMatcher()
+        {
+          @Override
+          public boolean matches(Path path) {
+            if (filter.shouldPrune(path)) {
+              return false;
+            }
+            if (isDirectory(path)) {
+              return true;
+            }
+            return filter.matches(path);
+          }
 
-        private boolean isDirectory(Path path) {
-          return PathWithAttributes.readAttrs(path).isDirectory();
-        }
-      };
+          private boolean isDirectory(Path path) {
+            return PathWithAttributes.readAttrs(path).isDirectory();
+          }
+        };
       Iterable<Path> iterable = filter.recursive() ? fileTraverser(createFilter(all)).depthFirstPreOrder(start)
           : newVirtualDirectoryStream(start, createFilter(all));
-      final Flux<PathWithAttributes> all2 = Flux.fromIterable(iterable).map(x -> new PathWithAttributes(x))
-          .filter(path -> filter.matches(path.path));
-      if (filter.dirsFirstInRecursive())
+      final Flux<PathWithAttributes> all2 = Flux.fromIterable(iterable)
+        .map(x -> new PathWithAttributes(x))
+        .filter(path -> filter.matches(path.path));
+      if (filter.dirsFirstInRecursive()) {
         return all2.sort(dirsFirst());
-      else
+      } else {
         return all2;
+      }
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -77,35 +84,40 @@ public class GuavaAndDirectoryStreamTraversalWithVirtualDirs implements FileTrav
 
   private DirectoryStream<Path> newVirtualDirectoryStream(Path start, Filter<Path> filter) throws IOException {
     PathWithAttributes startWithAttr = new PathWithAttributes(start);
-    if (startWithAttr.isVirtualDirectory())
+    if (startWithAttr.isVirtualDirectory()) {
       return newActualVirtualDirectoryStream(start, filter);
-    else
+    } else {
       return Files.newDirectoryStream(start, filter);
+    }
   }
 
   private DirectoryStream<Path> newActualVirtualDirectoryStream(Path pdfFile, Filter<Path> filter) {
     Preconditions.checkArgument(pdfFile.toString().toLowerCase().endsWith(".pdf"));
-    return new DirectoryStream<Path>() {
-      @Override
-      public void close() {
-        throw new RuntimeException("Not implemented yet!!!");
-      }
+    return new DirectoryStream<Path>()
+      {
+        @Override
+        public void close() {
+          throw new RuntimeException("Not implemented yet!!!");
+        }
 
-      @Override
-      public Iterator<Path> iterator() {
-        return Locations.dir(pdfFile).asReadableFile().usingInputStream(is -> {
-          val doc = PDDocument.load(is);
-          return List.ofAll(doc.getPages()).zipWithIndex().map(pageWithIndex -> toPath(pdfFile, pageWithIndex))
+        @Override
+        public Iterator<Path> iterator() {
+          return Locations.dir(pdfFile).asReadableFile().usingInputStream((InputStream is) -> {
+            PDDocument doc = PDDocument.load(is);
+            return List.ofAll(doc.getPages())
+              .zipWithIndex()
+              .map(pageWithIndex -> toPath(pdfFile, pageWithIndex))
               .iterator();
-        });
-      }
+          });
+        }
 
-      private Path toPath(Path pdfFile, Tuple2<PDPage, Integer> pageWithIndex) {
-        return pdfFile.resolve("page-" + pageWithIndex._2);
-      }
-    };
+        private Path toPath(Path pdfFile, Tuple2<PDPage, Integer> pageWithIndex) {
+          return pdfFile.resolve("page-" + pageWithIndex._2);
+        }
+      };
   }
 
+  @Override
   public Flux<Path> traverse(Path start, TraversalFilter filter) {
     return traverse2(start, filter).map(x -> x.path);
   }
@@ -137,11 +149,6 @@ public class GuavaAndDirectoryStreamTraversalWithVirtualDirs implements FileTrav
 
   // copied from newDirectoryStream(file,regex)
   private static Filter<Path> createFilter(PathMatcher all) throws IOException {
-    return new DirectoryStream.Filter<Path>() {
-      @Override
-      public boolean accept(Path path) {
-        return all.matches(path);
-      }
-    };
+    return path -> all.matches(path);
   }
 }

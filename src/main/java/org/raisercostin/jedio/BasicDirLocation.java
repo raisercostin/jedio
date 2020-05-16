@@ -5,5 +5,5 @@ public interface BasicDirLocation<SELF extends BasicDirLocation<SELF>> extends E
   @Override
   SELF child(RelativeLocation path);
 
-  ChangeableLocation<?, ?> asChangableLocation();
+  ChangeableLocation<?> asChangableLocation();
 }

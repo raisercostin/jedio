@@ -23,12 +23,12 @@ public class Locations {
   }
 
   @sugar
-  public static ReferenceLocation dir(String path) {
+  public static PathLocation dir(String path) {
     return dir(Paths.get(path));
   }
 
   @sugar
-  public static ReferenceLocation dir(File path) {
+  public static PathLocation dir(File path) {
     return dir(path.toPath());
   }
 
@@ -38,12 +38,12 @@ public class Locations {
   }
 
   @sugar
-  public static DirLocation existingDir(Path path) {
+  public static PathLocation existingDir(Path path) {
     return dir(path).mkdirIfNecessary();
   }
 
   @sugar
-  public static DirLocation existingDir(String path) {
+  public static PathLocation existingDir(String path) {
     return existingDir(Paths.get(path));
   }
 
@@ -55,11 +55,11 @@ public class Locations {
     return new ClasspathLocation(path);
   }
 
-  public static DirLocation dirFromRelative(String relativePath) {
+  public static PathLocation dirFromRelative(String relativePath) {
     return dirFromRelative(relative(relativePath));
   }
 
-  public static DirLocation dirFromRelative(RelativeLocation relative) {
+  public static PathLocation dirFromRelative(RelativeLocation relative) {
     return current().child(relative).mkdirIfNecessary();
   }
 

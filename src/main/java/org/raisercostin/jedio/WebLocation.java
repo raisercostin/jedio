@@ -26,7 +26,7 @@ import reactor.core.publisher.Flux;
 @Setter(lombok.AccessLevel.NONE)
 @AllArgsConstructor
 @ToString
-public class WebLocation implements ReadableDirLocation<WebLocation, WebLocation>, Location<WebLocation> {
+public class WebLocation implements ReadableDirLocation<WebLocation>, Location<WebLocation> {
   public final String webAddress;
 
   @Override

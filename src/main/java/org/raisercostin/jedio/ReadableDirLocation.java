@@ -6,20 +6,20 @@ import org.raisercostin.util.sugar;
 import reactor.core.publisher.Flux;
 
 /** ReadableDir means you can find children (you can list). */
-public interface ReadableDirLocation<SELF extends ReadableDirLocation<SELF, FileSELF>, FileSELF extends ReadableFileLocation<FileSELF>>
+public interface ReadableDirLocation<SELF extends ReadableDirLocation<SELF>>
     extends BasicDirLocation<SELF> {
   @Deprecated // @deprecated to reimplement in a efficient way
-  default Flux<FileSELF> findFilesAsFlux(boolean recursive) {
-    return findFilesAndDirs(recursive).filter(x -> x.isFile()).map(x -> (FileSELF) x);
+  default Flux<SELF> findFilesAsFlux(boolean recursive) {
+    return findFilesAndDirs(recursive).filter(x -> x.isFile());//.map(x -> x);
   }
 
   @sugar
-  default Iterator<FileSELF> findFiles(boolean recursive) {
+  default Iterator<SELF> findFiles(boolean recursive) {
     return Iterator.ofAll(findFilesAsFlux(recursive).toIterable());
   }
 
   @Deprecated // @deprecated to reimplement in a efficient way
-  default Flux<DirLocation<?, ?>> findDirs(boolean recursive) {
+  default Flux<DirLocation<?>> findDirs(boolean recursive) {
     return findFilesAndDirs(recursive).filter(x -> x.isDir()).map(x -> (DirLocation) x);
   }
 
@@ -34,7 +34,7 @@ public interface ReadableDirLocation<SELF extends ReadableDirLocation<SELF, File
 
   Flux<SELF> findFilesAndDirs(boolean recursive);
 
-  default void copyTo(DirLocation<?, ?> dir, CopyOptions copyOptions) {
+  default void copyTo(DirLocation<?> dir, CopyOptions copyOptions) {
     findFilesAsFlux(true).doOnSubscribe(s -> copyOptions.reportOperationEvent("copyDirStart", this))
       // .filter(item -> !item.equals(dir))
       .map(item -> {

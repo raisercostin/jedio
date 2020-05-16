@@ -25,8 +25,8 @@ import org.raisercostin.jedio.op.DeleteOptions;
 @NotThreadSafe
 public class SimpleShell implements Shell {
   private static final Pattern SPLIT_PARAMS_PATTERN = Pattern.compile("\"([^\"]*)\"|(\\S+)");
-  private Stack<DirLocation<?, ?>> dirs = new Stack<>();
-  private DirLocation<?, ?> current;
+  private Stack<DirLocation<?>> dirs = new Stack<>();
+  private DirLocation<?> current;
   private final Map<String, String> env;
   private Pattern sensibleRegex;
   private final DeleteOptions deleteOptions;
@@ -52,11 +52,11 @@ public class SimpleShell implements Shell {
   }
 
   @sugar
-  public SimpleShell(DirLocation<?, ?> path) {
+  public SimpleShell(DirLocation<?> path) {
     this(path, DeleteOptions.deleteByRenameOption());
   }
 
-  private SimpleShell(DirLocation<?, ?> path, DeleteOptions deleteOptions) {
+  private SimpleShell(DirLocation<?> path, DeleteOptions deleteOptions) {
     this.deleteOptions = deleteOptions;
     env = Maps.newHashMap();
     current = path;
@@ -82,7 +82,7 @@ public class SimpleShell implements Shell {
   // https://zeroturnaround.com/rebellabs/why-we-created-yaplj-yet-another-process-library-for-java/
   // -
   // https://stackoverflow.com/questions/193166/good-java-process-control-library
-  private ProcessResult executeInternal(DirLocation<?, ?> path, List<String> commandAndParams) {
+  private ProcessResult executeInternal(DirLocation<?> path, List<String> commandAndParams) {
     try {
       // File input = File.createTempFile("restfs", ".input");
       // TODO splitting command should work for "aaa bbbb" as argument
@@ -118,33 +118,33 @@ public class SimpleShell implements Shell {
   }
 
   @Override
-  public DirLocation<?, ?> pwd() {
+  public DirLocation<?> pwd() {
     return current;
   }
 
   @Override
-  public DirLocation<?, ?> cd(RelativeLocation path) {
+  public DirLocation<?> cd(RelativeLocation path) {
     return internalCd(child(path).existing().get().asDir());
   }
 
   @Override
-  public DirLocation<?, ?> pushd(DirLocation<?, ?> url) {
+  public DirLocation<?> pushd(DirLocation<?> url) {
     dirs.push(current);
     return internalCd(url);
   }
 
   @Override
-  public DirLocation<?, ?> pushd(RelativeLocation path) {
+  public DirLocation<?> pushd(RelativeLocation path) {
     dirs.push(current);
     return internalCd(child(path).existing().get().asDir());
   }
 
   @Override
-  public DirLocation<?, ?> popd() {
+  public DirLocation<?> popd() {
     return internalCd(dirs.pop());
   }
 
-  private DirLocation<?, ?> internalCd(DirLocation<?, ?> dir) {
+  private DirLocation<?> internalCd(DirLocation<?> dir) {
     current = dir;
     dir.mkdirIfNecessary();
     return dir;
@@ -168,7 +168,7 @@ public class SimpleShell implements Shell {
 
   @Override
   @sugar
-  public DirLocation<?, ?> pushd(String path) {
+  public DirLocation<?> pushd(String path) {
     return pushd(Locations.relative(path));
   }
 
@@ -184,7 +184,7 @@ public class SimpleShell implements Shell {
 
   @Override
   @sugar
-  public DirLocation<?, ?> mkdirAndPushd(String path) {
+  public DirLocation<?> mkdirAndPushd(String path) {
     mkdir(path);
     return pushd(path);
   }

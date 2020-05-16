@@ -34,7 +34,7 @@ public class DiskCachedLocation<SELF extends DiskCachedLocation<SELF>> implement
   @Setter(value = AccessLevel.NONE)
   @AllArgsConstructor
   private static class Root {
-    public DirLocation<?, ?> dir;
+    public DirLocation<?> dir;
     public Function1<String, String> transformer;
 
     public DiskCachedLocation<?> cached(ReadableFileLocation<?> x) {

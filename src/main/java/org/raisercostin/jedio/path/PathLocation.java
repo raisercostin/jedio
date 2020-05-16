@@ -43,12 +43,6 @@ import org.raisercostin.util.SimpleShell;
 import org.raisercostin.util.sugar;
 import reactor.core.publisher.Flux;
 
-class PathFileLocation extends PathLocation implements ReadableFileLocation<PathFileLocation> {
-  public PathFileLocation(Path path, boolean normalize) {
-    super(path, normalize);
-  }
-}
-
 /**
  * What is Absolute, Relative and Canonical Path
  * <li>https://javarevisited.blogspot.com/2014/08/difference-between-getpath-getabsolutepath-getcanonicalpath-java.html
@@ -58,10 +52,10 @@ class PathFileLocation extends PathLocation implements ReadableFileLocation<Path
  */
 @Data
 public class PathLocation
-    implements ReadableDirLocation<PathLocation, PathFileLocation>, WritableDirLocation<PathLocation>,
+    implements ReadableDirLocation<PathLocation>, WritableDirLocation<PathLocation>,
     NonExistingLocation<PathLocation>,
     ReadableFileLocation<PathLocation>, WritableFileLocation<PathLocation>,
-    ChangeableLocation<PathLocation, PathFileLocation>,
+    ChangeableLocation<PathLocation>,
     LinkLocation<PathLocation> {
 
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PathLocation.class);
@@ -278,7 +272,7 @@ public class PathLocation
   }
 
   @Override
-  public ReadableFileLocation asReadableFile() {
+  public ReadableFileLocation<?> asReadableFile() {
     return this;
   }
 
@@ -759,18 +753,18 @@ public class PathLocation
   }
 
   @Override
-  public Flux<PathFileLocation> findFilesAsFlux(boolean recursive) {
+  public Flux<PathLocation> findFilesAsFlux(boolean recursive) {
     return find(createFilter(recursive)).flatMap(x -> {
       if (x.isDirectory()) {
         return Flux.empty();
       } else {
-        return Flux.just((PathFileLocation) PathLocation.efficientExistingFile(x.path));
+        return Flux.just(PathLocation.efficientExistingFile(x.path));
       }
     });
   }
 
   @Override
-  public Flux<DirLocation<?, ?>> findDirs(boolean recursive) {
+  public Flux<DirLocation<?>> findDirs(boolean recursive) {
     return find(createFilter(recursive)).flatMap(x -> {
       if (!x.isDirectory()) {
         return Flux.empty();

@@ -136,8 +136,8 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
     return (DirLocation) this;
   }
 
-  default ReadableDirLocation<?, ?> asReadableDir() {
-    return (ReadableDirLocation<?, ?>) this;
+  default ReadableDirLocation<?> asReadableDir() {
+    return (ReadableDirLocation<?>) this;
   }
 
   default WritableDirLocation asWritableDir() {
