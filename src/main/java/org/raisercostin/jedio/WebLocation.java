@@ -3,6 +3,7 @@ package org.raisercostin.jedio;
 import java.util.function.Function;
 
 import io.vavr.API;
+import io.vavr.collection.Iterator;
 import io.vavr.collection.Seq;
 import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
@@ -12,7 +13,6 @@ import lombok.Setter;
 import lombok.ToString;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
-import org.raisercostin.jedio.op.DeleteOptions;
 import org.raisercostin.jedio.url.UrlLocation;
 import reactor.core.publisher.Flux;
 
@@ -27,27 +27,8 @@ import reactor.core.publisher.Flux;
 @AllArgsConstructor
 @ToString
 public class WebLocation implements ReadableDirLocation<WebLocation>, Location<WebLocation> {
+  public final boolean isRoot;
   public final String webAddress;
-
-  @Override
-  public WebLocation child(RelativeLocation path) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public ChangeableLocation asChangableLocation() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public NonExistingLocation delete(DeleteOptions options) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public String absolute() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
 
   @Override
   public String normalized() {
@@ -155,18 +136,33 @@ public class WebLocation implements ReadableDirLocation<WebLocation>, Location<W
     throw new RuntimeException("Not implemented yet!!!");
   }
 
-  private final Seq<String> prefixes = API.Seq("http://", "https://");
-  private final Seq<String> suffixes = API.Seq("", "/", "/favicon.ico", "/robots.txt", "/sitemap.xml",
+  private static final Seq<String> prefixes = API.Seq("http://", "https://");
+  private static final Seq<String> suffixes = API.Seq("", "/", "/favicon.ico", "/robots.txt", "/sitemap.xml",
     "/sitemap.xml.gz", "/sitemap.gz");
 
   //(http|https)://(wwww)?\.raisercostin\.org(/(favicon.ico|robots.txt|sitemap.xml|sitemap.xml.gz|sitemap.gz))?
   @Override
   public Flux<WebLocation> findFilesAndDirs(boolean recursive) {
-    //Flux.fromI
-    throw new RuntimeException("Not implemented yet!!!");
+    return Flux.fromIterable(ls());
+  }
+
+  @Override
+  public Iterator<WebLocation> ls() {
+    Seq<String> all = prefixes.map(prefix -> prefix + webAddress)
+      .flatMap(x -> suffixes.map(suffix -> x + suffix));
+    if (webAddress.startsWith("www.")) {
+      return all.map(x -> child(x)).iterator();
+    } else {
+      return all.appendAll(all.map(x -> "wwww." + x)).map(x -> child(x)).iterator();
+    }
   }
 
   public UrlLocation asUrlLocation() {
     return new UrlLocation(webAddress);
+  }
+
+  @Override
+  public WebLocation child(String path) {
+    return new WebLocation(false, path);
   }
 }

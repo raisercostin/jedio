@@ -102,6 +102,6 @@ public class Locations {
   }
 
   public static WebLocation web(String webAddress) {
-    return new WebLocation(webAddress);
+    return new WebLocation(true, webAddress);
   }
 }

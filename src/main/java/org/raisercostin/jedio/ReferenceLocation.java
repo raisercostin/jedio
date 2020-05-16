@@ -21,7 +21,9 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
   }
 
   @Deprecated
-  String absolute();
+  default String absolute() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
   @Deprecated
   String normalized();
