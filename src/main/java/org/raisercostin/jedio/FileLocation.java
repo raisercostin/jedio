@@ -8,11 +8,15 @@ public interface FileLocation<SELF extends FileLocation<SELF>> extends ExistingL
   }
 
   @sugar
-  default NonExistingLocation deleteFile() {
+  default NonExistingLocation<?> deleteFile() {
     return deleteFile(DeleteOptions.deleteDefault());
   }
 
-  NonExistingLocation deleteFile(DeleteOptions options);
+  default NonExistingLocation<?> deleteFile(DeleteOptions options) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  void rename(FileLocation<?> asWritableFile);
+  default void rename(FileLocation<?> asWritableFile) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 }

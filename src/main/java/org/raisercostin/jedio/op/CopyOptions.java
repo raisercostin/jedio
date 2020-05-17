@@ -8,9 +8,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.With;
 import org.raisercostin.jedio.ExistingLocation;
+import org.raisercostin.jedio.ReferenceLocation;
 
 public interface CopyOptions {
-  static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CopyOptions.class);
+  org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CopyOptions.class);
 
   Duration timeoutOnItem = Duration.ofSeconds(1);
   Duration timeoutTotal = Duration.ofSeconds(60);
@@ -23,8 +24,9 @@ public interface CopyOptions {
   }
 
   @FunctionalInterface
-  public static interface OperationListener {
-    void reportOperationEvent(String event, ExistingLocation item);
+  public interface OperationListener {
+    void reportOperationEvent(CopyEvent event, Throwable exception, ExistingLocation<?> src, ReferenceLocation<?> dst,
+        Object... args);
   }
 
   @Data
@@ -41,7 +43,9 @@ public interface CopyOptions {
     }
 
     public CopyOptions withDefaultReporting() {
-      return this.withOperationListener((event, item) -> log.info("copy {}: {}", event, item));
+      return this.withOperationListener(
+        (event, exception, src, dst, args) -> log.info("copy {}: {} -> {} details:{}", event, src, dst, args,
+          exception));
     }
 
     @Override
@@ -50,23 +54,31 @@ public interface CopyOptions {
     }
 
     @Override
-    public void reportOperationEvent(String event, ExistingLocation item) {
-      operationListener.reportOperationEvent(event, item);
+    public void reportOperationEvent(CopyEvent event, ExistingLocation<?> src, ReferenceLocation<?> dst,
+        Object... args) {
+      operationListener.reportOperationEvent(event, null, src, dst, args);
+    }
+
+    @Override
+    public void reportOperationEvent(CopyEvent event, Throwable exception, ExistingLocation<?> src,
+        ReferenceLocation<?> dst,
+        Object... args) {
+      operationListener.reportOperationEvent(event, exception, src, dst, args);
     }
   }
   // case class CopyOptions(overwriteIfAlreadyExists: Boolean = false, copyMeta:
   // Boolean, optionalMeta: Boolean, monitor: OperationMonitor =
   // LoggingOperationMonitor)
 
-  public static SimpleCopyOptions copyDefault() {
+  static SimpleCopyOptions copyDefault() {
     return copyDoNotOverwrite();
   }
 
-  public static SimpleCopyOptions copyDoNotOverwrite() {
+  static SimpleCopyOptions copyDoNotOverwrite() {
     return new SimpleCopyOptions(false, null);
   }
 
-  public static SimpleCopyOptions copyOverwrite() {
+  static SimpleCopyOptions copyOverwrite() {
     return new SimpleCopyOptions(true, null);
   }
 
@@ -82,6 +94,34 @@ public interface CopyOptions {
     return reportSteps;
   }
 
-  default void reportOperationEvent(String event, ExistingLocation item) {
+  public enum CopyEvent {
+    Unknown,
+    CopyFileBefore("Copy file triggered."),
+    IgnoreSourceDoesNotExists,
+    IgnoreDestinationExists,
+    CopyFileStarted,
+    CopyReplacing("A replace of content started"),
+    CopyFileFinished,
+    CopyFailed,
+    CopyDirStarted,
+    CopyDirFinished;
+
+    String description;
+
+    CopyEvent() {
+      this.description = name();
+    }
+
+    CopyEvent(String description) {
+      this.description = description;
+    }
+  }
+
+  default void reportOperationEvent(CopyEvent event, Throwable e, ExistingLocation<?> src, ReferenceLocation<?> dst,
+      Object... args) {
+  }
+
+  default void reportOperationEvent(CopyEvent event, ExistingLocation<?> src, ReferenceLocation<?> dst,
+      Object... args) {
   }
 }

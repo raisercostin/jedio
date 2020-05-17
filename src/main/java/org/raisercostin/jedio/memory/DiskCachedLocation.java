@@ -143,11 +143,6 @@ public class DiskCachedLocation<SELF extends DiskCachedLocation<SELF>> implement
   }
 
   @Override
-  public SELF existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
   public boolean exists() {
     return true;
   }

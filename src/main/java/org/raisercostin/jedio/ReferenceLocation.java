@@ -13,7 +13,9 @@ import reactor.core.publisher.Flux;
 
 // TODO maybe should contain type <T> of the actual internal instance
 public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends Location<SELF> {
-  SELF child(RelativeLocation path);
+  default SELF child(RelativeLocation path) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
   @sugar
   default SELF child(String path) {
@@ -26,16 +28,26 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
   }
 
   @Deprecated
-  String normalized();
+  default String normalized() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
   @Deprecated
-  String canonical();
+  default String canonical() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  String absoluteAndNormalized();
+  default String absoluteAndNormalized() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  String real();
+  default String real() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  String getName();
+  default String getName() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
   /**A form that is parsable back to the same type. Usually contains the schema/protocol.*/
   default String toExternalForm() {
@@ -60,31 +72,57 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
     throw new RuntimeException("Not implemented yet!!!");
   }
 
-  SELF makeDirOnParentIfNeeded();
+  default SELF makeDirOnParentIfNeeded() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  Option<? extends SELF> parent();
+  default Option<? extends SELF> parent() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  Option<SELF> existing();
+  default Option<SELF> existing() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  Option<NonExistingLocation<?>> nonExisting();
+  default Option<NonExistingLocation<?>> nonExisting() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  NonExistingLocation<?> nonExistingOrElse(Function<DirLocation, NonExistingLocation> fn);
+  default NonExistingLocation<?> nonExistingOrElse(Function<DirLocation, NonExistingLocation> fn) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  SELF existingOrElse(Function<NonExistingLocation, DirLocation> fn);
+  default SELF existingOrElse(Function<NonExistingLocation<?>, DirLocation<?>> fn) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  boolean exists();
+  default boolean exists() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  boolean isDir();
+  default boolean isDir() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  boolean isFile();
+  default boolean isFile() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  void symlinkTo(ReferenceLocation<?> parent);
+  default void symlinkTo(ReferenceLocation<?> parent) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  void junctionTo(ReferenceLocation<?> parent);
+  default void junctionTo(ReferenceLocation<?> parent) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  Option<LinkLocation> asSymlink();
+  default Option<LinkLocation> asSymlink() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  boolean isSymlink();
+  default boolean isSymlink() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
   @sugar
   default SELF mkdirIfNecessary() {
@@ -95,10 +133,14 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
     return find(traversal, filter, recursive, gitIgnore, true);
   }
 
-  Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore,
-      boolean dirsFirst);
+  default Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore,
+      boolean dirsFirst) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
-  SELF create(String path);
+  default SELF create(String path) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
   default SELF withExtension(String extension) {
     return create(FilenameUtils.removeExtension(absoluteAndNormalized()) + "." + extension);
@@ -122,7 +164,9 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
     return !exists() || length() == 0;
   }
 
-  long length();
+  default long length() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
   // various forced conversions
 

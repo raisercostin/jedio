@@ -114,11 +114,6 @@ public class MemoizedLocation<SELF extends MemoizedLocation<SELF>> implements Re
   }
 
   @Override
-  public SELF existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
   public boolean exists() {
     return true;
   }

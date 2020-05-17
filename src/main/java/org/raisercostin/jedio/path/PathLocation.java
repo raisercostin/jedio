@@ -38,6 +38,7 @@ import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDi
 import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.find.TraversalFilter;
 import org.raisercostin.jedio.op.CopyOptions;
+import org.raisercostin.jedio.op.CopyOptions.CopyEvent;
 import org.raisercostin.jedio.op.DeleteOptions;
 import org.raisercostin.util.SimpleShell;
 import org.raisercostin.util.sugar;
@@ -257,7 +258,7 @@ public class PathLocation
   }
 
   @Override
-  public PathLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
+  public PathLocation existingOrElse(Function<NonExistingLocation<?>, DirLocation<?>> fn) {
     if (!exists()) {
       return (PathLocation) fn.apply(this);
     } else {
@@ -335,29 +336,34 @@ public class PathLocation
 
   @Override
   public PathLocation copyFrom(ReadableFileLocation<?> source, CopyOptions copyOptions) {
-    if (copyOptions.makeDirIfNeeded()) {
-      makeDirOnParentIfNeeded();
-    }
-    if (exists() && !copyOptions.replaceExisting()) {
-      if (copyOptions.reportSteps()) {
-        copyOptions.reportOperationEvent("copyIgnore  ", this);
+    try {
+      copyOptions.reportOperationEvent(CopyEvent.CopyFileBefore, source, this);
+      if (copyOptions.makeDirIfNeeded()) {
+        makeDirOnParentIfNeeded();
       }
-    } else {
-      if (copyOptions.reportSteps()) {
-        copyOptions.reportOperationEvent("copyStart   ", this);
-      }
-      source.usingInputStream(inputStream -> {
-        if (copyOptions.replaceExisting()) {
-          Files.copy(inputStream, toPath(), StandardCopyOption.REPLACE_EXISTING);
+      if (exists() && !copyOptions.replaceExisting()) {
+        copyOptions.reportOperationEvent(CopyEvent.IgnoreDestinationExists, source, this);
+      } else {
+        //source is analysed for existance only if will actually try to copy
+        boolean sourceExists = source.exists();
+        if (!sourceExists) {
+          copyOptions.reportOperationEvent(CopyEvent.IgnoreSourceDoesNotExists, source, this);
         } else {
-          Files.copy(inputStream, toPath());
+          copyOptions.reportOperationEvent(CopyEvent.CopyFileStarted, source, this);
+          source.usingInputStream(inputStream -> {
+            if (copyOptions.replaceExisting()) {
+              copyOptions.reportOperationEvent(CopyEvent.CopyReplacing, source, this);
+              Files.copy(inputStream, toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } else {
+              Files.copy(inputStream, toPath());
+            }
+            return null;
+          });
+          copyOptions.reportOperationEvent(CopyEvent.CopyFileFinished, source, this);
         }
-        return null;
-      });
-
-      if (copyOptions.reportSteps()) {
-        copyOptions.reportOperationEvent("copyEnd     ", this);
       }
+    } catch (Throwable e) {
+      copyOptions.reportOperationEvent(CopyEvent.CopyFailed, e, source, this);
     }
     return this;
   }

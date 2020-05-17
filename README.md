@@ -9,6 +9,10 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
 
 ## Usage
 
+## ToDo
+- [ ] detect if a specific error is thrown multiple times and stop
+  - [ ] https - "javax.net.ssl.SSLHandshakeException: java.security.cert.CertificateException: No subject alternative DNS name matching revomatico.com found." 
+
 ### Maven
 
 #### Dependency

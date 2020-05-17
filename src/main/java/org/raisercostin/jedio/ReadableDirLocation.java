@@ -2,6 +2,7 @@ package org.raisercostin.jedio;
 
 import io.vavr.collection.Iterator;
 import org.raisercostin.jedio.op.CopyOptions;
+import org.raisercostin.jedio.op.CopyOptions.CopyEvent;
 import org.raisercostin.util.sugar;
 import reactor.core.publisher.Flux;
 
@@ -35,7 +36,7 @@ public interface ReadableDirLocation<SELF extends ReadableDirLocation<SELF>>
   Flux<SELF> findFilesAndDirs(boolean recursive);
 
   default void copyTo(DirLocation<?> dir, CopyOptions copyOptions) {
-    findFilesAsFlux(true).doOnSubscribe(s -> copyOptions.reportOperationEvent("copyDirStart", this))
+    findFilesAsFlux(true).doOnSubscribe(s -> copyOptions.reportOperationEvent(CopyEvent.CopyDirStarted, this, dir))
       // .filter(item -> !item.equals(dir))
       .map(item -> {
         WritableFileLocation<?> copied = item.asReadableFile()
@@ -44,7 +45,7 @@ public interface ReadableDirLocation<SELF extends ReadableDirLocation<SELF>>
         return copied;
       })
       .timeout(copyOptions.timeoutOnItem())
-      .doOnComplete(() -> copyOptions.reportOperationEvent("copyDirEnd", this))
+      .doOnComplete(() -> copyOptions.reportOperationEvent(CopyEvent.CopyDirFinished, this, dir))
       .blockLast(copyOptions.timeoutTotal());
   }
 }

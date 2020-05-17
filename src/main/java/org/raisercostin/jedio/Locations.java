@@ -5,13 +5,16 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.raisercostin.jedio.classpath.ClasspathLocation;
 import org.raisercostin.jedio.fs.stream.InputStreamLocation;
 import org.raisercostin.jedio.path.PathLocation;
-import org.raisercostin.jedio.url.UrlLocation;
+import org.raisercostin.jedio.url.HttpClientLocation;
+import org.raisercostin.jedio.url.JedioHttpClients;
 import org.raisercostin.util.sugar;
 
 public class Locations {
+  private static CloseableHttpClient defaultClient = JedioHttpClients.createHighPerfHttpClient();
 
   @sugar
   public static RelativeLocation relative(Path path) {
@@ -93,8 +96,8 @@ public class Locations {
     return existingFile(path).asWritableFile();
   }
 
-  public static UrlLocation url(String url) {
-    return new UrlLocation(url);
+  public static HttpClientLocation url(String url) {
+    return new HttpClientLocation(url, defaultClient);
   }
 
   public static InputStreamLocation stream(InputStream inputStream) {

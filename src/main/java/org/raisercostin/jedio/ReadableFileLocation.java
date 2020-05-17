@@ -11,10 +11,9 @@ import org.raisercostin.util.sugar;
 import reactor.core.publisher.Mono;
 
 public interface ReadableFileLocation<SELF extends ReadableFileLocation<SELF>> extends FileLocation<SELF> {
-  @Override
-  long length();
-
-  Option<String> readIfExists();
+  default Option<String> readIfExists() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
 
   // TODO @Deprecated(message="replace with functional equivalent that also
   // closes the stream: safeInputStream")
