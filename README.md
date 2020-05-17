@@ -10,6 +10,10 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
 ## Usage
 
 ## ToDo
+- [x] ignore ssl validation
+- [ ] copy meta info
+  - [ ] for UrlLocations entire header and other details with suffix: `-meta1.json`, `-meta2.json`, etc.
+  - [ ] other copy operation could describe the source of file?
 - [ ] detect if a specific error is thrown multiple times and stop
   - [ ] https - "javax.net.ssl.SSLHandshakeException: java.security.cert.CertificateException: No subject alternative DNS name matching revomatico.com found." 
 

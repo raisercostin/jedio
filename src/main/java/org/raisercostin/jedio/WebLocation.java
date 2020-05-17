@@ -11,12 +11,12 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.url.HttpClientLocation;
 import org.raisercostin.jedio.url.HttpStandardJavaLocation;
 import org.raisercostin.jedio.url.JedioHttpClients;
+import org.raisercostin.jedio.url.JedioHttpClients.JedioHttpClient;
 import reactor.core.publisher.Flux;
 
 /**A location that is generic: a web address `raisercostin.org` has the following children:
@@ -155,7 +155,7 @@ public class WebLocation implements ReadableDirLocation<WebLocation>, Location<W
       .map(x -> child(x));
   }
 
-  private static final CloseableHttpClient client = JedioHttpClients.createHighPerfHttpClient();
+  private static final JedioHttpClient client = JedioHttpClients.createHighPerfHttpClient();
 
   public HttpClientLocation asHttpClientLocation() {
     return new HttpClientLocation(webAddress, client);

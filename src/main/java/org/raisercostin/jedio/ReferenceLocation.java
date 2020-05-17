@@ -5,6 +5,7 @@ import java.util.function.Function;
 import io.vavr.control.Option;
 import lombok.val;
 import org.apache.commons.io.FilenameUtils;
+import org.jedio.deprecated;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.path.PathLocation;
@@ -146,14 +147,53 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
     return create(FilenameUtils.removeExtension(absoluteAndNormalized()) + "." + extension);
   }
 
+  /** dirname(/some/path/a.test)=/some/path */
+  default String dirname() {
+    val fullname = absoluteAndNormalized();
+    return FilenameUtils.getFullPath(fullname);
+  }
+
+  /** basename(/some/path/a.test)=a */
+  default String basename() {
+    val fullname = absoluteAndNormalized();
+    return FilenameUtils.getBaseName(fullname);
+  }
+
+  /** extension(/some/path/a.test)=.test */
+  default String extension() {
+    val fullname = absoluteAndNormalized();
+    return FilenameUtils.getExtension(fullname);
+  }
+
+  /** filename(/some/path/a.test)=a.text*/
+  default String filename() {
+    val fullname = absoluteAndNormalized();
+    return FilenameUtils.getName(fullname);
+  }
+
   default SELF withName(String name) {
-    return create(FilenameUtils.concat(FilenameUtils.getFullPath(absoluteAndNormalized()), name));
+    return create(FilenameUtils.concat(dirname(), name));
   }
 
   default SELF withName(Function<String, String> newName) {
-    val fullName = absoluteAndNormalized();
+    val fullname = absoluteAndNormalized();
+    return create(FilenameUtils.concat(
+      FilenameUtils.getFullPath(fullname),
+      newName.apply(FilenameUtils.getName(fullname))));
+  }
+
+  default SELF withBasename(Function<String, String> newBasename) {
+    val fullname = absoluteAndNormalized();
     return create(
-      FilenameUtils.concat(FilenameUtils.getFullPath(fullName), newName.apply(FilenameUtils.getName(fullName))));
+      FilenameUtils.concat(FilenameUtils.getFullPath(fullname),
+        newBasename.apply(FilenameUtils.getBaseName(fullname)) + "." +
+            FilenameUtils.getExtension(fullname)));
+  }
+
+  @Deprecated
+  @deprecated("use withBasename")
+  default SELF withNameAndExtension(Function<String, String> newBasename) {
+    return withBasename(newBasename);
   }
 
   default boolean hasExtension(String extension) {

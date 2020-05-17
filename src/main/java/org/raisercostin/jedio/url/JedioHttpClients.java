@@ -6,8 +6,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSession;
 
+import io.vavr.Lazy;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.ToString;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -16,9 +24,12 @@ import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.ConnectionConfig;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -31,6 +42,25 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 public class JedioHttpClients {
+  @Data
+  @Getter(lombok.AccessLevel.NONE)
+  @Setter(lombok.AccessLevel.NONE)
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @ToString
+  public static class JedioHttpClient {
+    public static JedioHttpClient from(String name, HttpClientBuilder builder) {
+      return new JedioHttpClient(name, builder, Lazy.of(() -> builder.build()));
+    }
+
+    public String name;
+    public HttpClientBuilder builder;
+    public Lazy<CloseableHttpClient> client;
+
+    public CloseableHttpClient client() {
+      return client.get();
+    }
+  }
+
   private static final int timeout = 5;
   private static final int hardTimeout = 5 * timeout; // seconds
   private static final int MILLIS = 1000;
@@ -39,29 +69,49 @@ public class JedioHttpClients {
   private static final Scheduler scheduler = Schedulers.newParallel("http-hard-abort", 100);
   private static final boolean enableHardAbort = true;
 
-  public static CloseableHttpClient createHighPerfHttpClient() {
-    return withIgnoreSsl(createHighPerfHttpClient(mgr -> {
-    })).build();
+  public static JedioHttpClient createHighPerfHttpClient() {
+    return JedioHttpClient.from("jedio1", withIgnoreSsl(createHighPerfHttpClient(mgr -> {
+    })));
   }
 
   /**
    * See - https://www.baeldung.com/httpclient-connection-management - https://www.baeldung.com/httpclient-timeout
    */
+  @SneakyThrows
   public static HttpClientBuilder createHighPerfHttpClient(Consumer<PoolingHttpClientConnectionManager> manager) {
-    ConnectionKeepAliveStrategy keepAliveStrategy = (response, context) -> {
-      HeaderElementIterator it = new BasicHeaderElementIterator(
-        response.headerIterator(HTTP.CONN_KEEP_ALIVE));
-      while (it.hasNext()) {
-        HeaderElement he = it.nextElement();
-        String param = he.getName();
-        String value = he.getValue();
-        if (value != null && param.equalsIgnoreCase("timeout")) {
-          return Long.parseLong(value) * MILLIS;
-        }
-      }
-      return timeout * MILLIS;
-    };
-    PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+    ConnectionKeepAliveStrategy keepAliveStrategy = keepAliveStrategy();
+    PoolingHttpClientConnectionManager connManager = createConnectionManager(manager);
+    RequestConfig requestConfig = createRequestConfig();
+    HttpClientBuilder builder = HttpClients.custom()
+      .setKeepAliveStrategy(keepAliveStrategy)
+      .setConnectionManager(connManager)
+      .setRetryHandler(retryHandler())
+      .setConnectionTimeToLive(60, TimeUnit.SECONDS)
+      .setDefaultRequestConfig(requestConfig)
+      .setSSLSocketFactory(createSSLSocketFactory());
+
+    // HttpParams params = new BasicHttpParams();
+    // HttpConnectionParams.setConnectionTimeout(params, 5000);
+    // HttpConnectionParams.setSoTimeout(params, 20000);
+    // HttpClient httpClient = new DefaultHttpClient(params);
+    //
+    return builder;
+  }
+
+  private static RequestConfig createRequestConfig() {
+    return RequestConfig.custom()
+      // .setStaleConnectionCheckEnabled(true) - used setValidateAfterInactivity
+      .setConnectTimeout(timeout * MILLIS)
+      .setConnectionRequestTimeout(timeout * MILLIS)
+      .setSocketTimeout(timeout * MILLIS)
+      .setContentCompressionEnabled(true)
+      .build();
+  }
+
+  private static PoolingHttpClientConnectionManager createConnectionManager(
+      Consumer<PoolingHttpClientConnectionManager> manager) {
+    PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(
+      createSocketFactoryRegistry());
     // HttpHost host = new HttpHost("hostname", 80);
     // HttpRoute route = new HttpRoute(host);
     // connManager.setSocketConfig(route.getTargetHost(), SocketConfig.custom().setSoTimeout(5000).build());
@@ -78,26 +128,34 @@ public class JedioHttpClients {
     connManager.setDefaultSocketConfig(defaultSocketConfig);
     connManager.setValidateAfterInactivity(timeout * MILLIS);
     manager.accept(connManager);
-    RequestConfig requestConfig = RequestConfig.custom()
-      // .setStaleConnectionCheckEnabled(true) - used setValidateAfterInactivity
-      .setConnectTimeout(timeout * MILLIS)
-      .setConnectionRequestTimeout(timeout * MILLIS)
-      .setSocketTimeout(timeout * MILLIS)
-      .setContentCompressionEnabled(true)
-      .build();
-    HttpClientBuilder builder = HttpClients.custom()
-      .setKeepAliveStrategy(keepAliveStrategy)
-      .setConnectionManager(connManager)
-      .setRetryHandler(retryHandler())
-      .setConnectionTimeToLive(60, TimeUnit.SECONDS)
-      .setDefaultRequestConfig(requestConfig);
+    return connManager;
+  }
 
-    // HttpParams params = new BasicHttpParams();
-    // HttpConnectionParams.setConnectionTimeout(params, 5000);
-    // HttpConnectionParams.setSoTimeout(params, 20000);
-    // HttpClient httpClient = new DefaultHttpClient(params);
-    //
-    return builder;
+  private static Registry<ConnectionSocketFactory> createSocketFactoryRegistry() {
+    return RegistryBuilder.<ConnectionSocketFactory>create()
+      .register("http", PlainConnectionSocketFactory.getSocketFactory())
+      .register("https", createSSLConnectionSocketFactory())
+      .build();
+  }
+
+  private static ConnectionSocketFactory createSSLConnectionSocketFactory() {
+    return createSSLSocketFactory();
+  }
+
+  private static ConnectionKeepAliveStrategy keepAliveStrategy() {
+    return (response, context) -> {
+      HeaderElementIterator it = new BasicHeaderElementIterator(
+        response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+      while (it.hasNext()) {
+        HeaderElement he = it.nextElement();
+        String param = he.getName();
+        String value = he.getValue();
+        if (value != null && param.equalsIgnoreCase("timeout")) {
+          return Long.parseLong(value) * MILLIS;
+        }
+      }
+      return timeout * MILLIS;
+    };
   }
 
   private static HttpRequestRetryHandler retryHandler() {
@@ -132,10 +190,20 @@ public class JedioHttpClients {
 
   @SneakyThrows
   public static HttpClientBuilder withIgnoreSsl(HttpClientBuilder httpClientBuilder) {
+    SSLConnectionSocketFactory sslsf = createSSLSocketFactory();
+    return httpClientBuilder.setSSLSocketFactory(sslsf);
+  }
+
+  @SneakyThrows
+  private static SSLConnectionSocketFactory createSSLSocketFactory() {
     SSLContextBuilder builder = new SSLContextBuilder();
     builder.loadTrustMaterial(null, (chain, authType) -> true);
-    SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build(), new NoopHostnameVerifier());
-    return httpClientBuilder.setSSLSocketFactory(sslsf);
+    SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build(),
+      (String hostname, SSLSession session) -> {
+        log.info("checking hostname {}", hostname);
+        return true;
+      });
+    return sslsf;
   }
 
   @Deprecated //use createHighPerfHttpClient

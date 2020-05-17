@@ -19,6 +19,8 @@ public interface CopyOptions {
 
   boolean replaceExisting();
 
+  boolean copyMeta();
+
   default boolean makeDirIfNeeded() {
     return true;
   }
@@ -36,6 +38,7 @@ public interface CopyOptions {
   public class SimpleCopyOptions implements CopyOptions {
     public final boolean replaceExisting;
     public final OperationListener operationListener;
+    public final boolean copyMeta;
 
     @Override
     public boolean replaceExisting() {
@@ -65,6 +68,11 @@ public interface CopyOptions {
         Object... args) {
       operationListener.reportOperationEvent(event, exception, src, dst, args);
     }
+
+    @Override
+    public boolean copyMeta() {
+      return copyMeta;
+    }
   }
   // case class CopyOptions(overwriteIfAlreadyExists: Boolean = false, copyMeta:
   // Boolean, optionalMeta: Boolean, monitor: OperationMonitor =
@@ -75,11 +83,11 @@ public interface CopyOptions {
   }
 
   static SimpleCopyOptions copyDoNotOverwrite() {
-    return new SimpleCopyOptions(false, null);
+    return new SimpleCopyOptions(false, null, true);
   }
 
   static SimpleCopyOptions copyOverwrite() {
-    return new SimpleCopyOptions(true, null);
+    return new SimpleCopyOptions(true, null, true);
   }
 
   default Duration timeoutOnItem() {
@@ -104,7 +112,9 @@ public interface CopyOptions {
     CopyFileFinished,
     CopyFailed,
     CopyDirStarted,
-    CopyDirFinished;
+    CopyDirFinished,
+    CopyMeta(
+        "Copy metadata. For http you will get the request and response: headers and other details. For all will get the exception and the source.");
 
     String description;
 

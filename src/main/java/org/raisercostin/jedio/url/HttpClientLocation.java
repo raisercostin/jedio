@@ -3,31 +3,45 @@ package org.raisercostin.jedio.url;
 import java.io.InputStream;
 import java.net.SocketException;
 
+import io.vavr.API;
+import io.vavr.collection.Map;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
+import org.apache.http.RequestLine;
+import org.apache.http.StatusLine;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.execchain.RequestAbortedException;
+import org.apache.http.params.HttpParams;
 import org.jedio.Audit;
+import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReadableFileLocation;
+import org.raisercostin.jedio.url.JedioHttpClients.JedioHttpClient;
+import org.raisercostin.util.functions.JedioFunction;
 import reactor.core.publisher.Mono;
 
 @Getter(lombok.AccessLevel.NONE)
 @Setter(lombok.AccessLevel.NONE)
-@ToString
 @Slf4j
 public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
   private static final int retries = 5;
-  public final CloseableHttpClient client;
+  public final JedioHttpClient client;
 
-  public HttpClientLocation(String url, CloseableHttpClient client) {
+  public HttpClientLocation(String url, JedioHttpClient client) {
     super(url);
     this.client = client;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("HttpClientLocation(%s, client=%s)", url, client.name);
   }
 
   @Override
@@ -82,12 +96,90 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
   @Override
   @SneakyThrows
   public InputStream unsafeInputStream() {
-    throw new RuntimeException("Not implemented yet!!!");
+    HttpGet get1 = new HttpGet(url.toExternalForm());
+    CloseableHttpResponse lastResponse = null;
+    Throwable ignoredExceptionForRetry = null;
+    try (CloseableHttpResponse response = client.client().execute(get1)) {
+      int code = response.getStatusLine().getStatusCode();
+      String reason = response.getStatusLine().getReasonPhrase();
+      lastResponse = response;
+      return response.getEntity().getContent();
+    }
     //    //TODO use client
     //    URLConnection conn = connection.get();
     //    //    if(url instanceof HttpURLConnection) {
     //    //    }
     //    return conn.getInputStream();
+  }
+
+  @Data
+  @AllArgsConstructor
+  @Getter(lombok.AccessLevel.NONE)
+  @Setter(lombok.AccessLevel.NONE)
+  @Slf4j
+  public static class HttpClientLocationMeta {
+    public HttpClientLocationMetaRequest request;
+    public HttpClientLocationMetaResponse response;
+  }
+
+  @Data
+  @AllArgsConstructor
+  @Getter(lombok.AccessLevel.NONE)
+  @Setter(lombok.AccessLevel.NONE)
+  @Slf4j
+  public static class HttpClientLocationMetaRequest {
+    public RequestLine requestLine;
+    public RequestConfig requestConfig;
+    public HttpParams httpParams;
+    public Map<String, Object> header;
+  }
+
+  @Data
+  @AllArgsConstructor
+  @Getter(lombok.AccessLevel.NONE)
+  @Setter(lombok.AccessLevel.NONE)
+  @Slf4j
+  public static class HttpClientLocationMetaResponse {
+    public StatusLine statusLine;
+    public Map<String, Object> header;
+  }
+
+  @Override
+  @SneakyThrows
+  public <R> R usingInputStreamAndMeta(boolean returnExceptionsAsMeta,
+      JedioFunction<StreamAndMeta, R> inputStreamConsumer) {
+    HttpGet request = new HttpGet(url.toExternalForm());
+    try (CloseableHttpResponse response = client.client().execute(request)) {
+      int code = response.getStatusLine().getStatusCode();
+      String reason = response.getStatusLine().getReasonPhrase();
+      InputStream in = response.getEntity().getContent();
+      //      Map<String, Object> values = API.(
+      //        "code", code,
+      //        "reason", reason,
+      //        "headers", API.List(response.getAllHeaders()),
+      //        "locale", response.getLocale(),
+      //        "protocolVersion", response.getProtocolVersion(),
+      //        "statusLine", response.getStatusLine(),
+      //        "params", response.getParams(),
+      //        "response", response,
+      //        "contentLength", response.getEntity().getContentLength(),
+      //        "contentEncoding", response.getEntity().getContentEncoding(),
+      //        "contentType", response.getEntity().getContentType());
+      HttpClientLocationMetaRequest req = new HttpClientLocationMetaRequest(
+        request.getRequestLine(),
+        request.getConfig(),
+        request.getParams(),
+        toHeaders(request.getAllHeaders()));
+      HttpClientLocationMetaResponse res = new HttpClientLocationMetaResponse(
+        response.getStatusLine(),
+        toHeaders(response.getAllHeaders()));
+      return inputStreamConsumer.apply(StreamAndMeta.fromPayload(
+        new HttpClientLocationMeta(req, res), in));
+    }
+  }
+
+  private Map<String, Object> toHeaders(Header[] allHeaders) {
+    return API.List(allHeaders).toMap(x -> x.getName(), x -> x.getValue());
   }
 
   @Override
@@ -103,23 +195,10 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
     return readContentAsync().block();
   }
 
-  private static class InvalidHttpResponse extends RuntimeException {
-    private static final long serialVersionUID = 1288977711847072395L;
-    public final CloseableHttpResponse response;
-
-    public InvalidHttpResponse(String message, CloseableHttpResponse response, Throwable ignoredExceptionForRetry) {
-      super(message + " response " + response);
-      this.response = response;
-      if (ignoredExceptionForRetry != null) {
-        addSuppressed(ignoredExceptionForRetry);
-      }
-    }
-  }
-
   public Mono<String> readContentAsyncOld() {
     HttpGet get1 = new HttpGet(url.toExternalForm());
     return Mono.fromCallable(() -> {
-      try (CloseableHttpResponse response = client.execute(get1)) {
+      try (CloseableHttpResponse response = client.client().execute(get1)) {
         return IOUtils.toString(response.getEntity().getContent());
       }
     });
@@ -132,6 +211,19 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
     // .asStringAsync();
     //
     // return Mono.fromCallable(() -> res.get().getBody());
+  }
+
+  private static class InvalidHttpResponse extends RuntimeException {
+    private static final long serialVersionUID = 1288977711847072395L;
+    public final CloseableHttpResponse response;
+
+    public InvalidHttpResponse(String message, CloseableHttpResponse response, Throwable ignoredExceptionForRetry) {
+      super(message + " response " + response);
+      this.response = response;
+      if (ignoredExceptionForRetry != null) {
+        addSuppressed(ignoredExceptionForRetry);
+      }
+    }
   }
 
   @Override
@@ -150,7 +242,7 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
       CloseableHttpResponse lastResponse = null;
       Throwable ignoredExceptionForRetry = null;
       for (int attempt = 1; attempt <= retries; attempt++) {
-        try (CloseableHttpResponse response = client.execute(get1)) {
+        try (CloseableHttpResponse response = client.client().execute(get1)) {
           int code = response.getStatusLine().getStatusCode();
           String reason = response.getStatusLine().getReasonPhrase();
           lastResponse = response;

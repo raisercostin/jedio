@@ -40,6 +40,8 @@ import org.raisercostin.jedio.find.TraversalFilter;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.CopyOptions.CopyEvent;
 import org.raisercostin.jedio.op.DeleteOptions;
+import org.raisercostin.nodes.Nodes;
+import org.raisercostin.nodes.impl.JsonUtils2;
 import org.raisercostin.util.SimpleShell;
 import org.raisercostin.util.sugar;
 import reactor.core.publisher.Flux;
@@ -350,12 +352,21 @@ public class PathLocation
           copyOptions.reportOperationEvent(CopyEvent.IgnoreSourceDoesNotExists, source, this);
         } else {
           copyOptions.reportOperationEvent(CopyEvent.CopyFileStarted, source, this);
-          source.usingInputStream(inputStream -> {
+          source.usingInputStreamAndMeta(true, streamAndMeta -> {
             if (copyOptions.replaceExisting()) {
               copyOptions.reportOperationEvent(CopyEvent.CopyReplacing, source, this);
-              Files.copy(inputStream, toPath(), StandardCopyOption.REPLACE_EXISTING);
+              Files.copy(streamAndMeta.is, toPath(), StandardCopyOption.REPLACE_EXISTING);
             } else {
-              Files.copy(inputStream, toPath());
+              Files.copy(streamAndMeta.is, toPath());
+            }
+            //write meta
+            if (copyOptions.copyMeta()) {
+              copyOptions.reportOperationEvent(CopyEvent.CopyMeta, source, this);
+              JsonUtils2 mapper = Nodes.json;
+              //mapper.mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, false);
+              String str = mapper.excluding("parent", "otherParents", "impl").toString(streamAndMeta.meta);
+              byte[] strToBytes = str.getBytes();
+              Files.write(withName(x -> x + "-meta1.json").toPath(), strToBytes);
             }
             return null;
           });
