@@ -134,7 +134,11 @@ public class WebLocation implements ReadableDirLocation<WebLocation>, Location<W
     throw new RuntimeException("Not implemented yet!!!");
   }
 
-  private static final Seq<String> prefixes1 = API.Seq("http://", "https://");
+  private static final Seq<String> prefixes1 = API.Seq(
+    "http://"
+  //"https://"
+  //
+  );
   private static final Seq<String> prefixes2 = API.Seq("", "www.");
   private static final Seq<String> suffixes = API.Seq("", "/", "/favicon.ico", "/robots.txt", "/sitemap.xml",
     "/sitemap.xml.gz", "/sitemap.gz");

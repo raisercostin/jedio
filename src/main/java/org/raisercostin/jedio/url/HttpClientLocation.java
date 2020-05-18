@@ -3,6 +3,7 @@ package org.raisercostin.jedio.url;
 import java.io.InputStream;
 import java.net.SocketException;
 
+import com.google.common.collect.Maps;
 import io.vavr.API;
 import io.vavr.collection.Map;
 import lombok.AllArgsConstructor;
@@ -18,8 +19,10 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.execchain.RequestAbortedException;
 import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HttpContext;
 import org.jedio.Audit;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReadableFileLocation;
@@ -120,6 +123,7 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
   public static class HttpClientLocationMeta {
     public HttpClientLocationMetaRequest request;
     public HttpClientLocationMetaResponse response;
+    public java.util.Map<String, Object> attrs;
   }
 
   @Data
@@ -149,22 +153,32 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
   public <R> R usingInputStreamAndMeta(boolean returnExceptionsAsMeta,
       JedioFunction<StreamAndMeta, R> inputStreamConsumer) {
     HttpGet request = new HttpGet(url.toExternalForm());
-    try (CloseableHttpResponse response = client.client().execute(request)) {
+    java.util.Map<String, Object> attrs = Maps.newConcurrentMap();
+    HttpClientContext context = HttpClientContext.adapt(new HttpContext()
+      {
+        @Override
+        public void setAttribute(String id, Object obj) {
+          if (id == null || obj == null) {
+            log.warn("cannot add attribute {}:{}", id, obj);
+          } else {
+            attrs.put(id, obj);
+          }
+        }
+
+        @Override
+        public Object removeAttribute(String id) {
+          return attrs.remove(id);
+        }
+
+        @Override
+        public Object getAttribute(String id) {
+          return attrs.get(id);
+        }
+      });
+    try (CloseableHttpResponse response = client.client().execute(request, context)) {
       int code = response.getStatusLine().getStatusCode();
       String reason = response.getStatusLine().getReasonPhrase();
       InputStream in = response.getEntity().getContent();
-      //      Map<String, Object> values = API.(
-      //        "code", code,
-      //        "reason", reason,
-      //        "headers", API.List(response.getAllHeaders()),
-      //        "locale", response.getLocale(),
-      //        "protocolVersion", response.getProtocolVersion(),
-      //        "statusLine", response.getStatusLine(),
-      //        "params", response.getParams(),
-      //        "response", response,
-      //        "contentLength", response.getEntity().getContentLength(),
-      //        "contentEncoding", response.getEntity().getContentEncoding(),
-      //        "contentType", response.getEntity().getContentType());
       HttpClientLocationMetaRequest req = new HttpClientLocationMetaRequest(
         request.getRequestLine(),
         request.getConfig(),
@@ -173,8 +187,13 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
       HttpClientLocationMetaResponse res = new HttpClientLocationMetaResponse(
         response.getStatusLine(),
         toHeaders(response.getAllHeaders()));
+      context.removeAttribute(context.HTTP_RESPONSE);
+      context.removeAttribute(context.HTTP_REQUEST);
+      context.removeAttribute(context.HTTP_CONNECTION);
+      context.removeAttribute("http.cookie-spec");
+      context.removeAttribute("http.cookiespec-registry");
       return inputStreamConsumer.apply(StreamAndMeta.fromPayload(
-        new HttpClientLocationMeta(req, res), in));
+        new HttpClientLocationMeta(req, res, attrs), in));
     }
   }
 
