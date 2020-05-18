@@ -143,10 +143,6 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
     throw new RuntimeException("Not implemented yet!!!");
   }
 
-  default SELF withExtension(String extension) {
-    return create(FilenameUtils.removeExtension(absoluteAndNormalized()) + "." + extension);
-  }
-
   /** dirname(/some/path/a.test)=/some/path */
   default String dirname() {
     val fullname = absoluteAndNormalized();
@@ -169,6 +165,17 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
   default String filename() {
     val fullname = absoluteAndNormalized();
     return FilenameUtils.getName(fullname);
+  }
+
+  default SELF withExtension(String newExtension) {
+    val fullname = absoluteAndNormalized();
+    return create(FilenameUtils.removeExtension(fullname) + "." + newExtension);
+  }
+
+  default SELF withExtension(Function<String, String> newExtension) {
+    val fullname = absoluteAndNormalized();
+    return create(
+      FilenameUtils.removeExtension(fullname) + "." + newExtension.apply(FilenameUtils.getExtension(fullname)));
   }
 
   default SELF withName(String name) {

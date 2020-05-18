@@ -366,7 +366,7 @@ public class PathLocation
               //mapper.mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, false);
               String str = mapper.excluding("parent", "otherParents", "impl").toString(streamAndMeta.meta);
               byte[] strToBytes = str.getBytes();
-              Files.write(withName(x -> x + "-meta1.json").toPath(), strToBytes);
+              Files.write(withExtension(x -> x + "-meta-json").toPath(), strToBytes);
             }
             return null;
           });

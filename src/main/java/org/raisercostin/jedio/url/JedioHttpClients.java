@@ -99,6 +99,7 @@ public class JedioHttpClients {
       .setRetryHandler(retryHandler())
       .setConnectionTimeToLive(60, TimeUnit.SECONDS)
       .setDefaultRequestConfig(requestConfig)
+      .disableRedirectHandling()
     //added already in connManager
     //.setSSLSocketFactory(createSSLSocketFactory())
     ;
