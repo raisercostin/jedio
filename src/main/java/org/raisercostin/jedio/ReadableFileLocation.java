@@ -2,11 +2,14 @@ package org.raisercostin.jedio;
 
 import java.io.InputStream;
 
+import io.vavr.collection.Map;
 import io.vavr.control.Option;
 import org.jedio.ExceptionUtils;
+import org.jedio.NodeUtils;
 import org.jedio.deprecated;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.op.CopyOptions;
+import org.raisercostin.nodes.Nodes;
 import org.raisercostin.util.functions.JedioFunction;
 import org.raisercostin.util.functions.JedioProcedure;
 import org.raisercostin.util.sugar;
@@ -66,6 +69,31 @@ public interface ReadableFileLocation<SELF extends ReadableFileLocation<SELF>> e
   @Deprecated
   @deprecated("If the content is too big String might be a bad container")
   String readContent();
+
+  @Deprecated
+  @deprecated("If the content is too big String might be a bad container")
+  default String readMetaContent() {
+    return meta().readContent();
+  }
+
+  public static class Meta {
+    boolean isSuccess;
+    Map<String, Object> payload;
+
+    @SuppressWarnings("unchecked")
+    public Option<String> field(String pointSelector) {
+      String[] keys = pointSelector.split("[.]");
+      return Option.of(NodeUtils.nullableString(this, keys));
+    }
+  }
+
+  default Meta readMeta() {
+    return Nodes.json.toObject(readMetaContent(), Meta.class);
+  }
+
+  default ReadableFileLocation<SELF> meta() {
+    return withExtension(ext -> ext + "-meta-json");
+  }
 
   default Mono<String> readContentAsync() {
     return Mono.fromSupplier(() -> readContent());

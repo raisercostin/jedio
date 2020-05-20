@@ -40,6 +40,7 @@ import org.raisercostin.jedio.find.TraversalFilter;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.CopyOptions.CopyEvent;
 import org.raisercostin.jedio.op.DeleteOptions;
+import org.raisercostin.nodes.ExceptionUtils;
 import org.raisercostin.nodes.Nodes;
 import org.raisercostin.nodes.impl.JsonUtils2;
 import org.raisercostin.util.SimpleShell;
@@ -284,7 +285,7 @@ public class PathLocation
     try {
       return IOUtils.toString(Files.newBufferedReader(toPath()));
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw ExceptionUtils.nowrap(e, "While reading %s", this);
     }
   }
 
