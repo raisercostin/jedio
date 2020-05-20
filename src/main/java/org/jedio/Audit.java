@@ -22,14 +22,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.impl.execchain.RequestAbortedException;
 
-/** Responsibility: log stuff but not for so many times if is an often warn.
- * - warn - a problem that is temporary and could be recovered but is rare, normally enabled
- * - info - some information that is rare, normally enabled (catalog updates, systems starts, cleanups, etc)
- * - debug - some information that is not rare (match updates, user/api interactions)
+/**
+ * Responsibility: log stuff but not for so many times if is an often warn. - warn - a problem that is temporary and
+ * could be recovered but is rare, normally enabled - info - some information that is rare, normally enabled (catalog
+ * updates, systems starts, cleanups, etc) - debug - some information that is not rare (match updates, user/api
+ * interactions)
  *
- *  Notions
- *  - rare - is not dependent on how long you run or how much processing you're doing
- *  */
+ * Notions - rare - is not dependent on how long you run or how much processing you're doing
+ */
 @Slf4j
 public class Audit {
   public static class AuditException extends RuntimeException {
@@ -67,12 +67,9 @@ public class Audit {
   }
 
   private static volatile boolean askedSituations = false;
-  //private static AtomicLongMap<String> all = AtomicLongMap.create();
-  private static LoadingCache<String, Long> all = CacheBuilder.newBuilder()
-    .maximumSize(100000)
-    .expireAfterAccess(30, TimeUnit.MINUTES)
-    .build(new CacheLoader<String, Long>()
-      {
+  // private static AtomicLongMap<String> all = AtomicLongMap.create();
+  private static LoadingCache<String, Long> all = CacheBuilder.newBuilder().maximumSize(100000)
+      .expireAfterAccess(30, TimeUnit.MINUTES).build(new CacheLoader<String, Long>() {
         @Override
         public Long load(String key) throws Exception {
           return 0L;
@@ -112,10 +109,8 @@ public class Audit {
     return throwable;
   }
 
-  /**@return knownException*/
-  private static boolean warn(long maxCounter, boolean isWarn, Throwable throwable,
-      String formatter,
-      Object... args) {
+  /** @return knownException */
+  private static boolean warn(long maxCounter, boolean isWarn, Throwable throwable, String formatter, Object... args) {
     if (throwable instanceof AuditException) {
       formatter = ((AuditException) throwable).formatter;
       args = ((AuditException) throwable).args;
@@ -124,14 +119,14 @@ public class Audit {
 
     try {
       Preconditions.checkArgument(
-        args == null || args.length == 0 || !Throwable.class.isInstance(args[args.length - 1]),
-        "Throwable should be the first value passed. Last value was that throwable %s", (Object) args);
+          args == null || args.length == 0 || !Throwable.class.isInstance(args[args.length - 1]),
+          "Throwable should be the first value passed. Last value was that throwable %s", (Object) args);
 
       boolean knownException = knownThrowable(throwable, formatter);
       if (throwable instanceof java.lang.AssertionError) {
         throwable = new RuntimeException(
-          "Maybee!!!!!! co.paralleluniverse.fibers.SuspendExecution: Oops. Forgot to instrument a method. Run your program with -Dco.paralleluniverse.fibers.verifyInstrumentation=true to catch the culprit!",
-          throwable);
+            "Maybee!!!!!! co.paralleluniverse.fibers.SuspendExecution: Oops. Forgot to instrument a method. Run your program with -Dco.paralleluniverse.fibers.verifyInstrumentation=true to catch the culprit!",
+            throwable);
       }
 
       String situationIdOrFormat = formatter;
@@ -139,7 +134,7 @@ public class Audit {
       if (askedSituations) {
         situations = situations.computeIfPresent(situationIdOrFormat, (key, value) -> value.increased())._2;
         situations = situations.computeIfAbsent(situationIdOrFormat,
-          x -> new Situation(situationIdOrFormat, 1, finalArgs, isWarn))._2;
+            x -> new Situation(situationIdOrFormat, 1, finalArgs, isWarn))._2;
       }
 
       Long counter = getAndIncrement(situationIdOrFormat);
@@ -180,7 +175,7 @@ public class Audit {
       return knownException;
     } catch (Throwable e) {
       log.warn("Really bad exception for formatter [{}] arguments {}", formatter,
-        finalArgs == null ? null : Vector.of(finalArgs), e);
+          finalArgs == null ? null : Vector.of(finalArgs), e);
     }
     return false;
   }
@@ -232,9 +227,8 @@ public class Audit {
     if (throwable.getCause() != null && throwable.getCause().getMessage().startsWith("Couldn't find match ")) {
       return true;
     }
-    if (//throwable instanceof ForbiddenCallException &&
-    throwable.getMessage() != null && throwable.getMessage()
-      .contains(
+    if (// throwable instanceof ForbiddenCallException &&
+    throwable.getMessage() != null && throwable.getMessage().contains(
         "Unauthorized/Forbidden call FiberUrlLocation2(useCircuitBreaker=false, url=http://inplay.goalserve.com/")) {
       return true;
     }
@@ -257,8 +251,7 @@ public class Audit {
       knownException = true;
     } else if (throwable instanceof RequestAbortedException && throwable.getMessage().equals("Request aborted")) {
       knownException = true;
-    } else if (throwable instanceof IllegalArgumentException
-        && throwable.getMessage() != null
+    } else if (throwable instanceof IllegalArgumentException && throwable.getMessage() != null
         && throwable.getMessage().startsWith("Invalid over/under.")) {
       knownException = true;
     }

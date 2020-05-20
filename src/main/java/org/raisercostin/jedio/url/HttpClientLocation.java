@@ -2,6 +2,8 @@ package org.raisercostin.jedio.url;
 
 import java.io.InputStream;
 import java.net.SocketException;
+import java.net.URI;
+import java.net.URL;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Maps;
@@ -25,6 +27,7 @@ import org.apache.http.impl.execchain.RequestAbortedException;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.jedio.Audit;
+import org.jedio.ExceptionUtils;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.url.JedioHttpClients.JedioHttpClient;
@@ -35,11 +38,33 @@ import reactor.core.publisher.Mono;
 @Setter(lombok.AccessLevel.NONE)
 @Slf4j
 public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
+  @SneakyThrows
+  public static HttpClientLocation url(String sourceHyperlink, String relativeOrAbsoluteHyperlink,
+      JedioHttpClient defaultClient) {
+    return sourceHyperlink != null
+        ? new HttpClientLocation(resolve(new URL(sourceHyperlink), relativeOrAbsoluteHyperlink), defaultClient)
+        : new HttpClientLocation(relativeOrAbsoluteHyperlink, defaultClient);
+  }
+
+  @SneakyThrows
+  private static URL resolve(URL url, String childOrAbsolute) {
+    try {
+      return url.toURI().resolve(childOrAbsolute).toURL();
+    } catch (Exception e) {
+      throw ExceptionUtils.nowrap(e, "Trying to create a relativize(%s,%s)", url, childOrAbsolute);
+    }
+  }
+
   private static final int retries = 5;
   @JsonIgnore
   public final JedioHttpClient client;
 
   public HttpClientLocation(String url, JedioHttpClient client) {
+    super(url);
+    this.client = client;
+  }
+
+  public HttpClientLocation(URL url, JedioHttpClient client) {
     super(url);
     this.client = client;
   }
@@ -60,44 +85,29 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
   }
 
   /**
-  //protected override
-  def unsafeToInputStreamUsingJava: InputStream = {
-    url.openConnection() match {
-      case conn: HttpURLConnection =>
-        config.configureConnection(conn)
-        import scala.collection.JavaConverters._
-        UrlLocation.logger.info("header:\n" + config.header.mkString("\n    "))
-        UrlLocation.logger.info(s"RequestHeaders for $raw:\n    " + conn.getRequestProperties.asScala.mkString("\n    "))
-        //if (UrlLocation.log.isDebugEnabled())
-        UrlLocation.logger.info(s"ResponseHeaders for $raw:\n    " + Try { conn.getHeaderFields.asScala.mkString("\n    ") })
-        handleCode(conn.getResponseCode, conn.getHeaderField("Location"), { conn.getInputStream }, Try { conn.getHeaderFields.asScala.toMap })
-      case conn =>
-        conn.getInputStream
-    }
-  }
-
-  def handleCode(code: Int, location: String, stream: => InputStream, map: => Try[Map[String, _]]): InputStream =
-    (code, location) match {
-      case (200, _) =>
-        stream
-      case (code, location) if config.allowedRedirects > redirects.size && location != null && location.nonEmpty && location != raw =>
-        //This is manual redirection. The connection should already do all the redirects if config.allowedRedirects is true
-        closeStream(stream)
-        UrlLocation(new java.net.URL(location), this +: redirects, config).unsafeToInputStream
-      case (code, _) =>
-        closeStream(stream)
-        throw new HttpStatusException(s"Got $code response from $this. A 200 code is needed to get an InputStream. The header is\n    " + map.getOrElse(Map()).mkString("\n    ")
-          + " After " + redirects.size + " redirects:\n    " + redirects.mkString("\n    "), code, this)
-    }
-
-  // * Shouldn't disconnect as it "Indicates that other requests to the server are unlikely in the near future."
-  // * We should just close() on the input/output/error streams
-  //  * http://stackoverflow.com/questions/15834350/httpurlconnection-closing-io-streams
-  def closeStream(stream: => InputStream) = Try {
-    if (stream != null)
-      stream.close
-  }.recover { case e => UrlLocation.logger.debug("Couldn't close input/error stream to " + this, e) }
-  */
+   * //protected override def unsafeToInputStreamUsingJava: InputStream = { url.openConnection() match { case conn:
+   * HttpURLConnection => config.configureConnection(conn) import scala.collection.JavaConverters._
+   * UrlLocation.logger.info("header:\n" + config.header.mkString("\n ")) UrlLocation.logger.info(s"RequestHeaders for
+   * $raw:\n " + conn.getRequestProperties.asScala.mkString("\n ")) //if (UrlLocation.log.isDebugEnabled())
+   * UrlLocation.logger.info(s"ResponseHeaders for $raw:\n " + Try { conn.getHeaderFields.asScala.mkString("\n ") })
+   * handleCode(conn.getResponseCode, conn.getHeaderField("Location"), { conn.getInputStream }, Try {
+   * conn.getHeaderFields.asScala.toMap }) case conn => conn.getInputStream } }
+   *
+   * def handleCode(code: Int, location: String, stream: => InputStream, map: => Try[Map[String, _]]): InputStream =
+   * (code, location) match { case (200, _) => stream case (code, location) if config.allowedRedirects > redirects.size
+   * && location != null && location.nonEmpty && location != raw => //This is manual redirection. The connection should
+   * already do all the redirects if config.allowedRedirects is true closeStream(stream) UrlLocation(new
+   * java.net.URL(location), this +: redirects, config).unsafeToInputStream case (code, _) => closeStream(stream) throw
+   * new HttpStatusException(s"Got $code response from $this. A 200 code is needed to get an InputStream. The header
+   * is\n " + map.getOrElse(Map()).mkString("\n ") + " After " + redirects.size + " redirects:\n " +
+   * redirects.mkString("\n "), code, this) }
+   *
+   * // * Shouldn't disconnect as it "Indicates that other requests to the server are unlikely in the near future." // *
+   * We should just close() on the input/output/error streams // *
+   * http://stackoverflow.com/questions/15834350/httpurlconnection-closing-io-streams def closeStream(stream: =>
+   * InputStream) = Try { if (stream != null) stream.close }.recover { case e => UrlLocation.logger.debug("Couldn't
+   * close input/error stream to " + this, e) }
+   */
   @Override
   @SneakyThrows
   public InputStream unsafeInputStream() {
@@ -110,11 +120,11 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
       lastResponse = response;
       return response.getEntity().getContent();
     }
-    //    //TODO use client
-    //    URLConnection conn = connection.get();
-    //    //    if(url instanceof HttpURLConnection) {
-    //    //    }
-    //    return conn.getInputStream();
+    // //TODO use client
+    // URLConnection conn = connection.get();
+    // // if(url instanceof HttpURLConnection) {
+    // // }
+    // return conn.getInputStream();
   }
 
   @Data
@@ -164,7 +174,7 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
     request.addHeader("Accept",
       "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
     request.addHeader("Accept-Encoding", "gzip, deflate");
-    //not needed anymore - request.addHeader("Accept-Charset", "utf-8, iso-8859-1;q=0.5");
+    // not needed anymore - request.addHeader("Accept-Charset", "utf-8, iso-8859-1;q=0.5");
     request.addHeader("Accept-Language", "en-US,en;q=0.9,ro;q=0.8");
     java.util.Map<String, Object> attrs = Maps.newConcurrentMap();
     HttpClientContext context = HttpClientContext.adapt(new HttpContext()
@@ -172,7 +182,7 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
         @Override
         public void setAttribute(String id, Object obj) {
           if (id == null || obj == null) {
-            //log.warn("cannot add attribute {}:{}", id, obj);
+            // log.warn("cannot add attribute {}:{}", id, obj);
           } else {
             attrs.put(id, obj);
           }
@@ -192,21 +202,16 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
       int code = response.getStatusLine().getStatusCode();
       String reason = response.getStatusLine().getReasonPhrase();
       InputStream in = response.getEntity().getContent();
-      HttpClientLocationMetaRequest req = new HttpClientLocationMetaRequest(
-        request.getRequestLine(),
-        request.getConfig(),
-        request.getParams(),
-        toHeaders(request.getAllHeaders()));
-      HttpClientLocationMetaResponse res = new HttpClientLocationMetaResponse(
-        response.getStatusLine(),
+      HttpClientLocationMetaRequest req = new HttpClientLocationMetaRequest(request.getRequestLine(),
+        request.getConfig(), request.getParams(), toHeaders(request.getAllHeaders()));
+      HttpClientLocationMetaResponse res = new HttpClientLocationMetaResponse(response.getStatusLine(),
         toHeaders(response.getAllHeaders()));
       context.removeAttribute(context.HTTP_RESPONSE);
       context.removeAttribute(context.HTTP_REQUEST);
       context.removeAttribute(context.HTTP_CONNECTION);
       context.removeAttribute("http.cookie-spec");
       context.removeAttribute("http.cookiespec-registry");
-      return inputStreamConsumer.apply(StreamAndMeta.fromPayload(
-        new HttpClientLocationMeta(req, res, attrs), in));
+      return inputStreamConsumer.apply(StreamAndMeta.fromPayload(new HttpClientLocationMeta(req, res, attrs), in));
     }
   }
 
@@ -218,8 +223,8 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
   @SneakyThrows
   public boolean exists() {
     return true;
-    //  HttpGet get1 = new HttpGet(url.toExternalForm());
-    //  CloseableHttpResponse response = client.execute(get1);
+    // HttpGet get1 = new HttpGet(url.toExternalForm());
+    // CloseableHttpResponse response = client.execute(get1);
   }
 
   @Override
@@ -262,14 +267,14 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
   public Mono<String> readContentAsync() {
     HttpGet get1 = new HttpGet(url.toExternalForm());
     return Mono.fromCallable(() -> {
-      //      if (enableHardAbort) {
-      //        scheduler.schedule(() -> {
-      //          // redundant null check
-      //          // if (get1 != null) {
-      //          get1.abort();
-      //          // }
-      //        }, hardTimeout, TimeUnit.SECONDS);
-      //      }
+      // if (enableHardAbort) {
+      // scheduler.schedule(() -> {
+      // // redundant null check
+      // // if (get1 != null) {
+      // get1.abort();
+      // // }
+      // }, hardTimeout, TimeUnit.SECONDS);
+      // }
 
       CloseableHttpResponse lastResponse = null;
       Throwable ignoredExceptionForRetry = null;
@@ -303,5 +308,16 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
     // .asStringAsync();
     //
     // return Mono.fromCallable(() -> res.get().getBody());
+  }
+
+  @Override
+  public HttpClientLocation child(String link) {
+    return new HttpClientLocation(resolve(url, link), client);
+  }
+
+  @Override
+  @SneakyThrows
+  public URI toUri() {
+    return url.toURI();
   }
 }

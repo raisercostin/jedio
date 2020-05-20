@@ -22,13 +22,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jedio.ExceptionUtils;
-import org.raisercostin.jedio.ChangeableLocation;
 import org.raisercostin.jedio.ExistingLocation;
 import org.raisercostin.jedio.Locations;
 import org.raisercostin.jedio.ReadableDirLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.RelativeLocation;
-import org.raisercostin.jedio.fs.stream.AbstractLocation;
 import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 
@@ -40,7 +38,7 @@ import reactor.core.publisher.Flux;
  * @author raiser
  */
 @Data
-public class ClasspathLocation extends AbstractLocation<ClasspathLocation>
+public class ClasspathLocation
     implements ReadableDirLocation<ClasspathLocation>, ExistingLocation<ClasspathLocation>,
     ReadableFileLocation<ClasspathLocation> {
   private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
@@ -156,13 +154,7 @@ public class ClasspathLocation extends AbstractLocation<ClasspathLocation>
   }
 
   @Override
-  public ChangeableLocation asChangableLocation() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
   public Flux<ClasspathLocation> findFilesAndDirs(boolean recursive) {
-    //return toPathLocation().findFilesAndDirs(recursive);
     throw new RuntimeException("Not implemented yet!!!");
   }
 }

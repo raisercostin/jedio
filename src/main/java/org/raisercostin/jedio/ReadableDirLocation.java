@@ -7,11 +7,10 @@ import org.raisercostin.util.sugar;
 import reactor.core.publisher.Flux;
 
 /** ReadableDir means you can find children (you can list). */
-public interface ReadableDirLocation<SELF extends ReadableDirLocation<SELF>>
-    extends BasicDirLocation<SELF> {
+public interface ReadableDirLocation<SELF extends ReadableDirLocation<SELF>> extends BasicDirLocation<SELF> {
   @Deprecated // @deprecated to reimplement in a efficient way
   default Flux<SELF> findFilesAsFlux(boolean recursive) {
-    return findFilesAndDirs(recursive).filter(x -> x.isFile());//.map(x -> x);
+    return findFilesAndDirs(recursive).filter(x -> x.isFile());// .map(x -> x);
   }
 
   @sugar
@@ -37,15 +36,13 @@ public interface ReadableDirLocation<SELF extends ReadableDirLocation<SELF>>
 
   default void copyTo(DirLocation<?> dir, CopyOptions copyOptions) {
     findFilesAsFlux(true).doOnSubscribe(s -> copyOptions.reportOperationEvent(CopyEvent.CopyDirStarted, this, dir))
-      // .filter(item -> !item.equals(dir))
-      .map(item -> {
-        WritableFileLocation<?> copied = item.asReadableFile()
-          .copyTo(item.relative(this, dir).get().asWritableFile(),
-            copyOptions);
-        return copied;
-      })
-      .timeout(copyOptions.timeoutOnItem())
-      .doOnComplete(() -> copyOptions.reportOperationEvent(CopyEvent.CopyDirFinished, this, dir))
-      .blockLast(copyOptions.timeoutTotal());
+        // .filter(item -> !item.equals(dir))
+        .map(item -> {
+          WritableFileLocation<?> copied = item.asReadableFile().copyTo(item.relative(this, dir).get().asWritableFile(),
+              copyOptions);
+          return copied;
+        }).timeout(copyOptions.timeoutOnItem())
+        .doOnComplete(() -> copyOptions.reportOperationEvent(CopyEvent.CopyDirFinished, this, dir))
+        .blockLast(copyOptions.timeoutTotal());
   }
 }

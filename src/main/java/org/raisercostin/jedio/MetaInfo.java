@@ -32,7 +32,7 @@ public class MetaInfo {
     }
 
     public static StreamAndMeta fromPayload(Object payload, InputStream in) {
-      return fromPayload(toMap(payload), in);
+      return fromPayloadMap(toMap(payload), in);
     }
 
     @SuppressWarnings("unchecked")
@@ -40,7 +40,7 @@ public class MetaInfo {
       return Nodes.json.toObject(Nodes.json.toString(payload), Map.class);
     }
 
-    public static StreamAndMeta fromPayload(Map<String, Object> payload, InputStream in) {
+    public static StreamAndMeta fromPayloadMap(Map<String, Object> payload, InputStream in) {
       return new StreamAndMeta(new MetaInfo(true, null, payload), in);
     }
 
@@ -61,6 +61,7 @@ public class MetaInfo {
   Map<String, Object> payload;
 
   @SuppressWarnings("unchecked")
+  /**Selector is converted to lowercase before search since http header is case insensitive.*/
   public Option<String> field(String pointSelector) {
     String[] keys = pointSelector.split("[.]");
     return Option.of(NodeUtils.nullableString(this, keys));

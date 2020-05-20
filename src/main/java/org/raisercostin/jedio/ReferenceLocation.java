@@ -1,9 +1,12 @@
 package org.raisercostin.jedio;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.function.Function;
 
 import io.vavr.Function2;
 import io.vavr.control.Option;
+import lombok.SneakyThrows;
 import lombok.val;
 import org.apache.commons.io.FilenameUtils;
 import org.jedio.deprecated;
@@ -51,8 +54,17 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
     throw new RuntimeException("Not implemented yet!!!");
   }
 
-  /**A form that is parsable back to the same type. Usually contains the schema/protocol.*/
+  /** A form that is parsable back to the same type. Usually contains the schema/protocol. */
   default String toExternalForm() {
+    return toUrl().toExternalForm();
+  }
+
+  @SneakyThrows
+  default URL toUrl() {
+    return toUri().toURL();
+  }
+
+  default URI toUri() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -162,7 +174,7 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
     return FilenameUtils.getExtension(fullname);
   }
 
-  /** filename(/some/path/a.test)=a.text*/
+  /** filename(/some/path/a.test)=a.text */
   default String filename() {
     val fullname = absoluteAndNormalized();
     return FilenameUtils.getName(fullname);
@@ -174,17 +186,14 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
 
   default SELF withName(Function<String, String> newName) {
     val fullname = absoluteAndNormalized();
-    return create(FilenameUtils.concat(
-      FilenameUtils.getFullPath(fullname),
-      newName.apply(FilenameUtils.getName(fullname))));
+    return create(
+      FilenameUtils.concat(FilenameUtils.getFullPath(fullname), newName.apply(FilenameUtils.getName(fullname))));
   }
 
   default SELF withBasename(Function<String, String> newBasename) {
     val fullname = absoluteAndNormalized();
-    return create(
-      FilenameUtils.concat(FilenameUtils.getFullPath(fullname),
-        newBasename.apply(FilenameUtils.getBaseName(fullname)) + "." +
-            FilenameUtils.getExtension(fullname)));
+    return create(FilenameUtils.concat(FilenameUtils.getFullPath(fullname),
+      newBasename.apply(FilenameUtils.getBaseName(fullname)) + "." + FilenameUtils.getExtension(fullname)));
   }
 
   default SELF withExtension(String newExtension) {
@@ -211,29 +220,19 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
   }
 
   /**
-   * This way we get the following advantages:
-   * - original file is a prefix of the #meta (easy to find all meta files related to a file)
-   * - multiple metas meta-http, meta-links, etc
-   * - in totalcmder meta comes after file (with some minor exceptions)
-   * - it works for empty exceptions too
-   * cons
-   * - the extension is not a usual extension (but the final part is `-json`)
+   * This way we get the following advantages: - original file is a prefix of the #meta (easy to find all meta files
+   * related to a file) - multiple metas meta-http, meta-links, etc - in totalcmder meta comes after file (with some
+   * minor exceptions) - it works for empty exceptions too cons - the extension is not a usual extension (but the final
+   * part is `-json`)
    *
-  com_darzar_www--http
-  com_darzar_www--http--
-  com_darzar_www--http.#meta-http-json
-  com_darzar_www--http--.#meta-http-json
-  com_darzar_www--http--favicon.ico
-  com_darzar_www--http--favicon.ico#meta-http-json
-  com_darzar_www--http--robots.txt
-  com_darzar_www--http--robots.txt#meta-http-json
-  com_darzar_www--http--sitemap.gz
-  com_darzar_www--http--sitemap.gz#meta-http-json
-  com_darzar_www--http--sitemap.xml
-  com_darzar_www--http--sitemap.xml#meta-http-json
-  com_darzar_www--http--sitemap.xml.gz
-  com_darzar_www--http--sitemap.xml.gz#meta-http-json
-  */
+   * com_darzar_www--http com_darzar_www--http-- com_darzar_www--http.#meta-http-json
+   * com_darzar_www--http--.#meta-http-json com_darzar_www--http--favicon.ico
+   * com_darzar_www--http--favicon.ico#meta-http-json com_darzar_www--http--robots.txt
+   * com_darzar_www--http--robots.txt#meta-http-json com_darzar_www--http--sitemap.gz
+   * com_darzar_www--http--sitemap.gz#meta-http-json com_darzar_www--http--sitemap.xml
+   * com_darzar_www--http--sitemap.xml#meta-http-json com_darzar_www--http--sitemap.xml.gz
+   * com_darzar_www--http--sitemap.xml.gz#meta-http-json
+   */
   default SELF meta(String meta, String extension) {
     return withExtension(originalExtension -> originalExtension + "#meta-" + meta + "-" + extension);
   }

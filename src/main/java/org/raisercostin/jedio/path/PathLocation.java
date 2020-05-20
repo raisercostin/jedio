@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -55,12 +56,9 @@ import reactor.core.publisher.Flux;
  * @author raiser
  */
 @Data
-public class PathLocation
-    implements ReadableDirLocation<PathLocation>, WritableDirLocation<PathLocation>,
-    NonExistingLocation<PathLocation>,
-    ReadableFileLocation<PathLocation>, WritableFileLocation<PathLocation>,
-    ChangeableLocation<PathLocation>,
-    LinkLocation<PathLocation> {
+public class PathLocation implements ReadableDirLocation<PathLocation>, WritableDirLocation<PathLocation>,
+    NonExistingLocation<PathLocation>, ReadableFileLocation<PathLocation>, WritableFileLocation<PathLocation>,
+    ChangeableLocation<PathLocation>, LinkLocation<PathLocation> {
 
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PathLocation.class);
 
@@ -353,7 +351,7 @@ public class PathLocation
       } else if (destAndHttpMetaExists && !copyOptions.replaceExisting()) {
         copyOptions.reportOperationEvent(CopyEvent.IgnoreDestinationExists, source, this);
       } else {
-        //source is analysed for existance only if will actually try to copy
+        // source is analysed for existance only if will actually try to copy
         if (!sourceExists) {
           copyOptions.reportOperationEvent(CopyEvent.IgnoreSourceDoesNotExists, source, this);
         } else {
@@ -366,10 +364,10 @@ public class PathLocation
             } else {
               Files.copy(streamAndMeta.is, actualDest.toPath());
             }
-            //write meta
+            // write meta
             if (copyOptions.copyMeta()) {
               JsonUtils2 mapper = Nodes.json;
-              //mapper.mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, false);
+              // mapper.mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, false);
               String str = mapper.excluding("parent", "otherParents", "impl").toString(streamAndMeta.meta);
               metaHttp.write(str);
               copyOptions.reportOperationEvent(CopyEvent.CopyMeta, source, this, metaHttp);
@@ -834,5 +832,10 @@ public class PathLocation
   @sugar
   public Iterator<PathLocation> ls(boolean recursive) {
     return Iterator.ofAll(findFilesAndDirs(recursive).toIterable());
+  }
+
+  @Override
+  public URI toUri() {
+    return path.toUri();
   }
 }

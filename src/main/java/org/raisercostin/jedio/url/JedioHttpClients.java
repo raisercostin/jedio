@@ -93,15 +93,11 @@ public class JedioHttpClients {
     ConnectionKeepAliveStrategy keepAliveStrategy = keepAliveStrategy();
     PoolingHttpClientConnectionManager connManager = createConnectionManager(manager);
     RequestConfig requestConfig = createRequestConfig();
-    HttpClientBuilder builder = HttpClients.custom()
-      .setKeepAliveStrategy(keepAliveStrategy)
-      .setConnectionManager(connManager)
-      .setRetryHandler(retryHandler())
-      .setConnectionTimeToLive(60, TimeUnit.SECONDS)
-      .setDefaultRequestConfig(requestConfig)
-      .disableRedirectHandling()
-    //added already in connManager
-    //.setSSLSocketFactory(createSSLSocketFactory())
+    HttpClientBuilder builder = HttpClients.custom().setKeepAliveStrategy(keepAliveStrategy)
+        .setConnectionManager(connManager).setRetryHandler(retryHandler()).setConnectionTimeToLive(60, TimeUnit.SECONDS)
+        .setDefaultRequestConfig(requestConfig).disableRedirectHandling()
+    // added already in connManager
+    // .setSSLSocketFactory(createSSLSocketFactory())
     ;
 
     // HttpParams params = new BasicHttpParams();
@@ -114,18 +110,15 @@ public class JedioHttpClients {
 
   private static RequestConfig createRequestConfig() {
     return RequestConfig.custom()
-      // .setStaleConnectionCheckEnabled(true) - used setValidateAfterInactivity
-      .setConnectTimeout(timeout * MILLIS)
-      .setConnectionRequestTimeout(timeout * MILLIS)
-      .setSocketTimeout(timeout * MILLIS)
-      .setContentCompressionEnabled(true)
-      .build();
+        // .setStaleConnectionCheckEnabled(true) - used setValidateAfterInactivity
+        .setConnectTimeout(timeout * MILLIS).setConnectionRequestTimeout(timeout * MILLIS)
+        .setSocketTimeout(timeout * MILLIS).setContentCompressionEnabled(true).build();
   }
 
   private static PoolingHttpClientConnectionManager createConnectionManager(
       Consumer<PoolingHttpClientConnectionManager> manager) {
     PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(
-      createSocketFactoryRegistry(), SystemDefaultDnsResolver.INSTANCE);
+        createSocketFactoryRegistry(), SystemDefaultDnsResolver.INSTANCE);
     // HttpHost host = new HttpHost("hostname", 80);
     // HttpRoute route = new HttpRoute(host);
     // connManager.setSocketConfig(route.getTargetHost(), SocketConfig.custom().setSoTimeout(5000).build());
@@ -146,10 +139,8 @@ public class JedioHttpClients {
   }
 
   private static Registry<ConnectionSocketFactory> createSocketFactoryRegistry() {
-    return RegistryBuilder.<ConnectionSocketFactory>create()
-      .register("http", createPlainConnectionSocketFactory())
-      .register("https", createSSLConnectionSocketFactory())
-      .build();
+    return RegistryBuilder.<ConnectionSocketFactory>create().register("http", createPlainConnectionSocketFactory())
+        .register("https", createSSLConnectionSocketFactory()).build();
   }
 
   @Data
@@ -197,17 +188,16 @@ public class JedioHttpClients {
   }
 
   private static ConnectionSocketFactory createPlainConnectionSocketFactory() {
-    //    return PlainConnectionSocketFactory.getSocketFactory();
-    return new PlainConnectionSocketFactory()
-      {
-        @Override
-        public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
-            InetSocketAddress localAddress, HttpContext context) throws IOException {
-          context.setAttribute(SOCKET_LOCAL_ADDRESS, SerializableInetSocketAddress.from(localAddress));
-          context.setAttribute(SOCKET_REMOTE_ADDRESS, SerializableInetSocketAddress.from(remoteAddress));
-          return super.connectSocket(connectTimeout, socket, host, remoteAddress, localAddress, context);
-        }
-      };
+    // return PlainConnectionSocketFactory.getSocketFactory();
+    return new PlainConnectionSocketFactory() {
+      @Override
+      public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
+          InetSocketAddress localAddress, HttpContext context) throws IOException {
+        context.setAttribute(SOCKET_LOCAL_ADDRESS, SerializableInetSocketAddress.from(localAddress));
+        context.setAttribute(SOCKET_REMOTE_ADDRESS, SerializableInetSocketAddress.from(remoteAddress));
+        return super.connectSocket(connectTimeout, socket, host, remoteAddress, localAddress, context);
+      }
+    };
   }
 
   @SneakyThrows
@@ -215,26 +205,24 @@ public class JedioHttpClients {
     SSLContextBuilder builder = new SSLContextBuilder();
     builder.loadTrustMaterial(null, (chain, authType) -> true);
     SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build(),
-      (String hostname, SSLSession session) -> {
-        log.info("checking hostname {}", hostname);
-        return true;
-      })
-      {
-        @Override
-        public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
-            InetSocketAddress localAddress, HttpContext context) throws IOException {
-          context.setAttribute(SOCKET_LOCAL_ADDRESS, SerializableInetSocketAddress.from(localAddress));
-          context.setAttribute(SOCKET_REMOTE_ADDRESS, SerializableInetSocketAddress.from(remoteAddress));
-          return super.connectSocket(connectTimeout, socket, host, remoteAddress, localAddress, context);
-        }
-      };
+        (String hostname, SSLSession session) -> {
+          log.info("checking hostname {}", hostname);
+          return true;
+        }) {
+      @Override
+      public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
+          InetSocketAddress localAddress, HttpContext context) throws IOException {
+        context.setAttribute(SOCKET_LOCAL_ADDRESS, SerializableInetSocketAddress.from(localAddress));
+        context.setAttribute(SOCKET_REMOTE_ADDRESS, SerializableInetSocketAddress.from(remoteAddress));
+        return super.connectSocket(connectTimeout, socket, host, remoteAddress, localAddress, context);
+      }
+    };
     return sslsf;
   }
 
   private static ConnectionKeepAliveStrategy keepAliveStrategy() {
     return (response, context) -> {
-      HeaderElementIterator it = new BasicHeaderElementIterator(
-        response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+      HeaderElementIterator it = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
       while (it.hasNext()) {
         HeaderElement he = it.nextElement();
         String param = he.getName();
@@ -277,7 +265,7 @@ public class JedioHttpClients {
     };
   }
 
-  @Deprecated //use createHighPerfHttpClient
+  @Deprecated // use createHighPerfHttpClient
   public static HttpClientBuilder createHighPerfHttpClientOld(Consumer<PoolingHttpClientConnectionManager> manager) {
     ConnectionKeepAliveStrategy myStrategy = (response, context) -> {
       HeaderElementIterator it = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
@@ -302,9 +290,7 @@ public class JedioHttpClients {
     // Set the total number of concurrent connections to a specific route, which is 2 by default.
     // connManager.setMaxPerRoute(route, 5);
     manager.accept(connManager);
-    HttpClientBuilder builder = HttpClients.custom()
-      .setKeepAliveStrategy(myStrategy)
-      .setConnectionManager(connManager);
+    HttpClientBuilder builder = HttpClients.custom().setKeepAliveStrategy(myStrategy).setConnectionManager(connManager);
     return builder;
   }
 }

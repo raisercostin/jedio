@@ -23,6 +23,10 @@ public abstract class HttpBaseLocation<SELF extends HttpBaseLocation<SELF>>
     this.url = new URL(url);
   }
 
+  HttpBaseLocation(URL url) {
+    this.url = url;
+  }
+
   @Override
   public String toExternalForm() {
     return url.toExternalForm();

@@ -4,7 +4,7 @@ import java.io.InputStream;
 
 import org.raisercostin.jedio.ReadableFileLocation;
 
-public class InputStreamLocation extends AbstractLocation implements ReadableFileLocation {
+public class InputStreamLocation implements ReadableFileLocation {
   private InputStream stream;
 
   public InputStreamLocation(InputStream stream) {
@@ -14,5 +14,10 @@ public class InputStreamLocation extends AbstractLocation implements ReadableFil
   @Override
   public InputStream unsafeInputStream() {
     return stream;
+  }
+
+  @Override
+  public String readContent() {
+    throw new RuntimeException("Not implemented yet!!!");
   }
 }

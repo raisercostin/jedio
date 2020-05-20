@@ -48,9 +48,8 @@ public interface CopyOptions {
     }
 
     public CopyOptions withDefaultReporting() {
-      return this.withOperationListener(
-        (event, exception, src, dst, args) -> log.info("copy {}: {} -> {} details:{}", event, src, dst, args,
-          exception));
+      return this.withOperationListener((event, exception, src, dst, args) -> log.info("copy {}: {} -> {} details:{}",
+          event, src, dst, args, exception));
     }
 
     @Override
@@ -66,8 +65,7 @@ public interface CopyOptions {
 
     @Override
     public void reportOperationEvent(CopyEvent event, Throwable exception, ExistingLocation<?> src,
-        ReferenceLocation<?> dst,
-        Object... args) {
+        ReferenceLocation<?> dst, Object... args) {
       operationListener.reportOperationEvent(event, exception, src, dst, args);
     }
 
@@ -105,19 +103,10 @@ public interface CopyOptions {
   }
 
   public enum CopyEvent {
-    Unknown,
-    CopyFileTriggered("Copy file triggered."),
-    IgnoreSourceDoesNotExists,
-    IgnoreDestinationMetaExists,
-    IgnoreDestinationExists,
-    CopyFileStarted,
-    CopyReplacing("A replace of content started"),
-    CopyFileFinished,
-    CopyFailed,
-    CopyDirStarted,
-    CopyDirFinished,
-    CopyMeta(
-        "Copy metadata. For http you will get the request and response: headers and other details. For all will get the exception and the source.");
+    Unknown, CopyFileTriggered(
+        "Copy file triggered."), IgnoreSourceDoesNotExists, IgnoreDestinationMetaExists, IgnoreDestinationExists, CopyFileStarted, CopyReplacing(
+            "A replace of content started"), CopyFileFinished, CopyFailed, CopyDirStarted, CopyDirFinished, CopyMeta(
+                "Copy metadata. For http you will get the request and response: headers and other details. For all will get the exception and the source.");
 
     String description;
 
@@ -138,7 +127,7 @@ public interface CopyOptions {
       Object... args) {
   }
 
-  /**Destination can be changed based on the input and metadata.*/
+  /** Destination can be changed based on the input and metadata. */
   @SuppressWarnings("unchecked")
   default <T extends WritableFileLocation<?>> T amend(T dest, StreamAndMeta streamAndMeta) {
     String code = streamAndMeta.meta.httpMetaResponseStatusCode().get();

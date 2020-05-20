@@ -5,10 +5,8 @@ import java.io.InputStream;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.raisercostin.jedio.ReadableFileLocation;
-import org.raisercostin.jedio.fs.stream.AbstractLocation;
 
-public class InMemoryLocation<SELF extends InMemoryLocation<SELF>> extends AbstractLocation<SELF>
-    implements ReadableFileLocation<SELF> {
+public class InMemoryLocation<SELF extends InMemoryLocation<SELF>> implements ReadableFileLocation<SELF> {
   private String data;
 
   public InMemoryLocation(String data) {
