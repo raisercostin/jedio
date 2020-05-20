@@ -8,7 +8,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.With;
 import org.raisercostin.jedio.ExistingLocation;
+import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReferenceLocation;
+import org.raisercostin.jedio.WritableFileLocation;
 
 public interface CopyOptions {
   org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CopyOptions.class);
@@ -104,8 +106,9 @@ public interface CopyOptions {
 
   public enum CopyEvent {
     Unknown,
-    CopyFileBefore("Copy file triggered."),
+    CopyFileTriggered("Copy file triggered."),
     IgnoreSourceDoesNotExists,
+    IgnoreDestinationMetaExists,
     IgnoreDestinationExists,
     CopyFileStarted,
     CopyReplacing("A replace of content started"),
@@ -133,5 +136,16 @@ public interface CopyOptions {
 
   default void reportOperationEvent(CopyEvent event, ExistingLocation<?> src, ReferenceLocation<?> dst,
       Object... args) {
+  }
+
+  /**Destination can be changed based on the input and metadata.*/
+  @SuppressWarnings("unchecked")
+  default <T extends WritableFileLocation<?>> T amend(T dest, StreamAndMeta streamAndMeta) {
+    String code = streamAndMeta.meta.httpMetaResponseStatusCode().get();
+    if (code.equals("200")) {
+      return dest;
+    } else {
+      return (T) dest.meta("http" + code, "html");
+    }
   }
 }

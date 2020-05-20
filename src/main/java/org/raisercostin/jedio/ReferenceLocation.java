@@ -2,6 +2,7 @@ package org.raisercostin.jedio;
 
 import java.util.function.Function;
 
+import io.vavr.Function2;
 import io.vavr.control.Option;
 import lombok.val;
 import org.apache.commons.io.FilenameUtils;
@@ -167,17 +168,6 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
     return FilenameUtils.getName(fullname);
   }
 
-  default SELF withExtension(String newExtension) {
-    val fullname = absoluteAndNormalized();
-    return create(FilenameUtils.removeExtension(fullname) + "." + newExtension);
-  }
-
-  default SELF withExtension(Function<String, String> newExtension) {
-    val fullname = absoluteAndNormalized();
-    return create(
-      FilenameUtils.removeExtension(fullname) + "." + newExtension.apply(FilenameUtils.getExtension(fullname)));
-  }
-
   default SELF withName(String name) {
     return create(FilenameUtils.concat(dirname(), name));
   }
@@ -195,6 +185,57 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
       FilenameUtils.concat(FilenameUtils.getFullPath(fullname),
         newBasename.apply(FilenameUtils.getBaseName(fullname)) + "." +
             FilenameUtils.getExtension(fullname)));
+  }
+
+  default SELF withExtension(String newExtension) {
+    val fullname = absoluteAndNormalized();
+    return create(FilenameUtils.removeExtension(fullname) + "." + newExtension);
+  }
+
+  default SELF withExtension(Function<String, String> newExtension) {
+    val fullname = absoluteAndNormalized();
+    return create(
+      FilenameUtils.removeExtension(fullname) + "." + newExtension.apply(FilenameUtils.getExtension(fullname)));
+  }
+
+  default SELF withBasenameAndExtension(Function2<String, String, String> newBasenameAndExtension) {
+    val fullname = absoluteAndNormalized();
+    val basename = FilenameUtils.getBaseName(fullname);
+    val extension = FilenameUtils.getExtension(fullname);
+    return create(
+      FilenameUtils.concat(FilenameUtils.getFullPath(fullname), newBasenameAndExtension.apply(basename, extension)));
+  }
+
+  default SELF meta() {
+    return meta("http", "json");
+  }
+
+  /**
+   * This way we get the following advantages:
+   * - original file is a prefix of the #meta (easy to find all meta files related to a file)
+   * - multiple metas meta-http, meta-links, etc
+   * - in totalcmder meta comes after file (with some minor exceptions)
+   * - it works for empty exceptions too
+   * cons
+   * - the extension is not a usual extension (but the final part is `-json`)
+   *
+  com_darzar_www--http
+  com_darzar_www--http--
+  com_darzar_www--http.#meta-http-json
+  com_darzar_www--http--.#meta-http-json
+  com_darzar_www--http--favicon.ico
+  com_darzar_www--http--favicon.ico#meta-http-json
+  com_darzar_www--http--robots.txt
+  com_darzar_www--http--robots.txt#meta-http-json
+  com_darzar_www--http--sitemap.gz
+  com_darzar_www--http--sitemap.gz#meta-http-json
+  com_darzar_www--http--sitemap.xml
+  com_darzar_www--http--sitemap.xml#meta-http-json
+  com_darzar_www--http--sitemap.xml.gz
+  com_darzar_www--http--sitemap.xml.gz#meta-http-json
+  */
+  default SELF meta(String meta, String extension) {
+    return withExtension(originalExtension -> originalExtension + "#meta-" + meta + "-" + extension);
   }
 
   @Deprecated

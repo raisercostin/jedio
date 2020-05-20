@@ -2,10 +2,8 @@ package org.raisercostin.jedio;
 
 import java.io.InputStream;
 
-import io.vavr.collection.Map;
 import io.vavr.control.Option;
 import org.jedio.ExceptionUtils;
-import org.jedio.NodeUtils;
 import org.jedio.deprecated;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.op.CopyOptions;
@@ -76,23 +74,8 @@ public interface ReadableFileLocation<SELF extends ReadableFileLocation<SELF>> e
     return meta().readContent();
   }
 
-  public static class Meta {
-    boolean isSuccess;
-    Map<String, Object> payload;
-
-    @SuppressWarnings("unchecked")
-    public Option<String> field(String pointSelector) {
-      String[] keys = pointSelector.split("[.]");
-      return Option.of(NodeUtils.nullableString(this, keys));
-    }
-  }
-
-  default Meta readMeta() {
-    return Nodes.json.toObject(readMetaContent(), Meta.class);
-  }
-
-  default ReadableFileLocation<SELF> meta() {
-    return withExtension(ext -> ext + "-meta-json");
+  default MetaInfo readMeta() {
+    return Nodes.json.toObject(readMetaContent(), MetaInfo.class);
   }
 
   default Mono<String> readContentAsync() {

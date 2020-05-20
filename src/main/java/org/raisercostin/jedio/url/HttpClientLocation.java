@@ -3,6 +3,7 @@ package org.raisercostin.jedio.url;
 import java.io.InputStream;
 import java.net.SocketException;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Maps;
 import io.vavr.API;
 import io.vavr.collection.Map;
@@ -35,6 +36,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
   private static final int retries = 5;
+  @JsonIgnore
   public final JedioHttpClient client;
 
   public HttpClientLocation(String url, JedioHttpClient client) {
@@ -73,7 +75,7 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
         conn.getInputStream
     }
   }
-  
+
   def handleCode(code: Int, location: String, stream: => InputStream, map: => Try[Map[String, _]]): InputStream =
     (code, location) match {
       case (200, _) =>
@@ -87,7 +89,7 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
         throw new HttpStatusException(s"Got $code response from $this. A 200 code is needed to get an InputStream. The header is\n    " + map.getOrElse(Map()).mkString("\n    ")
           + " After " + redirects.size + " redirects:\n    " + redirects.mkString("\n    "), code, this)
     }
-  
+
   // * Shouldn't disconnect as it "Indicates that other requests to the server are unlikely in the near future."
   // * We should just close() on the input/output/error streams
   //  * http://stackoverflow.com/questions/15834350/httpurlconnection-closing-io-streams
@@ -153,7 +155,6 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
   public <R> R usingInputStreamAndMeta(boolean returnExceptionsAsMeta,
       JedioFunction<StreamAndMeta, R> inputStreamConsumer) {
     HttpGet request = new HttpGet(url.toExternalForm());
-    request.addHeader("Host", "revomatico.com");
     request.addHeader("Connection", "keep-alive");
     request.addHeader("Pragma", "no-cache");
     request.addHeader("Cache-Control", "no-cache");
@@ -163,16 +164,15 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
     request.addHeader("Accept",
       "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
     request.addHeader("Accept-Encoding", "gzip, deflate");
+    //not needed anymore - request.addHeader("Accept-Charset", "utf-8, iso-8859-1;q=0.5");
     request.addHeader("Accept-Language", "en-US,en;q=0.9,ro;q=0.8");
-    request.addHeader("Cookie",
-      "_ga=GA1.2.249675547.1581604752; _hjid=a30b3fb1-f436-4dea-91bf-4ee27d788ba8; _lfa=eyI0bFpQR0VqdkplNEVMcEJrIjoiTEYxLjEuNzAyOThjYzRiNmRkNjRkZi4xNTgxNjA0NzUyNTk4In0%3D; _fbp=fb.1.1589106559287.2099860914; _gid=GA1.2.1184033498.1589709505; _gat_gtag_UA_115814156_2=1; _hjAbsoluteSessionInProgress=1");
     java.util.Map<String, Object> attrs = Maps.newConcurrentMap();
     HttpClientContext context = HttpClientContext.adapt(new HttpContext()
       {
         @Override
         public void setAttribute(String id, Object obj) {
           if (id == null || obj == null) {
-            log.warn("cannot add attribute {}:{}", id, obj);
+            //log.warn("cannot add attribute {}:{}", id, obj);
           } else {
             attrs.put(id, obj);
           }
