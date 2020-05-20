@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Maps;
@@ -42,14 +43,23 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
   public static HttpClientLocation url(String sourceHyperlink, String relativeOrAbsoluteHyperlink,
       JedioHttpClient defaultClient) {
     return sourceHyperlink != null
-        ? new HttpClientLocation(resolve(new URL(sourceHyperlink), relativeOrAbsoluteHyperlink), defaultClient)
+        ? new HttpClientLocation(resolve(sourceHyperlink, relativeOrAbsoluteHyperlink), defaultClient)
         : new HttpClientLocation(relativeOrAbsoluteHyperlink, defaultClient);
+  }
+
+  @SneakyThrows
+  private static URL resolve(String url, String childOrAbsolute) {
+    if (childOrAbsolute.isEmpty()) {
+      return new URL(url);
+    }
+    return resolve(new URL(url + "/"), childOrAbsolute);
   }
 
   @SneakyThrows
   private static URL resolve(URL url, String childOrAbsolute) {
     try {
-      return url.toURI().resolve(childOrAbsolute).toURL();
+      String encoded = URLEncoder.encode(childOrAbsolute, "UTF-8");
+      return url.toURI().resolve(encoded).toURL();
     } catch (Exception e) {
       throw ExceptionUtils.nowrap(e, "Trying to create a relativize(%s,%s)", url, childOrAbsolute);
     }

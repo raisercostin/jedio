@@ -27,13 +27,20 @@ import reactor.core.publisher.Flux;
 public class WebLocation implements ReadableDirLocation<WebLocation>, Location<WebLocation> {
   public final boolean isRoot;
   public final String webAddress;
-  private static final Seq<String> prefixes1 = API.Seq("http://"
-  // "https://"
+  private static final Seq<String> prefixes1 = API.Seq(
+    "http://",
+    "https://"
   //
   );
   private static final Seq<String> prefixes2 = API.Seq("", "www.");
-  private static final Seq<String> suffixes = API.Seq("", "/", "/favicon.ico", "/robots.txt", "/sitemap.xml",
-    "/sitemap.xml.gz", "/sitemap.gz");
+  private static final Seq<String> suffixes = API.Seq(
+    "",
+    "/",
+    "/favicon.ico",
+    "/robots.txt",
+    "/sitemap.xml",
+    "/sitemap.xml.gz",
+    "/sitemap.gz");
 
   // (http|https)://(wwww)?\.raisercostin\.org(/(favicon.ico|robots.txt|sitemap.xml|sitemap.xml.gz|sitemap.gz))?
   @Override
