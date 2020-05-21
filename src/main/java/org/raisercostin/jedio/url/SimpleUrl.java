@@ -28,13 +28,22 @@ public class SimpleUrl {
   String url;
 
   @SneakyThrows
+  public static URL resolve(String url, String childOrAbsolute) {
+    if (url == null) {
+      return resolve((URL) null, childOrAbsolute);
+    } else {
+      return resolve(new URL(url), childOrAbsolute);
+    }
+  }
+
+  @SneakyThrows
   public static URL resolve(URL url, String childOrAbsolute) {
     if (StringUtils.isEmpty(childOrAbsolute)) {
       return url;
     }
     URI child = new URI(childOrAbsolute, false);
     child.normalize();
-    if (child.isAbsoluteURI()) {
+    if (url == null || child.isAbsoluteURI()) {
       return new URL(child.getEscapedURI());
     }
     Preconditions.checkArgument(!child.hasAuthority(), "Child should not have authority. %s", child);

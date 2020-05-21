@@ -40,9 +40,8 @@ public class HttpClientLocation extends BaseHttpLocation<HttpClientLocation> {
   @SneakyThrows
   public static HttpClientLocation url(String sourceHyperlink, String relativeOrAbsoluteHyperlink,
       JedioHttpClient defaultClient) {
-    //    return new HttpClientLocation(BaseHttpLocation.resolve(sourceHyperlink, relativeOrAbsoluteHyperlink),
-    //      defaultClient);
-    return new HttpClientLocation(sourceHyperlink, false, defaultClient).child(relativeOrAbsoluteHyperlink);
+    return new HttpClientLocation(SimpleUrl.resolve(sourceHyperlink, relativeOrAbsoluteHyperlink), true,
+      defaultClient);
   }
 
   private static final int retries = 5;
