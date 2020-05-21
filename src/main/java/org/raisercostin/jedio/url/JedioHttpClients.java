@@ -76,7 +76,7 @@ public class JedioHttpClients {
   private static final int hardTimeout = 5 * timeout; // seconds
   private static final int MILLIS = 1000;
   private static final int ROUTES = 1000;
-  private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HttpBaseLocation.class);
+  private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BaseHttpLocation.class);
   private static final Scheduler scheduler = Schedulers.newParallel("http-hard-abort", 100);
   private static final boolean enableHardAbort = true;
 
@@ -93,9 +93,13 @@ public class JedioHttpClients {
     ConnectionKeepAliveStrategy keepAliveStrategy = keepAliveStrategy();
     PoolingHttpClientConnectionManager connManager = createConnectionManager(manager);
     RequestConfig requestConfig = createRequestConfig();
-    HttpClientBuilder builder = HttpClients.custom().setKeepAliveStrategy(keepAliveStrategy)
-        .setConnectionManager(connManager).setRetryHandler(retryHandler()).setConnectionTimeToLive(60, TimeUnit.SECONDS)
-        .setDefaultRequestConfig(requestConfig).disableRedirectHandling()
+    HttpClientBuilder builder = HttpClients.custom()
+      .setKeepAliveStrategy(keepAliveStrategy)
+      .setConnectionManager(connManager)
+      .setRetryHandler(retryHandler())
+      .setConnectionTimeToLive(60, TimeUnit.SECONDS)
+      .setDefaultRequestConfig(requestConfig)
+      .disableRedirectHandling()
     // added already in connManager
     // .setSSLSocketFactory(createSSLSocketFactory())
     ;
@@ -110,15 +114,18 @@ public class JedioHttpClients {
 
   private static RequestConfig createRequestConfig() {
     return RequestConfig.custom()
-        // .setStaleConnectionCheckEnabled(true) - used setValidateAfterInactivity
-        .setConnectTimeout(timeout * MILLIS).setConnectionRequestTimeout(timeout * MILLIS)
-        .setSocketTimeout(timeout * MILLIS).setContentCompressionEnabled(true).build();
+      // .setStaleConnectionCheckEnabled(true) - used setValidateAfterInactivity
+      .setConnectTimeout(timeout * MILLIS)
+      .setConnectionRequestTimeout(timeout * MILLIS)
+      .setSocketTimeout(timeout * MILLIS)
+      .setContentCompressionEnabled(true)
+      .build();
   }
 
   private static PoolingHttpClientConnectionManager createConnectionManager(
       Consumer<PoolingHttpClientConnectionManager> manager) {
     PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(
-        createSocketFactoryRegistry(), SystemDefaultDnsResolver.INSTANCE);
+      createSocketFactoryRegistry(), SystemDefaultDnsResolver.INSTANCE);
     // HttpHost host = new HttpHost("hostname", 80);
     // HttpRoute route = new HttpRoute(host);
     // connManager.setSocketConfig(route.getTargetHost(), SocketConfig.custom().setSoTimeout(5000).build());
@@ -139,8 +146,10 @@ public class JedioHttpClients {
   }
 
   private static Registry<ConnectionSocketFactory> createSocketFactoryRegistry() {
-    return RegistryBuilder.<ConnectionSocketFactory>create().register("http", createPlainConnectionSocketFactory())
-        .register("https", createSSLConnectionSocketFactory()).build();
+    return RegistryBuilder.<ConnectionSocketFactory>create()
+      .register("http", createPlainConnectionSocketFactory())
+      .register("https", createSSLConnectionSocketFactory())
+      .build();
   }
 
   @Data
@@ -189,15 +198,16 @@ public class JedioHttpClients {
 
   private static ConnectionSocketFactory createPlainConnectionSocketFactory() {
     // return PlainConnectionSocketFactory.getSocketFactory();
-    return new PlainConnectionSocketFactory() {
-      @Override
-      public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
-          InetSocketAddress localAddress, HttpContext context) throws IOException {
-        context.setAttribute(SOCKET_LOCAL_ADDRESS, SerializableInetSocketAddress.from(localAddress));
-        context.setAttribute(SOCKET_REMOTE_ADDRESS, SerializableInetSocketAddress.from(remoteAddress));
-        return super.connectSocket(connectTimeout, socket, host, remoteAddress, localAddress, context);
-      }
-    };
+    return new PlainConnectionSocketFactory()
+      {
+        @Override
+        public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
+            InetSocketAddress localAddress, HttpContext context) throws IOException {
+          context.setAttribute(SOCKET_LOCAL_ADDRESS, SerializableInetSocketAddress.from(localAddress));
+          context.setAttribute(SOCKET_REMOTE_ADDRESS, SerializableInetSocketAddress.from(remoteAddress));
+          return super.connectSocket(connectTimeout, socket, host, remoteAddress, localAddress, context);
+        }
+      };
   }
 
   @SneakyThrows
@@ -205,18 +215,19 @@ public class JedioHttpClients {
     SSLContextBuilder builder = new SSLContextBuilder();
     builder.loadTrustMaterial(null, (chain, authType) -> true);
     SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build(),
-        (String hostname, SSLSession session) -> {
-          log.info("checking hostname {}", hostname);
-          return true;
-        }) {
-      @Override
-      public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
-          InetSocketAddress localAddress, HttpContext context) throws IOException {
-        context.setAttribute(SOCKET_LOCAL_ADDRESS, SerializableInetSocketAddress.from(localAddress));
-        context.setAttribute(SOCKET_REMOTE_ADDRESS, SerializableInetSocketAddress.from(remoteAddress));
-        return super.connectSocket(connectTimeout, socket, host, remoteAddress, localAddress, context);
-      }
-    };
+      (String hostname, SSLSession session) -> {
+        log.info("checking hostname {}", hostname);
+        return true;
+      })
+      {
+        @Override
+        public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
+            InetSocketAddress localAddress, HttpContext context) throws IOException {
+          context.setAttribute(SOCKET_LOCAL_ADDRESS, SerializableInetSocketAddress.from(localAddress));
+          context.setAttribute(SOCKET_REMOTE_ADDRESS, SerializableInetSocketAddress.from(remoteAddress));
+          return super.connectSocket(connectTimeout, socket, host, remoteAddress, localAddress, context);
+        }
+      };
     return sslsf;
   }
 
@@ -237,32 +248,40 @@ public class JedioHttpClients {
 
   private static HttpRequestRetryHandler retryHandler() {
     return (exception, executionCount, context) -> {
-      log.info("try request: " + executionCount, exception);
-      if (executionCount >= 5) {
-        // Do not retry if over max retry count
-        return false;
-      }
-      if (exception instanceof InterruptedIOException) {
-        // Timeout
-        return false;
-      }
-      if (exception instanceof UnknownHostException) {
-        // Unknown host
-        return false;
-      }
-      if (exception instanceof SSLException) {
-        // SSL handshake exception
-        return false;
-      }
-      HttpClientContext clientContext = HttpClientContext.adapt(context);
-      HttpRequest request = clientContext.getRequest();
-      boolean idempotent = !(request instanceof HttpEntityEnclosingRequest);
-      if (idempotent) {
-        // Retry if the request is considered idempotent
-        return true;
-      }
-      return false;
+      boolean retryable = checkRetriable(exception, executionCount, context);
+      log.warn("error. try again request: {}. {} Enable debug to see fullstacktrace.", retryable,
+        exception.getMessage());
+      log.debug("error. try again request: {}. Fullstacktrace.", retryable, exception.getMessage(), exception);
+      return retryable;
     };
+  }
+
+  private static boolean checkRetriable(IOException exception, int executionCount, HttpContext context) {
+    if (executionCount >= 5) {
+      // Do not retry if over max retry count
+      return false;
+    }
+    if (exception instanceof InterruptedIOException) {
+      // Timeout
+      return false;
+    }
+    if (exception instanceof UnknownHostException) {
+      // Unknown host
+      return false;
+    }
+    if (exception instanceof SSLException) {
+      // SSL handshake exception
+      return false;
+    }
+
+    HttpClientContext clientContext = HttpClientContext.adapt(context);
+    HttpRequest request = clientContext.getRequest();
+    boolean idempotent = !(request instanceof HttpEntityEnclosingRequest);
+    if (idempotent) {
+      // Retry if the request is considered idempotent
+      return true;
+    }
+    return false;
   }
 
   @Deprecated // use createHighPerfHttpClient

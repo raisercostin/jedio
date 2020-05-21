@@ -26,6 +26,7 @@ import org.raisercostin.jedio.FileAltered;
 import org.raisercostin.jedio.FileLocation;
 import org.raisercostin.jedio.LinkLocation;
 import org.raisercostin.jedio.Locations;
+import org.raisercostin.jedio.MetaInfo;
 import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.ReadableDirLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
@@ -337,12 +338,12 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
 
   @Override
   public PathLocation copyFrom(ReadableFileLocation<?> source, CopyOptions copyOptions) {
+    copyOptions.reportOperationEvent(CopyEvent.CopyFileTriggered, source, this);
+    if (copyOptions.makeDirIfNeeded()) {
+      makeDirOnParentIfNeeded();
+    }
+    PathLocation metaHttp = meta("http", "json");
     try {
-      copyOptions.reportOperationEvent(CopyEvent.CopyFileTriggered, source, this);
-      if (copyOptions.makeDirIfNeeded()) {
-        makeDirOnParentIfNeeded();
-      }
-      PathLocation metaHttp = meta("http", "json");
       boolean sourceExists = source.exists();
       boolean metaShouldBeCreated = copyOptions.copyMeta() && !metaHttp.exists();
       boolean destAndHttpMetaExists = metaHttp.exists() && exists() && !metaShouldBeCreated;
@@ -357,27 +358,34 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
         } else {
           copyOptions.reportOperationEvent(CopyEvent.CopyFileStarted, source, this);
           source.usingInputStreamAndMeta(true, streamAndMeta -> {
-            PathLocation actualDest = copyOptions.amend(this, streamAndMeta);
-            if (copyOptions.replaceExisting()) {
-              copyOptions.reportOperationEvent(CopyEvent.CopyReplacing, source, this);
-              Files.copy(streamAndMeta.is, actualDest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            if (streamAndMeta.meta.isSuccess) {
+              PathLocation actualDest = copyOptions.amend(this, streamAndMeta);
+              if (copyOptions.replaceExisting()) {
+                copyOptions.reportOperationEvent(CopyEvent.CopyReplacing, source, this);
+                Files.copy(streamAndMeta.is, actualDest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+              } else {
+                Files.copy(streamAndMeta.is, actualDest.toPath());
+              }
+              // write meta
+              if (copyOptions.copyMeta()) {
+                JsonUtils2 mapper = Nodes.json;
+                // mapper.mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, false);
+                String str = mapper.excluding("parent", "otherParents", "impl").toString(streamAndMeta.meta);
+                metaHttp.write(str);
+                copyOptions.reportOperationEvent(CopyEvent.CopyMeta, source, this, metaHttp);
+              }
+              return null;
             } else {
-              Files.copy(streamAndMeta.is, actualDest.toPath());
+              copyOptions.reportOperationEvent(CopyEvent.CopyFailed, streamAndMeta.meta.error, source, this);
+              metaHttp.write(Nodes.json.toString(streamAndMeta.meta));
+              return null;
             }
-            // write meta
-            if (copyOptions.copyMeta()) {
-              JsonUtils2 mapper = Nodes.json;
-              // mapper.mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, false);
-              String str = mapper.excluding("parent", "otherParents", "impl").toString(streamAndMeta.meta);
-              metaHttp.write(str);
-              copyOptions.reportOperationEvent(CopyEvent.CopyMeta, source, this, metaHttp);
-            }
-            return null;
           });
           copyOptions.reportOperationEvent(CopyEvent.CopyFileFinished, source, this);
         }
       }
     } catch (Throwable e) {
+      metaHttp.write(Nodes.json.toString(MetaInfo.error(e)));
       copyOptions.reportOperationEvent(CopyEvent.CopyFailed, e, source, this);
     }
     return this;

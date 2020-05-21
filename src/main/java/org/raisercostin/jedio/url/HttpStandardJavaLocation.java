@@ -4,15 +4,25 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLConnection;
 
 import io.vavr.Lazy;
 import lombok.SneakyThrows;
+import org.apache.commons.httpclient.URI;
 
-public class HttpStandardJavaLocation extends HttpBaseLocation<HttpStandardJavaLocation> implements Closeable {
+public class HttpStandardJavaLocation extends BaseHttpLocation<HttpStandardJavaLocation> implements Closeable {
   public Lazy<URLConnection> connection = Lazy.of(() -> createConnection());
 
   public HttpStandardJavaLocation(String url) {
+    super(url);
+  }
+
+  public HttpStandardJavaLocation(URI uri) {
+    super(uri);
+  }
+
+  public HttpStandardJavaLocation(URL url) {
     super(url);
   }
 
@@ -47,5 +57,10 @@ public class HttpStandardJavaLocation extends HttpBaseLocation<HttpStandardJavaL
       HttpURLConnection huc = (HttpURLConnection) connection.get();
       huc.disconnect();
     }
+  }
+
+  @Override
+  protected HttpStandardJavaLocation create(URL resolve) {
+    return new HttpStandardJavaLocation(url);
   }
 }

@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLEncoder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Maps;
@@ -28,7 +27,6 @@ import org.apache.http.impl.execchain.RequestAbortedException;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.jedio.Audit;
-import org.jedio.ExceptionUtils;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.url.JedioHttpClients.JedioHttpClient;
@@ -38,31 +36,12 @@ import reactor.core.publisher.Mono;
 @Getter(lombok.AccessLevel.NONE)
 @Setter(lombok.AccessLevel.NONE)
 @Slf4j
-public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
+public class HttpClientLocation extends BaseHttpLocation<HttpClientLocation> {
   @SneakyThrows
   public static HttpClientLocation url(String sourceHyperlink, String relativeOrAbsoluteHyperlink,
       JedioHttpClient defaultClient) {
-    return sourceHyperlink != null
-        ? new HttpClientLocation(resolve(sourceHyperlink, relativeOrAbsoluteHyperlink), defaultClient)
-        : new HttpClientLocation(relativeOrAbsoluteHyperlink, defaultClient);
-  }
-
-  @SneakyThrows
-  private static URL resolve(String url, String childOrAbsolute) {
-    if (childOrAbsolute.isEmpty()) {
-      return new URL(url);
-    }
-    return resolve(new URL(url + "/"), childOrAbsolute);
-  }
-
-  @SneakyThrows
-  private static URL resolve(URL url, String childOrAbsolute) {
-    try {
-      String encoded = URLEncoder.encode(childOrAbsolute, "UTF-8");
-      return url.toURI().resolve(encoded).toURL();
-    } catch (Exception e) {
-      throw ExceptionUtils.nowrap(e, "Trying to create a relativize(%s,%s)", url, childOrAbsolute);
-    }
+    return new HttpClientLocation(BaseHttpLocation.resolve(sourceHyperlink, relativeOrAbsoluteHyperlink),
+      defaultClient);
   }
 
   private static final int retries = 5;
@@ -322,12 +301,17 @@ public class HttpClientLocation extends HttpBaseLocation<HttpClientLocation> {
 
   @Override
   public HttpClientLocation child(String link) {
-    return new HttpClientLocation(resolve(url, link), client);
+    return new HttpClientLocation(BaseHttpLocation.resolve(url, link), client);
   }
 
   @Override
   @SneakyThrows
   public URI toUri() {
     return url.toURI();
+  }
+
+  @Override
+  protected HttpClientLocation create(URL url) {
+    return new HttpClientLocation(url, client);
   }
 }

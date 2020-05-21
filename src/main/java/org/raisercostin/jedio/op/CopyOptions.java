@@ -48,8 +48,14 @@ public interface CopyOptions {
     }
 
     public CopyOptions withDefaultReporting() {
-      return this.withOperationListener((event, exception, src, dst, args) -> log.info("copy {}: {} -> {} details:{}",
-          event, src, dst, args, exception));
+      return this.withOperationListener((event, exception, src, dst, args) -> {
+        if (exception != null) {
+          log.warn("copy {}: {} -> {} details:{}. Enable debug for stacktrace.", event, src, dst, args);
+          log.debug("copy {}: {} -> {} details:{}. Error with stacktrace.", event, src, dst, args, exception);
+        } else {
+          log.info("copy {}: {} -> {} details:{}.", event, src, dst, args);
+        }
+      });
     }
 
     @Override
@@ -103,10 +109,21 @@ public interface CopyOptions {
   }
 
   public enum CopyEvent {
-    Unknown, CopyFileTriggered(
-        "Copy file triggered."), IgnoreSourceDoesNotExists, IgnoreDestinationMetaExists, IgnoreDestinationExists, CopyFileStarted, CopyReplacing(
-            "A replace of content started"), CopyFileFinished, CopyFailed, CopyDirStarted, CopyDirFinished, CopyMeta(
-                "Copy metadata. For http you will get the request and response: headers and other details. For all will get the exception and the source.");
+    Unknown,
+    CopyFileTriggered(
+        "Copy file triggered."),
+    IgnoreSourceDoesNotExists,
+    IgnoreDestinationMetaExists,
+    IgnoreDestinationExists,
+    CopyFileStarted,
+    CopyReplacing(
+        "A replace of content started"),
+    CopyFileFinished,
+    CopyFailed,
+    CopyDirStarted,
+    CopyDirFinished,
+    CopyMeta(
+        "Copy metadata. For http you will get the request and response: headers and other details. For all will get the exception and the source.");
 
     String description;
 

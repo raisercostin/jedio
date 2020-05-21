@@ -2,6 +2,8 @@ package org.raisercostin.jedio;
 
 import java.io.InputStream;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import io.vavr.collection.Map;
 import io.vavr.control.Option;
 import lombok.AccessLevel;
@@ -22,13 +24,22 @@ import org.raisercostin.nodes.Nodes;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PUBLIC)
 @Slf4j
 public class MetaInfo {
+  public static MetaInfo error(Throwable e) {
+    String errorAsString = Nodes.json.toString(e);
+    return new MetaInfo(false, e, errorAsString, null);
+  }
+
+  public static MetaInfo payload(Map<String, Object> payload) {
+    return new MetaInfo(true, null, null, payload);
+  }
+
   @AllArgsConstructor
   @Getter(lombok.AccessLevel.NONE)
   @Setter(lombok.AccessLevel.NONE)
   @Slf4j
   public static class StreamAndMeta implements AutoCloseable {
     public static StreamAndMeta fromThrowable(Throwable e) {
-      return new StreamAndMeta(new MetaInfo(false, e, null), null);
+      return new StreamAndMeta(MetaInfo.error(e), null);
     }
 
     public static StreamAndMeta fromPayload(Object payload, InputStream in) {
@@ -41,7 +52,7 @@ public class MetaInfo {
     }
 
     public static StreamAndMeta fromPayloadMap(Map<String, Object> payload, InputStream in) {
-      return new StreamAndMeta(new MetaInfo(true, null, payload), in);
+      return new StreamAndMeta(MetaInfo.payload(payload), in);
     }
 
     public MetaInfo meta;
@@ -57,7 +68,9 @@ public class MetaInfo {
   }
 
   boolean isSuccess;
+  @JsonProperty(access = Access.READ_ONLY)
   Throwable error;
+  String errorAsString;
   Map<String, Object> payload;
 
   @SuppressWarnings("unchecked")
