@@ -56,12 +56,17 @@ class HttpClientLocationTest {
 
   @Test
   void testReEscapeShouldNotHappen2() {
-    assertThat(UrlLocation.of("http://www.revomatico.com/|").child("a").toExternalForm())
-      .isEqualTo("http://www.revomatico.com/%7C/a");
-    assertThat(UrlLocation.of("http://www.revomatico.com/|").child("./").toExternalForm())
-      .isEqualTo("http://www.revomatico.com/%7C/");
-    assertThat(UrlLocation.of("http://www.revomatico.com/|").child("/").toExternalForm())
-      .isEqualTo("http://www.revomatico.com/");
+    assertThat(UrlLocation.of("http://www.revomatico.com/b/|/").child("a").toExternalForm())
+      .isEqualTo("http://www.revomatico.com/b/%7C/a");
+    assertThat(UrlLocation.of("http://www.revomatico.com/b/|").child("a").toExternalForm())
+      .describedAs("[a] should replace [/]")
+      .isEqualTo("http://www.revomatico.com/b/a");
+    assertThat(UrlLocation.of("http://www.revomatico.com/b/|/").child("./d").toExternalForm())
+      .isEqualTo("http://www.revomatico.com/b/%7C/d");
+    assertThat(UrlLocation.of("http://www.revomatico.com/b/|").child("./d").toExternalForm())
+      .isEqualTo("http://www.revomatico.com/b/d");
+    assertThat(UrlLocation.of("http://www.revomatico.com/|").child("/d").toExternalForm())
+      .isEqualTo("http://www.revomatico.com/d");
   }
 
   @Test
