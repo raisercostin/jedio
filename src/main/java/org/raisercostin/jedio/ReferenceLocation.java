@@ -12,6 +12,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.jedio.deprecated;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
+import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.path.PathLocation;
 import org.raisercostin.util.sugar;
 import reactor.core.publisher.Flux;
@@ -219,22 +220,9 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
     return meta("http", "json");
   }
 
-  /**
-   * This way we get the following advantages: - original file is a prefix of the #meta (easy to find all meta files
-   * related to a file) - multiple metas meta-http, meta-links, etc - in totalcmder meta comes after file (with some
-   * minor exceptions) - it works for empty exceptions too cons - the extension is not a usual extension (but the final
-   * part is `-json`)
-   *
-   * com_darzar_www--http com_darzar_www--http-- com_darzar_www--http.#meta-http-json
-   * com_darzar_www--http--.#meta-http-json com_darzar_www--http--favicon.ico
-   * com_darzar_www--http--favicon.ico#meta-http-json com_darzar_www--http--robots.txt
-   * com_darzar_www--http--robots.txt#meta-http-json com_darzar_www--http--sitemap.gz
-   * com_darzar_www--http--sitemap.gz#meta-http-json com_darzar_www--http--sitemap.xml
-   * com_darzar_www--http--sitemap.xml#meta-http-json com_darzar_www--http--sitemap.xml.gz
-   * com_darzar_www--http--sitemap.xml.gz#meta-http-json
-   */
+  @SuppressWarnings("unchecked")
   default SELF meta(String meta, String extension) {
-    return withExtension(originalExtension -> originalExtension + "#meta-" + meta + "-" + extension);
+    return CopyOptions.meta((SELF) this, meta, extension);
   }
 
   @Deprecated

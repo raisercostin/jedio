@@ -154,4 +154,27 @@ public interface CopyOptions {
       return (T) dest.meta("http" + code, "html");
     }
   }
+
+  /**
+   * This way we get the following advantages: - original file is a prefix of the #meta (easy to find all meta files
+   * related to a file) - multiple metas meta-http, meta-links, etc - in totalcmder meta comes after file (with some
+   * minor exceptions) - it works for empty exceptions too cons - the extension is not a usual extension (but the final
+   * part is `-json`)
+   *
+   * com_darzar_www--http com_darzar_www--http-- com_darzar_www--http.#meta-http-json
+   * com_darzar_www--http--.#meta-http-json com_darzar_www--http--favicon.ico
+   * com_darzar_www--http--favicon.ico#meta-http-json com_darzar_www--http--robots.txt
+   * com_darzar_www--http--robots.txt#meta-http-json com_darzar_www--http--sitemap.gz
+   * com_darzar_www--http--sitemap.gz#meta-http-json com_darzar_www--http--sitemap.xml
+   * com_darzar_www--http--sitemap.xml#meta-http-json com_darzar_www--http--sitemap.xml.gz
+   * com_darzar_www--http--sitemap.xml.gz#meta-http-json
+   */
+  static <T extends ReferenceLocation<T>> T meta(T referenceLocation, String meta, String extension) {
+    return referenceLocation.parent()
+      .get()
+      .child("." + meta)
+      .mkdirIfNecessary()
+      .child(referenceLocation.withExtension(originalExtension -> originalExtension + "#meta-" + meta + "-" + extension)
+        .filename());
+  }
 }

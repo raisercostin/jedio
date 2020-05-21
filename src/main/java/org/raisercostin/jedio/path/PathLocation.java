@@ -342,7 +342,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
     if (copyOptions.makeDirIfNeeded()) {
       makeDirOnParentIfNeeded();
     }
-    PathLocation metaHttp = meta("http", "json");
+    PathLocation metaHttp = this.meta("http", "json");
     try {
       boolean sourceExists = source.exists();
       boolean metaShouldBeCreated = copyOptions.copyMeta() && !metaHttp.exists();
