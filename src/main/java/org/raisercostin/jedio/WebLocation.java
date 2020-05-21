@@ -60,11 +60,11 @@ public class WebLocation implements ReadableDirLocation<WebLocation>, Location<W
   private static final JedioHttpClient client = JedioHttpClients.createHighPerfHttpClient();
 
   public HttpClientLocation asHttpClientLocation() {
-    return new HttpClientLocation(webAddress, client);
+    return new HttpClientLocation(webAddress, false, client);
   }
 
   public HttpStandardJavaLocation asHttpStandardJavaLocation() {
-    return new HttpStandardJavaLocation(webAddress);
+    return new HttpStandardJavaLocation(webAddress, false);
   }
 
   @Override

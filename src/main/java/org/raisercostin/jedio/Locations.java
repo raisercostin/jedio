@@ -97,7 +97,7 @@ public class Locations {
   }
 
   public static HttpClientLocation url(String url) {
-    return new HttpClientLocation(url, defaultClient);
+    return new HttpClientLocation(url, false, defaultClient);
   }
 
   public static InputStreamLocation stream(InputStream inputStream) {

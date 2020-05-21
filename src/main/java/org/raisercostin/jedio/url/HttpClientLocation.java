@@ -40,21 +40,22 @@ public class HttpClientLocation extends BaseHttpLocation<HttpClientLocation> {
   @SneakyThrows
   public static HttpClientLocation url(String sourceHyperlink, String relativeOrAbsoluteHyperlink,
       JedioHttpClient defaultClient) {
-    return new HttpClientLocation(BaseHttpLocation.resolve(sourceHyperlink, relativeOrAbsoluteHyperlink),
-      defaultClient);
+    //    return new HttpClientLocation(BaseHttpLocation.resolve(sourceHyperlink, relativeOrAbsoluteHyperlink),
+    //      defaultClient);
+    return new HttpClientLocation(sourceHyperlink, false, defaultClient).child(relativeOrAbsoluteHyperlink);
   }
 
   private static final int retries = 5;
   @JsonIgnore
   public final JedioHttpClient client;
 
-  public HttpClientLocation(String url, JedioHttpClient client) {
-    super(url);
+  public HttpClientLocation(String url, boolean escaped, JedioHttpClient client) {
+    super(url, escaped);
     this.client = client;
   }
 
-  public HttpClientLocation(URL url, JedioHttpClient client) {
-    super(url);
+  public HttpClientLocation(URL url, boolean escaped, JedioHttpClient client) {
+    super(url, escaped);
     this.client = client;
   }
 
@@ -73,30 +74,6 @@ public class HttpClientLocation extends BaseHttpLocation<HttpClientLocation> {
     return this;
   }
 
-  /**
-   * //protected override def unsafeToInputStreamUsingJava: InputStream = { url.openConnection() match { case conn:
-   * HttpURLConnection => config.configureConnection(conn) import scala.collection.JavaConverters._
-   * UrlLocation.logger.info("header:\n" + config.header.mkString("\n ")) UrlLocation.logger.info(s"RequestHeaders for
-   * $raw:\n " + conn.getRequestProperties.asScala.mkString("\n ")) //if (UrlLocation.log.isDebugEnabled())
-   * UrlLocation.logger.info(s"ResponseHeaders for $raw:\n " + Try { conn.getHeaderFields.asScala.mkString("\n ") })
-   * handleCode(conn.getResponseCode, conn.getHeaderField("Location"), { conn.getInputStream }, Try {
-   * conn.getHeaderFields.asScala.toMap }) case conn => conn.getInputStream } }
-   *
-   * def handleCode(code: Int, location: String, stream: => InputStream, map: => Try[Map[String, _]]): InputStream =
-   * (code, location) match { case (200, _) => stream case (code, location) if config.allowedRedirects > redirects.size
-   * && location != null && location.nonEmpty && location != raw => //This is manual redirection. The connection should
-   * already do all the redirects if config.allowedRedirects is true closeStream(stream) UrlLocation(new
-   * java.net.URL(location), this +: redirects, config).unsafeToInputStream case (code, _) => closeStream(stream) throw
-   * new HttpStatusException(s"Got $code response from $this. A 200 code is needed to get an InputStream. The header
-   * is\n " + map.getOrElse(Map()).mkString("\n ") + " After " + redirects.size + " redirects:\n " +
-   * redirects.mkString("\n "), code, this) }
-   *
-   * // * Shouldn't disconnect as it "Indicates that other requests to the server are unlikely in the near future." // *
-   * We should just close() on the input/output/error streams // *
-   * http://stackoverflow.com/questions/15834350/httpurlconnection-closing-io-streams def closeStream(stream: =>
-   * InputStream) = Try { if (stream != null) stream.close }.recover { case e => UrlLocation.logger.debug("Couldn't
-   * close input/error stream to " + this, e) }
-   */
   @Override
   @SneakyThrows
   public InputStream unsafeInputStream() {
@@ -301,7 +278,7 @@ public class HttpClientLocation extends BaseHttpLocation<HttpClientLocation> {
 
   @Override
   public HttpClientLocation child(String link) {
-    return new HttpClientLocation(BaseHttpLocation.resolve(url, link), client);
+    return create(url, true);
   }
 
   @Override
@@ -311,7 +288,7 @@ public class HttpClientLocation extends BaseHttpLocation<HttpClientLocation> {
   }
 
   @Override
-  protected HttpClientLocation create(URL url) {
-    return new HttpClientLocation(url, client);
+  protected HttpClientLocation create(URL url, boolean escaped) {
+    return new HttpClientLocation(url, escaped, client);
   }
 }

@@ -14,16 +14,16 @@ import org.apache.commons.httpclient.URI;
 public class HttpStandardJavaLocation extends BaseHttpLocation<HttpStandardJavaLocation> implements Closeable {
   public Lazy<URLConnection> connection = Lazy.of(() -> createConnection());
 
-  public HttpStandardJavaLocation(String url) {
-    super(url);
+  public HttpStandardJavaLocation(String url, boolean escaped) {
+    super(url, escaped);
+  }
+
+  public HttpStandardJavaLocation(URL url, boolean escaped) {
+    super(url, escaped);
   }
 
   public HttpStandardJavaLocation(URI uri) {
     super(uri);
-  }
-
-  public HttpStandardJavaLocation(URL url) {
-    super(url);
   }
 
   @SneakyThrows
@@ -60,7 +60,7 @@ public class HttpStandardJavaLocation extends BaseHttpLocation<HttpStandardJavaL
   }
 
   @Override
-  protected HttpStandardJavaLocation create(URL resolve) {
-    return new HttpStandardJavaLocation(url);
+  protected HttpStandardJavaLocation create(URL resolve, boolean escaped) {
+    return new HttpStandardJavaLocation(url, escaped);
   }
 }

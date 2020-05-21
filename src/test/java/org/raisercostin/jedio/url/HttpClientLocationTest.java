@@ -41,7 +41,27 @@ class HttpClientLocationTest {
         .of("http://www.revomatico.com/camel/")
         .child("portfolio/products/bean:cxfEndpoint|//someAddress")
         .toExternalForm())
-          .isEqualTo("http://www.revomatico.com/camel/portfolio/products/bean:cxfEndpoint|//someAddress");
+          .isEqualTo("http://www.revomatico.com/camel/portfolio/products/bean:cxfEndpoint%7C//someAddress");
+  }
+
+  @Test
+  void testReEscapeShouldNotHappen() {
+    assertThat(UrlLocation.of("http://www.revomatico.com/|").toExternalForm())
+      .isEqualTo("http://www.revomatico.com/%7C");
+    assertThat(UrlLocation.of("http://www.revomatico.com/%7C").toExternalForm())
+      .isEqualTo("http://www.revomatico.com/%257C");
+    assertThat(UrlLocation.of("http://www.revomatico.com/%7C", true).toExternalForm())
+      .isEqualTo("http://www.revomatico.com/%7C");
+  }
+
+  @Test
+  void testReEscapeShouldNotHappen2() {
+    assertThat(UrlLocation.of("http://www.revomatico.com/|").child("a").toExternalForm())
+      .isEqualTo("http://www.revomatico.com/%7C/a");
+    assertThat(UrlLocation.of("http://www.revomatico.com/|").child("./").toExternalForm())
+      .isEqualTo("http://www.revomatico.com/%7C/");
+    assertThat(UrlLocation.of("http://www.revomatico.com/|").child("/").toExternalForm())
+      .isEqualTo("http://www.revomatico.com/");
   }
 
   @Test
@@ -74,5 +94,14 @@ class HttpClientLocationTest {
       .child("")
       .toExternalForm())
         .hasMessageContaining("no protocol: //www.revomatico.com/");
+  }
+
+  @Test
+  void test8() {
+    assertThat(
+      UrlLocation.of("http://www.revomatico.com/benefits/clients/DFPRADM")
+        .child("/portofolio")
+        .toExternalForm())
+          .isEqualTo("http://www.revomatico.com/portofolio");
   }
 }
