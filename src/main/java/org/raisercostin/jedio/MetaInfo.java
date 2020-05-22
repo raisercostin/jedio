@@ -84,12 +84,12 @@ public class MetaInfo {
     return field("payload.response.header.Content-Type");
   }
 
-  public Option<String> httpMetaResponseStatusCode() {
-    return field("payload.response.statusLine.statusCode");
+  public Option<Integer> httpMetaResponseStatusCode() {
+    return field("payload.response.statusLine.statusCode").map(x -> new Integer(x));
   }
 
   public boolean httpMetaResponseStatusCodeIs200() {
-    return httpMetaResponseStatusCode().map(x -> x.equals("200")).getOrElse(false);
+    return httpMetaResponseStatusCode().map(x -> x.equals(200)).getOrElse(false);
   }
 
   public Option<String> httpMetaRequestUri() {

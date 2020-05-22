@@ -72,8 +72,8 @@ public class JedioHttpClients {
     }
   }
 
-  private static final int timeout = 5;
-  private static final int hardTimeout = 5 * timeout; // seconds
+  private static final int timeout = 20;
+  //private static final int hardTimeout = 5 * timeout; // seconds
   private static final int MILLIS = 1000;
   private static final int ROUTES = 1000;
   private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BaseHttpLocation.class);

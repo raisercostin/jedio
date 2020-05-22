@@ -360,11 +360,15 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
           source.usingInputStreamAndMeta(true, streamAndMeta -> {
             if (streamAndMeta.meta.isSuccess) {
               PathLocation actualDest = copyOptions.amend(this, streamAndMeta);
-              if (copyOptions.replaceExisting()) {
-                copyOptions.reportOperationEvent(CopyEvent.CopyReplacing, source, this);
-                Files.copy(streamAndMeta.is, actualDest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+              if (streamAndMeta.meta.httpResponseHeaderContentType().getOrElse("").startsWith("text/html")) {
+                if (copyOptions.replaceExisting()) {
+                  copyOptions.reportOperationEvent(CopyEvent.CopyReplacing, source, this);
+                  Files.copy(streamAndMeta.is, actualDest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } else {
+                  Files.copy(streamAndMeta.is, actualDest.toPath());
+                }
               } else {
-                Files.copy(streamAndMeta.is, actualDest.toPath());
+                copyOptions.reportOperationEvent(CopyEvent.IgnoreContentType, source, this, metaHttp);
               }
               // write meta
               if (copyOptions.copyMeta()) {

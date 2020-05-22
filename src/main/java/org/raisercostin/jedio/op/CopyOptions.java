@@ -115,6 +115,7 @@ public interface CopyOptions {
     IgnoreSourceDoesNotExists,
     IgnoreDestinationMetaExists,
     IgnoreDestinationExists,
+    IgnoreContentType,
     CopyFileStarted,
     CopyReplacing(
         "A replace of content started"),
@@ -123,7 +124,9 @@ public interface CopyOptions {
     CopyDirStarted,
     CopyDirFinished,
     CopyMeta(
-        "Copy metadata. For http you will get the request and response: headers and other details. For all will get the exception and the source.");
+        "Copy metadata. For http you will get the request and response: headers and other details. For all will get the exception and the source.")
+    //
+    ;
 
     String description;
 
@@ -147,8 +150,8 @@ public interface CopyOptions {
   /** Destination can be changed based on the input and metadata. */
   @SuppressWarnings("unchecked")
   default <T extends WritableFileLocation<?>> T amend(T dest, StreamAndMeta streamAndMeta) {
-    String code = streamAndMeta.meta.httpMetaResponseStatusCode().get();
-    if (code.equals("200")) {
+    int code = streamAndMeta.meta.httpMetaResponseStatusCode().get();
+    if (code == 200) {
       return dest;
     } else {
       return (T) dest.meta("http" + code, "html");
