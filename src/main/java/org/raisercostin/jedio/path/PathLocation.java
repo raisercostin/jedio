@@ -489,7 +489,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
 
   private void createWindowsJunction(Path place, Path symlink, Path target) {
     new SimpleShell(place.getParent())
-      .execute("cmd /C mklink /J \"" + symlink + "\" \"" + target.toFile().getName() + "\"");
+        .execute("cmd /C mklink /J \"" + symlink + "\" \"" + target.toFile().getName() + "\"");
   }
 
   private void createSymlink(Path symlink, Path target) {
@@ -502,7 +502,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
 
   private void createWindowsSymlink(Path place, String symlink, String targetName) {
     new SimpleShell(place.getParent())
-      .execute("cmd /C sudo cmd /C mklink /D \"" + symlink + "\" \"" + targetName + "\"");
+        .execute("cmd /C sudo cmd /C mklink /D \"" + symlink + "\" \"" + targetName + "\"");
   }
 
   private void createLinuxSymlink(Path place, String symlink, String targetPath) {
@@ -763,7 +763,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   // };
 
   static GuavaAndDirectoryStreamTraversalWithVirtualDirs traversal = new GuavaAndDirectoryStreamTraversalWithVirtualDirs(
-    true, x -> false);
+      true, x -> false);
 
   private TraversalFilter createFilter(boolean recursive) {
     return FindFilters.createFindFilter("", "", false, recursive);

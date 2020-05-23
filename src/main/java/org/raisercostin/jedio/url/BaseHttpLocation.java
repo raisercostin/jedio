@@ -22,9 +22,9 @@ public abstract class BaseHttpLocation<SELF extends BaseHttpLocation<SELF>>
   public static class UrlLocation extends BaseHttpLocation<UrlLocation> {
     @SneakyThrows
     /**
-    * @param escaped <tt>true</tt> if URI character sequence is in escaped form.
-    *                <tt>false</tt> otherwise.
-    */
+     * @param escaped
+     *          <tt>true</tt> if URI character sequence is in escaped form. <tt>false</tt> otherwise.
+     */
     public static UrlLocation of(String url, boolean escaped) {
       return new UrlLocation(url, escaped);
     }
@@ -65,17 +65,17 @@ public abstract class BaseHttpLocation<SELF extends BaseHttpLocation<SELF>>
     }
   }
   //
-  //  @SneakyThrows
-  //  public static URI uriNormalized(String uri) {
-  //    URI res = new URI(uri, false);
-  //    res.normalize();
-  //    return res;
-  //  }
+  // @SneakyThrows
+  // public static URI uriNormalized(String uri) {
+  // URI res = new URI(uri, false);
+  // res.normalize();
+  // return res;
+  // }
   //
-  //  @SneakyThrows
-  //  public static URI uri(String uri) {
-  //    return new URI(uri, false);
-  //  }
+  // @SneakyThrows
+  // public static URI uri(String uri) {
+  // return new URI(uri, false);
+  // }
 
   @SneakyThrows
   public static URL resolve(String url, String childOrAbsolute) {
@@ -102,7 +102,7 @@ public abstract class BaseHttpLocation<SELF extends BaseHttpLocation<SELF>>
     return new URI(url, escaped);
   }
 
-  /** Url is always escaped properly.*/
+  /** Url is always escaped properly. */
   public final URL url;
 
   BaseHttpLocation(String url, boolean escaped) {
