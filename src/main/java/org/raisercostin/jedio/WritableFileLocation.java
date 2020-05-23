@@ -2,8 +2,8 @@ package org.raisercostin.jedio;
 
 import java.io.InputStream;
 
+import org.jedio.sugar;
 import org.raisercostin.jedio.op.CopyOptions;
-import org.raisercostin.util.sugar;
 
 /** Writable by me or others? */
 public interface WritableFileLocation<SELF extends WritableFileLocation<SELF>> extends FileLocation<SELF> {

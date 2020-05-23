@@ -1,9 +1,9 @@
 package org.raisercostin.jedio;
 
 import io.vavr.collection.Iterator;
+import org.jedio.sugar;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.CopyOptions.CopyEvent;
-import org.raisercostin.util.sugar;
 import reactor.core.publisher.Flux;
 
 /** ReadableDir means you can find children (you can list). */

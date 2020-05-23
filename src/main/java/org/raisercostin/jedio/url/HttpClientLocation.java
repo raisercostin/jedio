@@ -27,10 +27,10 @@ import org.apache.http.impl.execchain.RequestAbortedException;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.jedio.Audit;
+import org.jedio.functions.JedioFunction;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.url.JedioHttpClients.JedioHttpClient;
-import org.raisercostin.util.functions.JedioFunction;
 import reactor.core.publisher.Mono;
 
 @Getter(lombok.AccessLevel.NONE)

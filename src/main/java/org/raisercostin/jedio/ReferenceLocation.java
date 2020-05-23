@@ -10,11 +10,11 @@ import lombok.SneakyThrows;
 import lombok.val;
 import org.apache.commons.io.FilenameUtils;
 import org.jedio.deprecated;
+import org.jedio.sugar;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.path.PathLocation;
-import org.raisercostin.util.sugar;
 import reactor.core.publisher.Flux;
 
 // TODO maybe should contain type <T> of the actual internal instance

@@ -1,4 +1,4 @@
-package org.raisercostin.util;
+package org.jedio;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

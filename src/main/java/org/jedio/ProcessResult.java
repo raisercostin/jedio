@@ -1,4 +1,4 @@
-package org.raisercostin.util;
+package org.jedio;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

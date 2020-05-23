@@ -1,4 +1,4 @@
-package org.raisercostin.util;
+package org.jedio;
 
 public class functions {
   @FunctionalInterface

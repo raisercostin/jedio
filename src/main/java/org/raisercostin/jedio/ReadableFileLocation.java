@@ -5,12 +5,12 @@ import java.io.InputStream;
 import io.vavr.control.Option;
 import org.jedio.ExceptionUtils;
 import org.jedio.deprecated;
+import org.jedio.sugar;
+import org.jedio.functions.JedioFunction;
+import org.jedio.functions.JedioProcedure;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.nodes.Nodes;
-import org.raisercostin.util.functions.JedioFunction;
-import org.raisercostin.util.functions.JedioProcedure;
-import org.raisercostin.util.sugar;
 import reactor.core.publisher.Mono;
 
 public interface ReadableFileLocation<SELF extends ReadableFileLocation<SELF>> extends FileLocation<SELF> {

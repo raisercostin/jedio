@@ -5,13 +5,13 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.jedio.sugar;
 import org.raisercostin.jedio.classpath.ClasspathLocation;
 import org.raisercostin.jedio.fs.stream.InputStreamLocation;
 import org.raisercostin.jedio.path.PathLocation;
 import org.raisercostin.jedio.url.HttpClientLocation;
 import org.raisercostin.jedio.url.JedioHttpClients;
 import org.raisercostin.jedio.url.JedioHttpClients.JedioHttpClient;
-import org.raisercostin.util.sugar;
 
 public class Locations {
   private static JedioHttpClient defaultClient = JedioHttpClients.createHighPerfHttpClient();

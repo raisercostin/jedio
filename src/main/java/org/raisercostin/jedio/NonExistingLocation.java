@@ -1,6 +1,6 @@
 package org.raisercostin.jedio;
 
-import org.raisercostin.util.sugar;
+import org.jedio.sugar;
 
 /** Location that is known to exist. */
 public interface NonExistingLocation<SELF extends NonExistingLocation<SELF>> extends ReferenceLocation<SELF> {
