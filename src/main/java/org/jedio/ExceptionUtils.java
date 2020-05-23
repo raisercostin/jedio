@@ -23,7 +23,7 @@ public class ExceptionUtils {
   }
 
   @FunctionalInterface
-  public static interface MyCheckedException<R> {
+  public interface MyCheckedException<R> {
     R apply() throws Throwable;
   }
 
@@ -60,8 +60,9 @@ public class ExceptionUtils {
   // claim that the typeErasure invocation throws a RuntimeException
   private static <R, T extends Throwable> R sneakyThrow(final Throwable throwable, String format, Object... args)
       throws T {
-    if (format != null)
+    if (format != null) {
       throwable.addSuppressed(new RuntimeException(String.format(format, args)));
+    }
     throw (T) throwable;
   }
 

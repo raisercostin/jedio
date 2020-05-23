@@ -17,22 +17,25 @@ public class PathWithAttributes {
 
   public PathWithAttributes(Path path) {
     this.path = path;
-    this.attrs = Lazy.of(() -> readAttrs(path));
+    attrs = Lazy.of(() -> readAttrs(path));
   }
 
   public boolean isDirectory() {
-    if (isVirtualDirectory())
+    if (isVirtualDirectory()) {
       return true;
-    if (isInsideVirtualDirectory())
+    }
+    if (isInsideVirtualDirectory()) {
       // TODO fix
       return false;
+    }
     return attrs.get().isDirectory();
   }
 
   public FileTime lastModifiedTime() {
-    if (isInsideVirtualDirectory())
+    if (isInsideVirtualDirectory()) {
       // TODO fix
       return FileTime.fromMillis(0);
+    }
     return attrs.get().lastModifiedTime();
   }
 

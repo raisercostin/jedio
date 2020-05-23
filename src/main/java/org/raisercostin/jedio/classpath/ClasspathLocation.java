@@ -54,8 +54,8 @@ public class ClasspathLocation implements ReadableDirLocation<ClasspathLocation>
   private final URL resourceUrl;
 
   public ClasspathLocation(String path) {
-    this.resourcePath = fixPath(path);
-    this.resourceUrl = toUrl(resourcePath);
+    resourcePath = fixPath(path);
+    resourceUrl = toUrl(resourcePath);
   }
 
   private String fixPath(String path) {
@@ -88,7 +88,7 @@ public class ClasspathLocation implements ReadableDirLocation<ClasspathLocation>
 
   private Path toPath() {
     return ExceptionUtils.tryWithSuppressed(() -> {
-      URL resource = ClasspathLocation.class.getClassLoader().getResource(this.resourcePath);
+      URL resource = ClasspathLocation.class.getClassLoader().getResource(resourcePath);
       System.out.println("resource=" + resource);
       Preconditions.checkNotNull(resource);
       URI uri = resource.toURI();
@@ -96,7 +96,7 @@ public class ClasspathLocation implements ReadableDirLocation<ClasspathLocation>
       System.out.println("uri=" + uri);
       Preconditions.checkNotNull(uri);
       return Paths.get(uri);
-    }, "When trying to read resource [%s]", this.resourcePath);
+    }, "When trying to read resource [%s]", resourcePath);
   }
 
   private FileSystem initFileSystem(URI uri) throws IOException {

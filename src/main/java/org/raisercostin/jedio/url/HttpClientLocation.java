@@ -27,6 +27,7 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.execchain.RequestAbortedException;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpCoreContext;
 import org.jedio.Audit;
 import org.jedio.functions.JedioFunction;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
@@ -171,9 +172,9 @@ public class HttpClientLocation extends BaseHttpLocation<HttpClientLocation> {
         request.getConfig(), request.getParams(), toHeaders(request.getAllHeaders()));
       HttpClientLocationMetaResponse res = new HttpClientLocationMetaResponse(response.getStatusLine(),
         toHeaders(response.getAllHeaders()));
-      context.removeAttribute(context.HTTP_RESPONSE);
-      context.removeAttribute(context.HTTP_REQUEST);
-      context.removeAttribute(context.HTTP_CONNECTION);
+      context.removeAttribute(HttpCoreContext.HTTP_RESPONSE);
+      context.removeAttribute(HttpCoreContext.HTTP_REQUEST);
+      context.removeAttribute(HttpCoreContext.HTTP_CONNECTION);
       context.removeAttribute("http.cookie-spec");
       context.removeAttribute("http.cookiespec-registry");
       return inputStreamConsumer.apply(StreamAndMeta.fromPayload(new HttpClientLocationMeta(req, res, attrs), in));

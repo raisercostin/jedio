@@ -26,10 +26,11 @@ public class GuavaAndDirectoryStreamTraversal3 implements FileTraversal2 {
 
   public GuavaAndDirectoryStreamTraversal3(boolean followLinks) {
     // this.followLinks = followLinks;
-    if (followLinks)
+    if (followLinks) {
       options = new LinkOption[0];
-    else
+    } else {
       options = new LinkOption[] { LinkOption.NOFOLLOW_LINKS };
+    }
   }
 
   // could be cached?
@@ -56,29 +57,35 @@ public class GuavaAndDirectoryStreamTraversal3 implements FileTraversal2 {
   // .toRealPath()
   public Flux<PathWithAttributes> traverse(Path start, TraversalFilter filter, boolean recursive) {
     try {
-      PathMatcher all = new PathMatcher() {
-        @Override
-        public boolean matches(Path path) {
-          if (filter.shouldPrune(path))
-            return false;
-          if (isDirectory(path))
-            return true;
-          return filter.matches(path);
-        }
+      PathMatcher all = new PathMatcher()
+        {
+          @Override
+          public boolean matches(Path path) {
+            if (filter.shouldPrune(path)) {
+              return false;
+            }
+            if (isDirectory(path)) {
+              return true;
+            }
+            return filter.matches(path);
+          }
 
-        private boolean isDirectory(Path path) {
-          return readAttrs(path).isDirectory();
-        }
-      };
+          private boolean isDirectory(Path path) {
+            return readAttrs(path).isDirectory();
+          }
+        };
       Iterable<Path> iterable = recursive ? fileTraverser(createFilter(all)).depthFirstPreOrder(start)
           : Files.newDirectoryStream(start, createFilter(all));
-      return Flux.fromIterable(iterable).map(x -> new PathWithAttributes(x)).filter(path -> filter.matches(path.path))
-          .sort(dirsFirst());
+      return Flux.fromIterable(iterable)
+        .map(x -> new PathWithAttributes(x))
+        .filter(path -> filter.matches(path.path))
+        .sort(dirsFirst());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
+  @Override
   public Flux<Path> traverse(Path start, TraversalFilter filter) {
     return traverse(start, filter, false).map(x -> x.path);
   }
@@ -110,11 +117,6 @@ public class GuavaAndDirectoryStreamTraversal3 implements FileTraversal2 {
 
   // copied from newDirectoryStream(file,regex)
   private static Filter<Path> createFilter(PathMatcher all) throws IOException {
-    return new DirectoryStream.Filter<Path>() {
-      @Override
-      public boolean accept(Path path) {
-        return all.matches(path);
-      }
-    };
+    return path -> all.matches(path);
   }
 }

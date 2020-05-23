@@ -36,13 +36,15 @@ public interface ReadableDirLocation<SELF extends ReadableDirLocation<SELF>> ext
 
   default void copyTo(DirLocation<?> dir, CopyOptions copyOptions) {
     findFilesAsFlux(true).doOnSubscribe(s -> copyOptions.reportOperationEvent(CopyEvent.CopyDirStarted, this, dir))
-        // .filter(item -> !item.equals(dir))
-        .map(item -> {
-          WritableFileLocation<?> copied = item.asReadableFile().copyTo(item.relative(this, dir).get().asWritableFile(),
-              copyOptions);
-          return copied;
-        }).timeout(copyOptions.timeoutOnItem())
-        .doOnComplete(() -> copyOptions.reportOperationEvent(CopyEvent.CopyDirFinished, this, dir))
-        .blockLast(copyOptions.timeoutTotal());
+      // .filter(item -> !item.equals(dir))
+      .map(item -> {
+        WritableFileLocation<?> copied = item.asReadableFile()
+          .copyTo(item.relative(this, dir).get().asWritableFile(),
+            copyOptions);
+        return copied;
+      })
+      .timeout(copyOptions.timeoutOnItem())
+      .doOnComplete(() -> copyOptions.reportOperationEvent(CopyEvent.CopyDirFinished, this, dir))
+      .blockLast(copyOptions.timeoutTotal());
   }
 }

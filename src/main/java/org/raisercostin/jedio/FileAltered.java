@@ -19,6 +19,7 @@ public class FileAltered {
     return Locations.dir(dir.resolve((Path) event.context()));
   }
 
+  @Override
   public String toString() {
     return location() + " " + event.kind().name() + "#" + event.count();
   }

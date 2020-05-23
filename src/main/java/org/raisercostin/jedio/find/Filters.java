@@ -1,23 +1,17 @@
 package org.raisercostin.jedio.find;
 
 import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 
 import com.google.common.base.Splitter;
 import io.vavr.collection.Stream;
 
 public class Filters {
-  public static final PathMatcher NO_PRUNING_PATH_MATCHER = new PathMatcher() {
-    @Override
-    public boolean matches(Path path) {
-      return false;
-    }
-  };
+  public static final PathMatcher NO_PRUNING_PATH_MATCHER = path -> false;
 
   /**
    * Sample gitIgnores:
-   * 
+   *
    * <pre>
    *     # for now only dirs
    *     target
@@ -45,7 +39,7 @@ public class Filters {
 
   /**
    * From TotalCommander help
-   * 
+   *
    * <pre>
    * In this field, you can enter the search mask for the files you want to find. A question mark ? stands for exacly one character, and an asterisk * stands for any number of characters. Multiple search masks can be entered, separated by spaces (see examples below). All masks after the pipe character | will be treated as exclude masks.
    * Note: Names with spaces do not need to be put in double quotes, e.g. Letter to Mr. Smith.doc. Total Commander now looks for both the entire name and the name parts individually. However, when the pipe character | is used for an exclude mask, names with spaces must be put in double quotes.

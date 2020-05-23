@@ -19,13 +19,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.raisercostin.jedio.FileAltered;
-import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 
 /**
  * Adapted from https://github.com/helmbold/rxfilewatcher (based on RxJava2)
- * 
+ *
  * @author raisercostin
  */
 public final class PathObservables {
@@ -36,7 +35,7 @@ public final class PathObservables {
   /**
    * Creates an observable that watches the given directory and all its subdirectories. Directories that are created
    * after subscription are watched, too.
-   * 
+   *
    * @param path
    *          Root directory to be watched
    * @return Observable that emits an event for each filesystem event.
@@ -48,7 +47,7 @@ public final class PathObservables {
 
   /**
    * Creates an observable that watches the given path but not its subdirectories.
-   * 
+   *
    * @param path
    *          Path to be watched
    * @return Observable that emits an event for each filesystem event.
@@ -69,7 +68,7 @@ public final class PathObservables {
     }
 
     private Flux<FileAltered> create() {
-      return EmitterProcessor.create(subscriber -> {
+      return Flux.create(subscriber -> {
         try (WatchService watcher = directory.getFileSystem().newWatchService()) {
           if (recursive) {
             registerAll(directory, watcher);
@@ -110,13 +109,14 @@ public final class PathObservables {
      */
     // TODO use traversal from PathLocation
     private void registerAll(final Path rootDirectory, final WatchService watcher) throws IOException {
-      Files.walkFileTree(rootDirectory, new SimpleFileVisitor<Path>() {
-        @Override
-        public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
-          register(dir, watcher);
-          return FileVisitResult.CONTINUE;
-        }
-      });
+      Files.walkFileTree(rootDirectory, new SimpleFileVisitor<Path>()
+        {
+          @Override
+          public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
+            register(dir, watcher);
+            return FileVisitResult.CONTINUE;
+          }
+        });
     }
 
     private void register(final Path dir, final WatchService watcher) throws IOException {

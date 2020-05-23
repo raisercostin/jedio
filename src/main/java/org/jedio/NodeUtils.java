@@ -21,12 +21,12 @@ public class NodeUtils {
 
   public static String notNullString(Object object, Object firstKey, Object... restKeys) {
     return Objects.toString(nullableInternal(object, Iterator.of(firstKey).concat(Iterator.of(restKeys)), false, true),
-        "returnedNullString");
+      "returnedNullString");
   }
 
   public static String nullableString(Object object, String firstKey, Object... restKeys) {
     return Objects.toString(
-        nullableInternal(object, Iterator.<Object>of(firstKey).concat(Iterator.of(restKeys)), true, true), null);
+      nullableInternal(object, Iterator.<Object>of(firstKey).concat(Iterator.of(restKeys)), true, true), null);
   }
 
   public static String nullableString(Object object, Object... keys) {
@@ -36,7 +36,7 @@ public class NodeUtils {
   public static String nullableStringWithFallback(String fallbackValue, Object object, Object firstKey,
       Object... restKeys) {
     return Objects.toString(nullableInternal(object, Iterator.of(firstKey).concat(Iterator.of(restKeys)), true, true),
-        fallbackValue);
+      fallbackValue);
   }
 
   public static <T> T notNull(Object object, Object firstKey, Object... restKeys) {
@@ -59,7 +59,7 @@ public class NodeUtils {
   public static <T> T nullableInternal(Object object, Iterator<Object> keys, boolean nullable,
       boolean caseInsensitive) {
     T value = (T) keys.foldLeft(object,
-        (currentObject, key) -> getByKey(currentObject, key, nullable, caseInsensitive));
+      (currentObject, key) -> getByKey(currentObject, key, nullable, caseInsensitive));
     return value;
   }
 
@@ -88,7 +88,7 @@ public class NodeUtils {
       return (T) setByKey(node, key, value);
     }
     Object currentValue = withValueOfInternal(getByKey(node, key, false, caseInsensitive), keys.tail(), value,
-        caseInsensitive);
+      caseInsensitive);
     return (T) setByKey(node, key, currentValue);
   }
 
@@ -106,7 +106,7 @@ public class NodeUtils {
       return object;
     }
     if (object instanceof Seq) {
-      Seq<Object> seq = ((Seq<Object>) object);
+      Seq<Object> seq = (Seq<Object>) object;
       if (key == null) {
         return seq.append(value);
       }
@@ -122,7 +122,7 @@ public class NodeUtils {
       return object;
     }
     throw new RuntimeException(
-        String.format("Don't know how to set %s[%s] on object %s", object.getClass(), key, object));
+      String.format("Don't know how to set %s[%s] on object %s", object.getClass(), key, object));
   }
 
   private static <T> T getByKey(Object object, Object key, boolean nullable, boolean caseInsensitive) {
@@ -143,11 +143,13 @@ public class NodeUtils {
       return null;
     }
     if (object instanceof java.util.Map) {
-      java.util.Map<Object, T> map = ((java.util.Map<Object, T>) object);
+      java.util.Map<Object, T> map = (java.util.Map<Object, T>) object;
       T res = map.get(key);
       if (res == null && caseInsensitive) {
-        return Iterator.ofAll(map.entrySet()).find(entry -> entry.getKey().toString().equalsIgnoreCase(key.toString()))
-            .map(entry -> entry.getValue()).getOrNull();
+        return Iterator.ofAll(map.entrySet())
+          .find(entry -> entry.getKey().toString().equalsIgnoreCase(key.toString()))
+          .map(entry -> entry.getValue())
+          .getOrNull();
       }
       return res;
     }
@@ -155,8 +157,9 @@ public class NodeUtils {
       Map<Object, T> map = (Map<Object, T>) object;
       T res = map.getOrElse(key, null);
       if (res == null && caseInsensitive) {
-        return map.find(entry -> entry._1.toString().equalsIgnoreCase(key.toString())).map(entry -> entry._2)
-            .getOrNull();
+        return map.find(entry -> entry._1.toString().equalsIgnoreCase(key.toString()))
+          .map(entry -> entry._2)
+          .getOrNull();
       }
       return res;
     }
@@ -181,6 +184,6 @@ public class NodeUtils {
       return (T) field.get(object);
     }
     throw new RuntimeException(
-        String.format("Don't know how to get %s[%s] on object %s", object.getClass(), key, object));
+      String.format("Don't know how to get %s[%s] on object %s", object.getClass(), key, object));
   }
 }

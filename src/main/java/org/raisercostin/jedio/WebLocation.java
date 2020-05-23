@@ -28,15 +28,15 @@ public class WebLocation implements ReadableDirLocation<WebLocation>, Location<W
   public final boolean isRoot;
   public final String webAddress;
   private static final Seq<String> prefixes1 = API.Seq(
-      // "http://",
-      "https://"
+    // "http://",
+    "https://"
   //
   );
   private static final Seq<String> prefixes2 = API.Seq(
-      // "",
-      "www.");
+    // "",
+    "www.");
   private static final Seq<String> suffixes = API.Seq("", "/", "/favicon.ico", "/robots.txt", "/sitemap.xml",
-      "/sitemap.xml.gz", "/sitemap.gz");
+    "/sitemap.xml.gz", "/sitemap.gz");
 
   // (http|https)://(wwww)?\.raisercostin\.org(/(favicon.ico|robots.txt|sitemap.xml|sitemap.xml.gz|sitemap.gz))?
   @Override
@@ -47,9 +47,10 @@ public class WebLocation implements ReadableDirLocation<WebLocation>, Location<W
   @Override
   public Iterator<WebLocation> ls() {
     return prefixes1
-        .flatMap(
-            prefix1 -> prefixes2.flatMap(prefix2 -> suffixes.map(suffix -> prefix1 + prefix2 + webAddress + suffix)))
-        .iterator().map(x -> child(x));
+      .flatMap(
+        prefix1 -> prefixes2.flatMap(prefix2 -> suffixes.map(suffix -> prefix1 + prefix2 + webAddress + suffix)))
+      .iterator()
+      .map(x -> child(x));
   }
 
   private static final JedioHttpClient client = JedioHttpClients.createHighPerfHttpClient();

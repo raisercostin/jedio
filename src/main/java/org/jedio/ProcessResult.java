@@ -60,9 +60,10 @@ public class ProcessResult {
       if (finished) {
         int exitValue = proc.exitValue();
         if (exitValue != 0) {
-          if (!error.isEmpty())
+          if (!error.isEmpty()) {
             throw new RuntimeException("Couldn't execute [" + command + "] errorCode=" + exitValue + "\nOutput:["
                 + output + "]\n Error:[" + error + "]");
+          }
         }
       } else {
         throw new RuntimeException("Timeout. Couldn't execute [" + command + "] errorCode=none\nOutput:[" + output
@@ -77,26 +78,30 @@ public class ProcessResult {
   }
 
   private void message(DirLocation current, int exitValue, String command, String output, String error) {
-    if (exitValue == 0 && output.isEmpty() && error.isEmpty())
+    if (exitValue == 0 && output.isEmpty() && error.isEmpty()) {
       logger.info(current.toString() + " > [" + command + "]");
-    else
+    } else {
       logger.info(current.toString() + " > " + command + "\nExitValue: " + exitValue + "\nOutput:[" + print(output)
           + "]\nError:[" + print(error) + "]\n");
+    }
   }
 
   private String print(String message) {
-    if (message.isEmpty())
+    if (message.isEmpty()) {
       return "";
-    if (message.contains("\n"))
+    }
+    if (message.contains("\n")) {
       return "\n" + message;
+    }
     return message;
   }
 
   private String blurMessage(Pattern sensibleRegex, String message) {
-    if (sensibleRegex != null)
+    if (sensibleRegex != null) {
       return sensibleRegex.matcher(message).replaceAll("***");
-    else
+    } else {
       return message;
+    }
   }
 
   private static String toString(final InputStream input, final String encoding) {
