@@ -99,4 +99,8 @@ public class MetaInfo {
   public Option<String> httpMetaResponseHeaderLocation() {
     return field("payload.response.header.Location");
   }
+
+  public boolean httpResponseHeaderContentTypeIsHtml() {
+    return httpResponseHeaderContentType().getOrElse("").startsWith("text/html");
+  }
 }

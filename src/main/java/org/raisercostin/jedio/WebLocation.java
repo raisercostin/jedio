@@ -28,11 +28,13 @@ public class WebLocation implements ReadableDirLocation<WebLocation>, Location<W
   public final boolean isRoot;
   public final String webAddress;
   private static final Seq<String> prefixes1 = API.Seq(
-    "http://",
+    //"http://",
     "https://"
   //
   );
-  private static final Seq<String> prefixes2 = API.Seq("", "www.");
+  private static final Seq<String> prefixes2 = API.Seq(
+    //"",
+    "www.");
   private static final Seq<String> suffixes = API.Seq(
     "",
     "/",

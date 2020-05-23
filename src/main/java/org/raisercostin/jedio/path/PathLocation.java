@@ -360,7 +360,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
           source.usingInputStreamAndMeta(true, streamAndMeta -> {
             if (streamAndMeta.meta.isSuccess) {
               PathLocation actualDest = copyOptions.amend(this, streamAndMeta);
-              if (streamAndMeta.meta.httpResponseHeaderContentType().getOrElse("").startsWith("text/html")) {
+              if (streamAndMeta.meta.httpResponseHeaderContentTypeIsHtml()) {
                 if (copyOptions.replaceExisting()) {
                   copyOptions.reportOperationEvent(CopyEvent.CopyReplacing, source, this);
                   Files.copy(streamAndMeta.is, actualDest.toPath(), StandardCopyOption.REPLACE_EXISTING);

@@ -75,7 +75,11 @@ public interface ReadableFileLocation<SELF extends ReadableFileLocation<SELF>> e
   }
 
   default MetaInfo readMeta() {
-    return Nodes.json.toObject(readMetaContent(), MetaInfo.class);
+    try {
+      return Nodes.json.toObject(readMetaContent(), MetaInfo.class);
+    } catch (Exception e) {
+      throw ExceptionUtils.nowrap(e, "While reading metadata of %s", this);
+    }
   }
 
   default Mono<String> readContentAsync() {
