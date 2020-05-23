@@ -1,6 +1,7 @@
 package org.raisercostin.jedio.memory;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import io.vavr.Function1;
 import io.vavr.control.Option;
@@ -95,12 +96,12 @@ public class DiskCachedLocation<SELF extends DiskCachedLocation<SELF>> implement
   }
 
   @Override
-  public String readContent() {
+  public String readContent(Charset charset) {
     ReferenceLocation cached = cache.locationFor(location);
     if (cached.exists()) {
-      return cached.asReadableFile().readContent();
+      return cached.asReadableFile().readContent(charset);
     } else {
-      String content = location.readContent();
+      String content = location.readContent(charset);
       cached.asWritableFile().write(cache.transformer.apply(content));
       return content;
     }

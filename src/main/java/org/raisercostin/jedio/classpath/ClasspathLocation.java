@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
@@ -41,7 +42,7 @@ import reactor.core.publisher.Flux;
 public class ClasspathLocation implements ReadableDirLocation<ClasspathLocation>, ExistingLocation<ClasspathLocation>,
     ReadableFileLocation<ClasspathLocation> {
   private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
-      .getOrElse(ClassLoader.class.getClassLoader());
+    .getOrElse(ClassLoader.class.getClassLoader());
 
   private static URL toUrl(String resourcePath) {
     URL res = specialClassLoader.getResource(resourcePath);
@@ -134,9 +135,9 @@ public class ClasspathLocation implements ReadableDirLocation<ClasspathLocation>
   }
 
   @Override
-  public String readContent() {
+  public String readContent(Charset charset) {
     try (BufferedInputStream b = new BufferedInputStream(unsafeInputStream())) {
-      return IOUtils.toString(b, "UTF-8");
+      return IOUtils.toString(b, charset);
     } catch (IOException e) {
       throw new RuntimeException("Can't read resource [" + resourcePath + "]", e);
     }

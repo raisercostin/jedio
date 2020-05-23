@@ -1,6 +1,7 @@
 package org.raisercostin.jedio.fs.mem;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -19,7 +20,7 @@ public class InMemoryLocation<SELF extends InMemoryLocation<SELF>> implements Re
   }
 
   @Override
-  public String readContent() {
+  public String readContent(Charset charset) {
     return data;
   }
 }

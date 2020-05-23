@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 
 import io.vavr.Lazy;
 import lombok.SneakyThrows;
@@ -47,7 +48,7 @@ public class HttpStandardJavaLocation extends BaseHttpLocation<HttpStandardJavaL
   }
 
   @Override
-  public String readContent() {
+  public String readContent(Charset charset) {
     return HttpUtils.getFromURL(url.toExternalForm());
   }
 

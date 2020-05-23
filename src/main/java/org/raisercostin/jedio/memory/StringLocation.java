@@ -2,6 +2,7 @@ package org.raisercostin.jedio.memory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import io.vavr.control.Option;
 import org.raisercostin.jedio.LinkLocation;
@@ -84,7 +85,7 @@ public class StringLocation<SELF extends StringLocation<SELF>>
   }
 
   @Override
-  public String readContent() {
+  public String readContent(Charset charset) {
     return content;
   }
 

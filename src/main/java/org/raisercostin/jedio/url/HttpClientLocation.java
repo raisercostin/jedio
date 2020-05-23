@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Maps;
@@ -134,41 +135,42 @@ public class HttpClientLocation extends BaseHttpLocation<HttpClientLocation> {
     request.addHeader("Cache-Control", "no-cache");
     request.addHeader("Upgrade-Insecure-Requests", "1");
     request.addHeader("User-Agent",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36");
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36");
     request.addHeader("Accept",
-        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+      "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
     request.addHeader("Accept-Encoding", "gzip, deflate");
     // not needed anymore - request.addHeader("Accept-Charset", "utf-8, iso-8859-1;q=0.5");
     request.addHeader("Accept-Language", "en-US,en;q=0.9,ro;q=0.8");
     java.util.Map<String, Object> attrs = Maps.newConcurrentMap();
-    HttpClientContext context = HttpClientContext.adapt(new HttpContext() {
-      @Override
-      public void setAttribute(String id, Object obj) {
-        if (id == null || obj == null) {
-          // log.warn("cannot add attribute {}:{}", id, obj);
-        } else {
-          attrs.put(id, obj);
+    HttpClientContext context = HttpClientContext.adapt(new HttpContext()
+      {
+        @Override
+        public void setAttribute(String id, Object obj) {
+          if (id == null || obj == null) {
+            // log.warn("cannot add attribute {}:{}", id, obj);
+          } else {
+            attrs.put(id, obj);
+          }
         }
-      }
 
-      @Override
-      public Object removeAttribute(String id) {
-        return attrs.remove(id);
-      }
+        @Override
+        public Object removeAttribute(String id) {
+          return attrs.remove(id);
+        }
 
-      @Override
-      public Object getAttribute(String id) {
-        return attrs.get(id);
-      }
-    });
+        @Override
+        public Object getAttribute(String id) {
+          return attrs.get(id);
+        }
+      });
     try (CloseableHttpResponse response = client.client().execute(request, context)) {
       int code = response.getStatusLine().getStatusCode();
       String reason = response.getStatusLine().getReasonPhrase();
       InputStream in = response.getEntity().getContent();
       HttpClientLocationMetaRequest req = new HttpClientLocationMetaRequest(request.getRequestLine(),
-          request.getConfig(), request.getParams(), toHeaders(request.getAllHeaders()));
+        request.getConfig(), request.getParams(), toHeaders(request.getAllHeaders()));
       HttpClientLocationMetaResponse res = new HttpClientLocationMetaResponse(response.getStatusLine(),
-          toHeaders(response.getAllHeaders()));
+        toHeaders(response.getAllHeaders()));
       context.removeAttribute(context.HTTP_RESPONSE);
       context.removeAttribute(context.HTTP_REQUEST);
       context.removeAttribute(context.HTTP_CONNECTION);
@@ -191,7 +193,7 @@ public class HttpClientLocation extends BaseHttpLocation<HttpClientLocation> {
   }
 
   @Override
-  public String readContent() {
+  public String readContent(Charset charset) {
     return readContentAsync().block();
   }
 

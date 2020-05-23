@@ -1,13 +1,15 @@
 package org.raisercostin.jedio;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import io.vavr.control.Option;
 import org.jedio.ExceptionUtils;
 import org.jedio.deprecated;
-import org.jedio.sugar;
 import org.jedio.functions.JedioFunction;
 import org.jedio.functions.JedioProcedure;
+import org.jedio.sugar;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.nodes.Nodes;
@@ -64,9 +66,27 @@ public interface ReadableFileLocation<SELF extends ReadableFileLocation<SELF>> e
     return new StreamAndMeta(null, unsafeInputStream());
   }
 
+  Charset charset1 = StandardCharsets.UTF_8;
+  Charset charset2 = StandardCharsets.ISO_8859_1;
+
   @Deprecated
   @deprecated("If the content is too big String might be a bad container")
-  String readContent();
+  default String readContent() {
+    try {
+      return readContent(charset1);
+    } catch (Exception e) {
+      try {
+        return readContent(charset2);
+      } catch (Exception e2) {
+        throw ExceptionUtils.nowrap(e, "While reading %s with charsets %s and %s. Others could exist %s", this,
+          charset1, charset2, Charset.availableCharsets().keySet());
+      }
+    }
+  }
+
+  @Deprecated
+  @deprecated("If the content is too big String might be a bad container")
+  String readContent(Charset charset);
 
   @Deprecated
   @deprecated("If the content is too big String might be a bad container")

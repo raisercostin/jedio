@@ -2,6 +2,7 @@ package org.raisercostin.jedio.url;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 
 import lombok.Data;
 import lombok.Getter;
@@ -55,7 +56,7 @@ public abstract class BaseHttpLocation<SELF extends BaseHttpLocation<SELF>>
     }
 
     @Override
-    public String readContent() {
+    public String readContent(Charset charset) {
       throw new RuntimeException("Not implemented yet!!!");
     }
 

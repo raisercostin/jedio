@@ -1,6 +1,7 @@
 package org.raisercostin.jedio.memory;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import io.vavr.control.Option;
 import lombok.AccessLevel;
@@ -63,9 +64,9 @@ public class MemoizedLocation<SELF extends MemoizedLocation<SELF>> implements Re
   }
 
   @Override
-  public String readContent() {
+  public String readContent(Charset charset) {
     if (content == null) {
-      content = location.readContent();
+      content = location.readContent(charset);
     }
     return content;
   }
