@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.raisercostin</groupId>
     <artifactId>maven-defaults-raisercostin</artifactId>
-    <version>1.9</version>
+    <version>1.12</version>
   </parent>
   <artifactId>jedio</artifactId>
   <version>0.27-SNAPSHOT</version>
