@@ -109,14 +109,13 @@ public final class PathObservables {
      */
     // TODO use traversal from PathLocation
     private void registerAll(final Path rootDirectory, final WatchService watcher) throws IOException {
-      Files.walkFileTree(rootDirectory, new SimpleFileVisitor<Path>()
-        {
-          @Override
-          public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
-            register(dir, watcher);
-            return FileVisitResult.CONTINUE;
-          }
-        });
+      Files.walkFileTree(rootDirectory, new SimpleFileVisitor<Path>() {
+        @Override
+        public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
+          register(dir, watcher);
+          return FileVisitResult.CONTINUE;
+        }
+      });
     }
 
     private void register(final Path dir, final WatchService watcher) throws IOException {

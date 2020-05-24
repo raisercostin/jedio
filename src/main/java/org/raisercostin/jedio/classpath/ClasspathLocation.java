@@ -42,7 +42,7 @@ import reactor.core.publisher.Flux;
 public class ClasspathLocation implements ReadableDirLocation<ClasspathLocation>, ExistingLocation<ClasspathLocation>,
     ReadableFileLocation<ClasspathLocation> {
   private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
-    .getOrElse(ClassLoader.class.getClassLoader());
+      .getOrElse(ClassLoader.class.getClassLoader());
 
   private static URL toUrl(String resourcePath) {
     URL res = specialClassLoader.getResource(resourcePath);

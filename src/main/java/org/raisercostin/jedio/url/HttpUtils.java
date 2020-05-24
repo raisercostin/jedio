@@ -24,22 +24,21 @@ public class HttpUtils {
   private static void init() {
     if (first.getAndSet(false)) {
       try {
-        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager()
-          {
-            @Override
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-              return null;
-            }
+        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+          @Override
+          public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+            return null;
+          }
 
-            @Override
-            public void checkClientTrusted(X509Certificate[] certs, String authType) {
-            }
+          @Override
+          public void checkClientTrusted(X509Certificate[] certs, String authType) {
+          }
 
-            @Override
-            public void checkServerTrusted(X509Certificate[] certs, String authType) {
-            }
+          @Override
+          public void checkServerTrusted(X509Certificate[] certs, String authType) {
+          }
 
-          } };
+        } };
 
         SSLContext sslcontext = SSLContext.getInstance("TLS");
         sslcontext.init(null, trustAllCerts, new java.security.SecureRandom());
@@ -60,12 +59,9 @@ public class HttpUtils {
     // logger.debug("call lsports ... " + urlAddress);
     // https://github.com/Kong/unirest-java/issues/148
     try {
-      HttpResponse<String> res = Unirest.get(url)
-        .header("User-Agent", USER_AGENT)
-        .header("Accept", "*/*")
-        .header("Content-Type", "application/json; charset=UTF-8")
-        .header("Accept-Encoding", "gzip,deflate,sdch")
-        .asString();
+      HttpResponse<String> res = Unirest.get(url).header("User-Agent", USER_AGENT).header("Accept", "*/*")
+          .header("Content-Type", "application/json; charset=UTF-8").header("Accept-Encoding", "gzip,deflate,sdch")
+          .asString();
       // logger.debug(
       // "call lsports done." + urlAddress + " done (HTTP-" + res.getStatus() +
       // ": " + res.getStatusText() + ")");
