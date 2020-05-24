@@ -69,6 +69,11 @@ public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends
     throw new RuntimeException("Not implemented yet!!!");
   }
 
+  @SneakyThrows
+  default org.apache.commons.httpclient.URI toApacheUri() {
+    return new org.apache.commons.httpclient.URI(toUrl().toExternalForm(), true);
+  }
+
   default Option<RelativeLocation> stripAncestor(BasicDirLocation<?> x) {
     throw new RuntimeException("Not implemented yet!!!");
   }

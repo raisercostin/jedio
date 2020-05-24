@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.commons.httpclient.URI;
 import org.jedio.sugar;
 import org.raisercostin.jedio.classpath.ClasspathLocation;
 import org.raisercostin.jedio.fs.stream.InputStreamLocation;
@@ -12,6 +13,7 @@ import org.raisercostin.jedio.path.PathLocation;
 import org.raisercostin.jedio.url.HttpClientLocation;
 import org.raisercostin.jedio.url.JedioHttpClients;
 import org.raisercostin.jedio.url.JedioHttpClients.JedioHttpClient;
+import org.raisercostin.jedio.url.SimpleUrl;
 
 public class Locations {
   private static JedioHttpClient defaultClient = JedioHttpClients.createHighPerfHttpClient();
@@ -110,5 +112,13 @@ public class Locations {
 
   public static HttpClientLocation url(String sourceHyperlink, String relativeOrAbsoluteHyperlink) {
     return HttpClientLocation.url(sourceHyperlink, relativeOrAbsoluteHyperlink, defaultClient);
+  }
+
+  public static HttpClientLocation url(SimpleUrl url) {
+    return HttpClientLocation.url(url, defaultClient);
+  }
+
+  public static HttpClientLocation url(URI uri) {
+    return url(new SimpleUrl(uri));
   }
 }

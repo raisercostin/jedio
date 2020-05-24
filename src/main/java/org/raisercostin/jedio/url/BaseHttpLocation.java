@@ -114,6 +114,10 @@ public abstract class BaseHttpLocation<SELF extends BaseHttpLocation<SELF>>
     this(toApacheUri(url, escaped));
   }
 
+  BaseHttpLocation(SimpleUrl url) {
+    this(url.uri);
+  }
+
   @SneakyThrows
   BaseHttpLocation(URI uri) {
     this.url = new URL(uri.toString());

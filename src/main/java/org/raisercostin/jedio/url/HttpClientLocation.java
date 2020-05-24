@@ -2,9 +2,9 @@ package org.raisercostin.jedio.url;
 
 import java.io.InputStream;
 import java.net.SocketException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Maps;
@@ -39,6 +39,10 @@ import reactor.core.publisher.Mono;
 @Setter(lombok.AccessLevel.NONE)
 @Slf4j
 public class HttpClientLocation extends BaseHttpLocation<HttpClientLocation> {
+  public static HttpClientLocation url(SimpleUrl url, JedioHttpClient defaultClient) {
+    return new HttpClientLocation(url, defaultClient);
+  }
+
   @SneakyThrows
   public static HttpClientLocation url(String sourceHyperlink, String relativeOrAbsoluteHyperlink,
       JedioHttpClient defaultClient) {
@@ -56,6 +60,11 @@ public class HttpClientLocation extends BaseHttpLocation<HttpClientLocation> {
 
   public HttpClientLocation(URL url, boolean escaped, JedioHttpClient client) {
     super(url, escaped);
+    this.client = client;
+  }
+
+  public HttpClientLocation(SimpleUrl url, JedioHttpClient client) {
+    super(url);
     this.client = client;
   }
 
@@ -282,13 +291,15 @@ public class HttpClientLocation extends BaseHttpLocation<HttpClientLocation> {
   }
 
   @Override
-  @SneakyThrows
-  public URI toUri() {
-    return url.toURI();
-  }
-
-  @Override
   protected HttpClientLocation create(URL url, boolean escaped) {
     return new HttpClientLocation(url, escaped, client);
+  }
+
+  @SneakyThrows
+  public HttpClientLocation withEscapedQuery(Function<String, String> escapedQuery) {
+    org.apache.commons.httpclient.URI uri = toApacheUri();
+    String newEscapedQuery = escapedQuery.apply(uri.getEscapedQuery());
+    uri.setEscapedQuery(newEscapedQuery);
+    return create(new URL(uri.getEscapedURI()), true);
   }
 }
