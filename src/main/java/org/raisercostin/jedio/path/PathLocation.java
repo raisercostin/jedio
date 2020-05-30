@@ -5,8 +5,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -18,8 +21,11 @@ import com.google.common.base.Preconditions;
 import io.vavr.collection.Iterator;
 import io.vavr.control.Option;
 import lombok.Data;
+import lombok.SneakyThrows;
+import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.SystemUtils;
 import org.jedio.SimpleShell;
 import org.jedio.sugar;
@@ -283,12 +289,22 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
 
   @Override
   public String readContent(Charset charset) {
-    try (BufferedReader b = Files.newBufferedReader(toPath(), charset)) {
+    try (BufferedReader b = reader(toPath(), charset)) {
       return IOUtils.toString(b);
     } catch (IOException e) {
       throw ExceptionUtils.nowrap(e, "While reading %s with charset %s. Others could exist %s", this, charset,
-          Charset.availableCharsets().keySet());
+        Charset.availableCharsets().keySet());
     }
+  }
+
+  @SneakyThrows
+  private BufferedReader reader(Path path, Charset charset) {
+    CharsetDecoder decoder = charset.newDecoder();
+    Reader reader = new InputStreamReader(new BOMInputStream(Files.newInputStream(path),
+      ByteOrderMark.UTF_8,
+      ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
+      ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE), decoder);
+    return new BufferedReader(reader);
   }
 
   @Override
@@ -492,7 +508,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
 
   private void createWindowsJunction(Path place, Path symlink, Path target) {
     new SimpleShell(place.getParent())
-        .execute("cmd /C mklink /J \"" + symlink + "\" \"" + target.toFile().getName() + "\"");
+      .execute("cmd /C mklink /J \"" + symlink + "\" \"" + target.toFile().getName() + "\"");
   }
 
   private void createSymlink(Path symlink, Path target) {
@@ -505,7 +521,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
 
   private void createWindowsSymlink(Path place, String symlink, String targetName) {
     new SimpleShell(place.getParent())
-        .execute("cmd /C sudo cmd /C mklink /D \"" + symlink + "\" \"" + targetName + "\"");
+      .execute("cmd /C sudo cmd /C mklink /D \"" + symlink + "\" \"" + targetName + "\"");
   }
 
   private void createLinuxSymlink(Path place, String symlink, String targetPath) {
@@ -766,7 +782,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   // };
 
   static GuavaAndDirectoryStreamTraversalWithVirtualDirs traversal = new GuavaAndDirectoryStreamTraversalWithVirtualDirs(
-      true, x -> false);
+    true, x -> false);
 
   private TraversalFilter createFilter(boolean recursive) {
     return FindFilters.createFindFilter("", "", false, recursive);
