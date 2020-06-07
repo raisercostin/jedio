@@ -29,7 +29,7 @@ public class DiskCachedLocation implements ReadableFileLocation, ReadableFileLoc
     public DirLocation dir;
     public Function1<String, String> transformer;
 
-    public DiskCachedLocation cached(ReadableFileLocationLike<?> x) {
+    public DiskCachedLocation cached(ReadableFileLocation x) {
       return new DiskCachedLocation(this, x);
     }
 
@@ -47,9 +47,9 @@ public class DiskCachedLocation implements ReadableFileLocation, ReadableFileLoc
   }
 
   private final Root cache;
-  private final ReadableFileLocationLike<?> location;
+  private final ReadableFileLocation location;
 
-  public DiskCachedLocation(Root cache, ReadableFileLocationLike<?> location) {
+  public DiskCachedLocation(Root cache, ReadableFileLocation location) {
     this.cache = cache;
     this.location = location;
   }
