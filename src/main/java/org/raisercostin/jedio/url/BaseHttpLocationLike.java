@@ -11,16 +11,15 @@ import lombok.SneakyThrows;
 import lombok.ToString;
 import org.apache.commons.httpclient.URI;
 import org.raisercostin.jedio.impl.ReadableFileLocationLike;
-import org.raisercostin.jedio.impl.ReferenceLocationLike;
 
 @Data
 @Getter(lombok.AccessLevel.NONE)
 @Setter(lombok.AccessLevel.NONE)
 @ToString
-public abstract class BaseHttpLocation<SELF extends BaseHttpLocation<SELF>>
-    implements ReferenceLocationLike<SELF>, ReadableFileLocationLike<SELF> {
+public abstract class BaseHttpLocationLike<SELF extends BaseHttpLocationLike<SELF>>
+    implements ReadableFileLocationLike<SELF> {
 
-  public static class UrlLocation extends BaseHttpLocation<UrlLocation> {
+  public static class UrlLocation extends BaseHttpLocationLike<UrlLocation> {
     @SneakyThrows
     /**
      * @param escaped
@@ -106,20 +105,20 @@ public abstract class BaseHttpLocation<SELF extends BaseHttpLocation<SELF>>
   /** Url is always escaped properly. */
   public final URL url;
 
-  BaseHttpLocation(String url, boolean escaped) {
+  BaseHttpLocationLike(String url, boolean escaped) {
     this(toApacheUri(url, escaped));
   }
 
-  BaseHttpLocation(URL url, boolean escaped) {
+  BaseHttpLocationLike(URL url, boolean escaped) {
     this(toApacheUri(url, escaped));
   }
 
-  BaseHttpLocation(SimpleUrl url) {
+  BaseHttpLocationLike(SimpleUrl url) {
     this(url.uri);
   }
 
   @SneakyThrows
-  BaseHttpLocation(URI uri) {
+  BaseHttpLocationLike(URI uri) {
     this.url = new URL(uri.toString());
   }
 

@@ -8,7 +8,7 @@ import java.net.URL;
 import lombok.SneakyThrows;
 import org.apache.xerces.util.URI;
 import org.junit.jupiter.api.Test;
-import org.raisercostin.jedio.url.BaseHttpLocation.UrlLocation;
+import org.raisercostin.jedio.url.BaseHttpLocationLike.UrlLocation;
 
 class HttpClientLocationTest {
   @Test

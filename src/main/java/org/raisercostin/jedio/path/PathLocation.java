@@ -30,9 +30,12 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jedio.SimpleShell;
 import org.jedio.sugar;
 import org.raisercostin.jedio.BasicDirLocation;
+import org.raisercostin.jedio.ChangeableLocation;
 import org.raisercostin.jedio.FileAltered;
+import org.raisercostin.jedio.FileLocation;
 import org.raisercostin.jedio.Locations;
 import org.raisercostin.jedio.MetaInfo;
+import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.RelativeLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
@@ -65,7 +68,9 @@ import reactor.core.publisher.Flux;
  * @author raiser
  */
 @Data
-public class PathLocation implements ReadableDirLocationLike<PathLocation>, WritableDirLocationLike<PathLocation>,
+public class PathLocation
+    implements FileLocation, ChangeableLocation, NonExistingLocation,
+    ReadableDirLocationLike<PathLocation>, WritableDirLocationLike<PathLocation>,
     NonExistingLocationLike<PathLocation>, ReadableFileLocationLike<PathLocation>,
     WritableFileLocationLike<PathLocation>,
     ChangeableLocationLike<PathLocation>, LinkLocationLike<PathLocation> {
@@ -98,7 +103,7 @@ public class PathLocation implements ReadableDirLocationLike<PathLocation>, Writ
 
   @Override
   public PathLocation child(RelativeLocation child) {
-    return Locations.path(fixPath(path.resolve(child.getLocation())));
+    return Locations.path(fixPath(path.resolve(child.relativePath())));
   }
 
   @Override

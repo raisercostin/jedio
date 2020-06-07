@@ -24,6 +24,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jedio.ExceptionUtils;
 import org.raisercostin.jedio.Locations;
+import org.raisercostin.jedio.ReadableDirLocation;
+import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.RelativeLocation;
 import org.raisercostin.jedio.impl.ExistingLocationLike;
 import org.raisercostin.jedio.impl.ReadableDirLocationLike;
@@ -39,10 +41,12 @@ import reactor.core.publisher.Flux;
  * @author raiser
  */
 @Data
-public class ClasspathLocation implements ReadableDirLocationLike<ClasspathLocation>, ExistingLocationLike<ClasspathLocation>,
+public class ClasspathLocation
+    implements ReadableDirLocation, ReadableFileLocation, ReadableDirLocationLike<ClasspathLocation>,
+    ExistingLocationLike<ClasspathLocation>,
     ReadableFileLocationLike<ClasspathLocation> {
   private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
-      .getOrElse(ClassLoader.class.getClassLoader());
+    .getOrElse(ClassLoader.class.getClassLoader());
 
   private static URL toUrl(String resourcePath) {
     URL res = specialClassLoader.getResource(resourcePath);
@@ -120,7 +124,7 @@ public class ClasspathLocation implements ReadableDirLocationLike<ClasspathLocat
 
   @Override
   public ClasspathLocation child(RelativeLocation child) {
-    return Locations.classpath(fixPath(resourcePath + "/" + child.getLocation()));
+    return Locations.classpath(fixPath(resourcePath + "/" + child.relativePath()));
   }
   //
   // private InputStream toStream() {

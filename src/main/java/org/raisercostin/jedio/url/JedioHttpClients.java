@@ -76,7 +76,7 @@ public class JedioHttpClients {
   // private static final int hardTimeout = 5 * timeout; // seconds
   private static final int MILLIS = 1000;
   private static final int ROUTES = 1000;
-  private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BaseHttpLocation.class);
+  private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BaseHttpLocationLike.class);
   private static final Scheduler scheduler = Schedulers.newParallel("http-hard-abort", 100);
   private static final boolean enableHardAbort = true;
 

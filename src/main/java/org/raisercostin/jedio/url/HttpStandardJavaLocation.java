@@ -11,8 +11,10 @@ import java.nio.charset.Charset;
 import io.vavr.Lazy;
 import lombok.SneakyThrows;
 import org.apache.commons.httpclient.URI;
+import org.raisercostin.jedio.ReadableFileLocation;
 
-public class HttpStandardJavaLocation extends BaseHttpLocation<HttpStandardJavaLocation> implements Closeable {
+public class HttpStandardJavaLocation extends BaseHttpLocationLike<HttpStandardJavaLocation>
+    implements ReadableFileLocation, Closeable {
   public Lazy<URLConnection> connection = Lazy.of(() -> createConnection());
 
   public HttpStandardJavaLocation(String url, boolean escaped) {

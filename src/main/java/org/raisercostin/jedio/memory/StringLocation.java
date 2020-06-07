@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 
 import io.vavr.control.Option;
+import org.raisercostin.jedio.FileLocation;
+import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.impl.LinkLocationLike;
 import org.raisercostin.jedio.impl.NonExistingLocationLike;
 import org.raisercostin.jedio.impl.ReadableFileLocationLike;
@@ -14,7 +16,8 @@ import org.raisercostin.jedio.op.DeleteOptions;
 import reactor.core.publisher.Mono;
 
 public class StringLocation
-    implements ReadableFileLocationLike<StringLocation>, WritableFileLocationLike<StringLocation>,
+    implements FileLocation, NonExistingLocation,
+    ReadableFileLocationLike<StringLocation>, WritableFileLocationLike<StringLocation>,
     NonExistingLocationLike<StringLocation> {
   public String content;
 

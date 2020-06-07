@@ -8,8 +8,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.raisercostin.jedio.ReadableDirLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
-import org.raisercostin.jedio.impl.LocationLike;
 import org.raisercostin.jedio.impl.ReadableDirLocationLike;
 import org.raisercostin.jedio.url.JedioHttpClients.JedioHttpClient;
 import reactor.core.publisher.Flux;
@@ -24,7 +24,8 @@ import reactor.core.publisher.Flux;
 @Setter(lombok.AccessLevel.NONE)
 @AllArgsConstructor
 @ToString
-public class WebLocation implements ReadableDirLocationLike<WebLocation>, LocationLike<WebLocation> {
+public class WebLocation
+    implements ReadableDirLocation, ReadableDirLocationLike<WebLocation> {
   public final boolean isRoot;
   public final String webAddress;
   private static final Seq<String> prefixes1 = API.Seq(

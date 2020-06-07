@@ -3,9 +3,10 @@ package org.raisercostin.jedio.fs.stream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
+import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.impl.ReadableFileLocationLike;
 
-public class InputStreamLocation implements ReadableFileLocationLike<InputStreamLocation> {
+public class InputStreamLocation implements ReadableFileLocation, ReadableFileLocationLike<InputStreamLocation> {
   private InputStream stream;
 
   public InputStreamLocation(InputStream stream) {
