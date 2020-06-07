@@ -27,10 +27,8 @@ class FindTest {
   @Test
   void testFindFilesGradually() {
     assertTimeoutPreemptively(Duration.ofSeconds(2), () -> {
-      DirLocationLike all = Locations.path("e:/work/electrica")
-        .findDirs(true)
-        .doOnNext(x -> System.out.println(x))
-        .blockFirst(Duration.ofSeconds(1));
+      DirLocationLike all = Locations.path("e:/work/electrica").findDirs(true).doOnNext(x -> System.out.println(x))
+          .blockFirst(Duration.ofSeconds(1));
       // .blockLast();
       System.out.println(all);
     });

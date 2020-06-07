@@ -101,14 +101,14 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
    * Returns a new location inside `to` with the same relative path as the current item is inside `from`. For example
    * file `Location.file("c:\a\b\c.txt").relative("c:\","c:\x") equals Location.file("c:\x\a\b\c.txt")`
    */
-  //@Override
+  // @Override
   @SuppressWarnings("unchecked")
   default Option<SELF> relative(BasicDirLocation from, BasicDirLocation to) {
     Option<RelativeLocation> relative = stripAncestor(from);
     return relative.map(x -> (SELF) to.child(x));
   }
 
-  //  @Override
+  // @Override
   default Option<SELF> findAncestor(Function<ReferenceLocationLike<?>, Boolean> fn) {
     throw new RuntimeException("Not implemented yet!!!");
   }
@@ -237,14 +237,14 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
   default SELF withName(Function<String, String> newName) {
     val fullname = absoluteAndNormalized();
     return create(
-      FilenameUtils.concat(FilenameUtils.getFullPath(fullname), newName.apply(FilenameUtils.getName(fullname))));
+        FilenameUtils.concat(FilenameUtils.getFullPath(fullname), newName.apply(FilenameUtils.getName(fullname))));
   }
 
   @Override
   default SELF withBasename(Function<String, String> newBasename) {
     val fullname = absoluteAndNormalized();
     return create(FilenameUtils.concat(FilenameUtils.getFullPath(fullname),
-      newBasename.apply(FilenameUtils.getBaseName(fullname)) + "." + FilenameUtils.getExtension(fullname)));
+        newBasename.apply(FilenameUtils.getBaseName(fullname)) + "." + FilenameUtils.getExtension(fullname)));
   }
 
   @Override
@@ -257,7 +257,7 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
   default SELF withExtension(Function<String, String> newExtension) {
     val fullname = absoluteAndNormalized();
     return create(
-      FilenameUtils.removeExtension(fullname) + "." + newExtension.apply(FilenameUtils.getExtension(fullname)));
+        FilenameUtils.removeExtension(fullname) + "." + newExtension.apply(FilenameUtils.getExtension(fullname)));
   }
 
   @Override
@@ -266,7 +266,7 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
     val basename = FilenameUtils.getBaseName(fullname);
     val extension = FilenameUtils.getExtension(fullname);
     return create(
-      FilenameUtils.concat(FilenameUtils.getFullPath(fullname), newBasenameAndExtension.apply(basename, extension)));
+        FilenameUtils.concat(FilenameUtils.getFullPath(fullname), newBasenameAndExtension.apply(basename, extension)));
   }
 
   @Override

@@ -38,7 +38,7 @@ public class Pdf2TableMain implements ApplicationRunner {
       CommandLineApp app = new technology.tabula.CommandLineApp(null, line);
       x.location().asWritableFile().rename(x.location().asWritableFile());
       app.extractFileInto(new File(x.location().absoluteAndNormalized()),
-        new File(x.location().absoluteAndNormalized() + ".csv"));
+          new File(x.location().absoluteAndNormalized() + ".csv"));
       // extractFileInto
       // technology.tabula.CommandLineApp.main(
       // new String[] { , "-o", x.location().absoluteAndNormalized() + ".csv"

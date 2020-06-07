@@ -86,7 +86,7 @@ public interface ReadableFileLocationLike<SELF extends ReadableFileLocationLike<
         return readContent(charset2);
       } catch (Exception e2) {
         throw ExceptionUtils.nowrap(e, "While reading %s with charsets %s and %s. Others could exist %s", this,
-          charset1, charset2, Charset.availableCharsets().keySet());
+            charset1, charset2, Charset.availableCharsets().keySet());
       }
     }
   }

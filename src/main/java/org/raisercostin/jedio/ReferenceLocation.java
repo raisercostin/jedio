@@ -50,9 +50,9 @@ public interface ReferenceLocation extends Location {
    * Returns a new location inside `to` with the same relative path as the current item is inside `from`. For example
    * file `Location.file("c:\a\b\c.txt").relative("c:\","c:\x") equals Location.file("c:\x\a\b\c.txt")`
    */
-  //TODO override properly in ReferenceLocationLike
-  //default Option<ReferenceLocation> relativeRef(BasicDirLocation<?> from, BasicDirLocation<?> to);
-  //<T extends ReferenceLocation> Option<T> findAncestor(Function<ReferenceLocation, Boolean> fn);
+  // TODO override properly in ReferenceLocationLike
+  // default Option<ReferenceLocation> relativeRef(BasicDirLocation<?> from, BasicDirLocation<?> to);
+  // <T extends ReferenceLocation> Option<T> findAncestor(Function<ReferenceLocation, Boolean> fn);
 
   ReferenceLocation mkdirOnParentIfNeeded();
 

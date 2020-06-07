@@ -68,11 +68,9 @@ import reactor.core.publisher.Flux;
  * @author raiser
  */
 @Data
-public class PathLocation
-    implements FileLocation, ChangeableLocation, NonExistingLocation,
-    ReadableDirLocationLike<PathLocation>, WritableDirLocationLike<PathLocation>,
-    NonExistingLocationLike<PathLocation>, ReadableFileLocationLike<PathLocation>,
-    WritableFileLocationLike<PathLocation>,
+public class PathLocation implements FileLocation, ChangeableLocation, NonExistingLocation,
+    ReadableDirLocationLike<PathLocation>, WritableDirLocationLike<PathLocation>, NonExistingLocationLike<PathLocation>,
+    ReadableFileLocationLike<PathLocation>, WritableFileLocationLike<PathLocation>,
     ChangeableLocationLike<PathLocation>, LinkLocationLike<PathLocation> {
 
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PathLocation.class);
@@ -299,17 +297,15 @@ public class PathLocation
       return IOUtils.toString(b);
     } catch (IOException e) {
       throw ExceptionUtils.nowrap(e, "While reading %s with charset %s. Others could exist %s", this, charset,
-        Charset.availableCharsets().keySet());
+          Charset.availableCharsets().keySet());
     }
   }
 
   @SneakyThrows
   private BufferedReader reader(Path path, Charset charset) {
     CharsetDecoder decoder = charset.newDecoder();
-    Reader reader = new InputStreamReader(new BOMInputStream(Files.newInputStream(path),
-      ByteOrderMark.UTF_8,
-      ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
-      ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE), decoder);
+    Reader reader = new InputStreamReader(new BOMInputStream(Files.newInputStream(path), ByteOrderMark.UTF_8,
+        ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE), decoder);
     return new BufferedReader(reader);
   }
 
@@ -514,7 +510,7 @@ public class PathLocation
 
   private void createWindowsJunction(Path place, Path symlink, Path target) {
     new SimpleShell(place.getParent())
-      .execute("cmd /C mklink /J \"" + symlink + "\" \"" + target.toFile().getName() + "\"");
+        .execute("cmd /C mklink /J \"" + symlink + "\" \"" + target.toFile().getName() + "\"");
   }
 
   private void createSymlink(Path symlink, Path target) {
@@ -527,7 +523,7 @@ public class PathLocation
 
   private void createWindowsSymlink(Path place, String symlink, String targetName) {
     new SimpleShell(place.getParent())
-      .execute("cmd /C sudo cmd /C mklink /D \"" + symlink + "\" \"" + targetName + "\"");
+        .execute("cmd /C sudo cmd /C mklink /D \"" + symlink + "\" \"" + targetName + "\"");
   }
 
   private void createLinuxSymlink(Path place, String symlink, String targetPath) {
@@ -788,7 +784,7 @@ public class PathLocation
   // };
 
   static GuavaAndDirectoryStreamTraversalWithVirtualDirs traversal = new GuavaAndDirectoryStreamTraversalWithVirtualDirs(
-    true, x -> false);
+      true, x -> false);
 
   private TraversalFilter createFilter(boolean recursive) {
     return FindFilters.createFindFilter("", "", false, recursive);

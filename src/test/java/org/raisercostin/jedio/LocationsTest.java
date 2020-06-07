@@ -13,13 +13,12 @@ class LocationsTest {
   @Test
   void test() {
     assertEquals("PathLocation(path=" + Paths.get(".").toAbsolutePath().normalize() + ")",
-      Locations.current().toString());
+        Locations.current().toString());
   }
 
   @Test
   void testCopyTo() {
-    assertEquals(346622,
-      Locations.classpath("a b.jpg").copyTo(Locations.path("target/ab-copied.jpg")).length());
+    assertEquals(346622, Locations.classpath("a b.jpg").copyTo(Locations.path("target/ab-copied.jpg")).length());
   }
 
   @Test

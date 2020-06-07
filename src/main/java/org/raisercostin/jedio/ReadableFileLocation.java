@@ -27,8 +27,7 @@ public interface ReadableFileLocation extends BasicFileLocation {
 
   <R> R usingInputStream(JedioFunction<InputStream, R> inputStreamConsumer);
 
-  <R> R usingInputStreamAndMeta(boolean returnExceptionsAsMeta,
-      JedioFunction<StreamAndMeta, R> inputStreamConsumer);
+  <R> R usingInputStreamAndMeta(boolean returnExceptionsAsMeta, JedioFunction<StreamAndMeta, R> inputStreamConsumer);
 
   StreamAndMeta unsafeInputStreamAndMeta();
 

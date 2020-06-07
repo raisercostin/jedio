@@ -15,10 +15,8 @@ import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.DeleteOptions;
 import reactor.core.publisher.Mono;
 
-public class StringLocation
-    implements FileLocation, NonExistingLocation,
-    ReadableFileLocationLike<StringLocation>, WritableFileLocationLike<StringLocation>,
-    NonExistingLocationLike<StringLocation> {
+public class StringLocation implements FileLocation, NonExistingLocation, ReadableFileLocationLike<StringLocation>,
+    WritableFileLocationLike<StringLocation>, NonExistingLocationLike<StringLocation> {
   public String content;
 
   public StringLocation(String content) {
