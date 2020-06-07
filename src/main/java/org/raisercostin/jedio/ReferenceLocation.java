@@ -8,7 +8,6 @@ import io.vavr.Function2;
 import io.vavr.control.Option;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
-import org.raisercostin.jedio.impl.DirLocationLike;
 import org.raisercostin.jedio.impl.LinkLocationLike;
 import org.raisercostin.jedio.impl.NonExistingLocationLike;
 import org.raisercostin.jedio.path.PathLocation;
@@ -43,6 +42,10 @@ public interface ReferenceLocation extends Location {
 
   Option<RelativeLocation> stripAncestor(BasicDirLocation x);
 
+  default Option<RelativeLocation> relativize(BasicDirLocation ancestor) {
+    return stripAncestor(ancestor);
+  }
+
   /**
    * Returns a new location inside `to` with the same relative path as the current item is inside `from`. For example
    * file `Location.file("c:\a\b\c.txt").relative("c:\","c:\x") equals Location.file("c:\x\a\b\c.txt")`
@@ -53,15 +56,17 @@ public interface ReferenceLocation extends Location {
 
   ReferenceLocation mkdirOnParentIfNeeded();
 
-  <T extends ReferenceLocation> Option<T> parent();
+  // <T extends ReferenceLocation> Option<T> parent();
+  Option<ReferenceLocation> parentRef();
 
-  <T extends ReferenceLocation> Option<T> existing();
+  // <T extends ReferenceLocation> Option<T> existing();
+  Option<ReferenceLocation> existingRef();
 
   Option<NonExistingLocationLike<?>> nonExisting();
 
-  NonExistingLocationLike<?> nonExistingOrElse(Function<DirLocationLike, NonExistingLocationLike> fn);
+  NonExistingLocation nonExistingOrElse(Function<DirLocation, NonExistingLocation> fn);
 
-  ReferenceLocation existingOrElse(Function<NonExistingLocationLike<?>, DirLocationLike<?>> fn);
+  ReferenceLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn);
 
   boolean exists();
 

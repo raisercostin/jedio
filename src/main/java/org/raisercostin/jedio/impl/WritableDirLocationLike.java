@@ -1,5 +1,6 @@
 package org.raisercostin.jedio.impl;
 
+import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.WritableDirLocation;
 import org.raisercostin.jedio.op.DeleteOptions;
 
@@ -7,5 +8,5 @@ import org.raisercostin.jedio.op.DeleteOptions;
 public interface WritableDirLocationLike<SELF extends WritableDirLocationLike<SELF>>
     extends BasicDirLocationLike<SELF>, WritableDirLocation {
   @Override
-  NonExistingLocationLike deleteDir(DeleteOptions options);
+  NonExistingLocation deleteDir(DeleteOptions options);
 }

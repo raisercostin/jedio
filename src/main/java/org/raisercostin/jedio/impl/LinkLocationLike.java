@@ -1,5 +1,7 @@
 package org.raisercostin.jedio.impl;
 
+import org.raisercostin.jedio.ReferenceLocation;
+
 /**
  * A location that just points to other location. Could be created using
  * <li>hardlinks @see {@link java.nio.file.Files#createLink}
@@ -12,5 +14,5 @@ package org.raisercostin.jedio.impl;
  * <li>redirect? etc.
  */
 public interface LinkLocationLike<SELF extends LinkLocationLike<SELF>> extends ReferenceLocationLike<SELF> {
-  SELF getTarget();
+  ReferenceLocation getTarget();
 }

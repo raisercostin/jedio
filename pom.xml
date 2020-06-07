@@ -286,6 +286,7 @@
           - https://projectlombok.org/setup/ecj-in-maven-pom-example.xml
           -->
         <!--$NO-MVN-MAN-VER$ -->
+        <!-- 
         <dependencies>
           <dependency>
             <groupId>org.codehaus.plexus</groupId>
@@ -298,6 +299,7 @@
             <version>3.21.0</version>
           </dependency>
         </dependencies>
+         -->
         <configuration>
           <source>${source.java.version}</source>
           <target>${target.java.version}</target>

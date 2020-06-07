@@ -23,8 +23,8 @@ public interface ReadableDirLocationLike<SELF extends ReadableDirLocationLike<SE
   }
 
   @Deprecated // @deprecated to reimplement in a efficient way
-  default Flux<DirLocationLike<?>> findDirs(boolean recursive) {
-    return findFilesAndDirs(recursive).filter(x -> x.isDir()).map(x -> (DirLocationLike) x);
+  default Flux<DirLocation> findDirs(boolean recursive) {
+    return findFilesAndDirs(recursive).filter(x -> x.isDir()).map(x -> (DirLocation) x);
   }
 
   default Iterator<SELF> ls() {

@@ -31,6 +31,7 @@ import org.jedio.SimpleShell;
 import org.jedio.sugar;
 import org.raisercostin.jedio.BasicDirLocation;
 import org.raisercostin.jedio.ChangeableLocation;
+import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.FileAltered;
 import org.raisercostin.jedio.FileLocation;
 import org.raisercostin.jedio.Locations;
@@ -46,7 +47,6 @@ import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDi
 import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.find.TraversalFilter;
 import org.raisercostin.jedio.impl.ChangeableLocationLike;
-import org.raisercostin.jedio.impl.DirLocationLike;
 import org.raisercostin.jedio.impl.LinkLocationLike;
 import org.raisercostin.jedio.impl.NonExistingLocationLike;
 import org.raisercostin.jedio.impl.ReadableDirLocationLike;
@@ -165,7 +165,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public NonExistingLocationLike deleteDir(DeleteOptions options) {
+  public NonExistingLocation deleteDir(DeleteOptions options) {
     if (options.deleteByRename()) {
       deleteDirByRename();
     } else {
@@ -193,7 +193,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public NonExistingLocationLike deleteFile(DeleteOptions options) {
+  public NonExistingLocation deleteFile(DeleteOptions options) {
     if (options.deleteByRename()) {
       deleteFileByRename();
     } else {
@@ -221,7 +221,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public NonExistingLocationLike delete(DeleteOptions options) {
+  public NonExistingLocation delete(DeleteOptions options) {
     if (isDir()) {
       deleteDir(options);
     } else {
@@ -259,7 +259,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public NonExistingLocationLike nonExistingOrElse(Function<DirLocationLike, NonExistingLocationLike> fn) {
+  public NonExistingLocation nonExistingOrElse(Function<DirLocation, NonExistingLocation> fn) {
     if (exists()) {
       return fn.apply(this);
     } else {
@@ -273,7 +273,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public PathLocation existingOrElse(Function<NonExistingLocationLike<?>, DirLocationLike<?>> fn) {
+  public PathLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
     if (!exists()) {
       return (PathLocation) fn.apply(this);
     } else {
@@ -474,10 +474,6 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   @Override
   public Option<PathLocation> parent() {
     return Option.of(path.getParent()).map(x -> create(x));
-  }
-
-  public Option<RelativeLocation> relativize(DirLocationLike ancestor) {
-    return stripAncestor(ancestor);
   }
 
   @Override
@@ -818,7 +814,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public Flux<DirLocationLike<?>> findDirs(boolean recursive) {
+  public Flux<DirLocation> findDirs(boolean recursive) {
     return find(createFilter(recursive)).flatMap(x -> {
       if (!x.isDirectory()) {
         return Flux.empty();
@@ -853,7 +849,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public DirLocationLike asDir() {
+  public PathLocation asDir() {
     return this;
   }
 

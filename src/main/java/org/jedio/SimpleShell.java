@@ -16,9 +16,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.Locations;
+import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
-import org.raisercostin.jedio.impl.NonExistingLocationLike;
 import org.raisercostin.jedio.op.DeleteOptions;
 
 // An instance must be created when is needed as is not thread safe.
@@ -124,7 +124,7 @@ public class SimpleShell implements Shell {
 
   @Override
   public DirLocation cd(RelativeLocation path) {
-    return internalCd(child(path).existing().get().asDir());
+    return internalCd(child(path).existingRef().get().asDir());
   }
 
   @Override
@@ -136,7 +136,7 @@ public class SimpleShell implements Shell {
   @Override
   public DirLocation pushd(RelativeLocation path) {
     dirs.push(current);
-    return internalCd(child(path).existing().get().asDir());
+    return internalCd(child(path).existingRef().get().asDir());
   }
 
   @Override
@@ -152,7 +152,7 @@ public class SimpleShell implements Shell {
 
   @Override
   public void mkdir(RelativeLocation path) {
-    child(path).existingOrElse(NonExistingLocationLike::mkdir);
+    child(path).existingOrElse(NonExistingLocation::mkdir);
   }
 
   @Override

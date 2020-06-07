@@ -9,10 +9,12 @@ import io.vavr.control.Option;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.apache.commons.io.FilenameUtils;
+import org.jedio.Cast;
 import org.jedio.deprecated;
 import org.jedio.sugar;
 import org.raisercostin.jedio.BasicDirLocation;
 import org.raisercostin.jedio.DirLocation;
+import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
 import org.raisercostin.jedio.WritableDirLocation;
@@ -120,14 +122,26 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
     throw new RuntimeException("Not implemented yet!!!");
   }
 
-  @Override
-  default Option<? extends SELF> parent() {
+  // @Override
+  default Option<SELF> parent() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
+  default Option<ReferenceLocation> parentRef() {
+    return Cast.cast(parent());
+  }
+
+  // @Override
   default Option<SELF> existing() {
     throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  default Option<ReferenceLocation> existingRef() {
+    return Cast.cast(existing());
   }
 
   @Override
@@ -136,12 +150,12 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
   }
 
   @Override
-  default NonExistingLocationLike<?> nonExistingOrElse(Function<DirLocationLike, NonExistingLocationLike> fn) {
+  default NonExistingLocation nonExistingOrElse(Function<DirLocation, NonExistingLocation> fn) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  default SELF existingOrElse(Function<NonExistingLocationLike<?>, DirLocationLike<?>> fn) {
+  default SELF existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -183,7 +197,7 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
   @Override
   @sugar
   default SELF mkdirIfNeeded() {
-    return existingOrElse(NonExistingLocationLike::mkdir);
+    return existingOrElse(NonExistingLocation::mkdir);
   }
 
   @Override
