@@ -16,7 +16,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.Charsets;
-import org.raisercostin.jedio.DirLocation;
+import org.raisercostin.jedio.impl.DirLocationLike;
 
 @Data
 @Getter(value = AccessLevel.NONE)
@@ -31,7 +31,7 @@ public class ProcessResult {
   public final boolean finished;
   private Process proc;
 
-  public ProcessResult(DirLocation current, List<String> commandAndParams, Pattern sensibleRegex, Process proc) {
+  public ProcessResult(DirLocationLike current, List<String> commandAndParams, Pattern sensibleRegex, Process proc) {
     try {
       String command = blurMessage(sensibleRegex, Joiner.on(" ").join(commandAndParams));
       boolean finished = proc.waitFor(10, TimeUnit.SECONDS);
@@ -77,7 +77,7 @@ public class ProcessResult {
     return get().get();
   }
 
-  private void message(DirLocation current, int exitValue, String command, String output, String error) {
+  private void message(DirLocationLike current, int exitValue, String command, String output, String error) {
     if (exitValue == 0 && output.isEmpty() && error.isEmpty()) {
       logger.info(current.toString() + " > [" + command + "]");
     } else {

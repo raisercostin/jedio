@@ -2,35 +2,35 @@ package org.jedio;
 
 import java.nio.file.Path;
 
-import org.raisercostin.jedio.DirLocation;
-import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
+import org.raisercostin.jedio.impl.DirLocationLike;
+import org.raisercostin.jedio.impl.ReferenceLocationLike;
 
 public interface Shell {
-  ReferenceLocation<?> child(RelativeLocation path);
+  ReferenceLocationLike<?> child(RelativeLocation path);
 
-  ReferenceLocation<?> child(String path);
+  ReferenceLocationLike<?> child(String path);
 
-  DirLocation<?> pwd();
+  DirLocationLike<?> pwd();
 
   String absolute(String path);
 
-  DirLocation<?> cd(RelativeLocation path);
+  DirLocationLike<?> cd(RelativeLocation path);
 
   @sugar
-  DirLocation<?> pushd(String path);
+  DirLocationLike<?> pushd(String path);
 
-  DirLocation<?> pushd(DirLocation<?> url);
+  DirLocationLike<?> pushd(DirLocationLike<?> url);
 
-  DirLocation<?> pushd(RelativeLocation path);
+  DirLocationLike<?> pushd(RelativeLocation path);
 
-  DirLocation<?> popd();
+  DirLocationLike<?> popd();
 
   void mkdir(RelativeLocation path);
 
   void mkdir(String path);
 
-  DirLocation<?> mkdirAndPushd(String path);
+  DirLocationLike<?> mkdirAndPushd(String path);
 
   void deleteIfExists(String path);
 

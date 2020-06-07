@@ -23,11 +23,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jedio.ExceptionUtils;
-import org.raisercostin.jedio.ExistingLocation;
 import org.raisercostin.jedio.Locations;
-import org.raisercostin.jedio.ReadableDirLocation;
-import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.RelativeLocation;
+import org.raisercostin.jedio.impl.ExistingLocationLike;
+import org.raisercostin.jedio.impl.ReadableDirLocationLike;
+import org.raisercostin.jedio.impl.ReadableFileLocationLike;
 import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 
@@ -39,8 +39,8 @@ import reactor.core.publisher.Flux;
  * @author raiser
  */
 @Data
-public class ClasspathLocation implements ReadableDirLocation<ClasspathLocation>, ExistingLocation<ClasspathLocation>,
-    ReadableFileLocation<ClasspathLocation> {
+public class ClasspathLocation implements ReadableDirLocationLike<ClasspathLocation>, ExistingLocationLike<ClasspathLocation>,
+    ReadableFileLocationLike<ClasspathLocation> {
   private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
       .getOrElse(ClassLoader.class.getClassLoader());
 
@@ -149,7 +149,7 @@ public class ClasspathLocation implements ReadableDirLocation<ClasspathLocation>
   }
 
   @Override
-  public ReadableFileLocation asReadableFile() {
+  public ReadableFileLocationLike asReadableFile() {
     return this;
   }
 

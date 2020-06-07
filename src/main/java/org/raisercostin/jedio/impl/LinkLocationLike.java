@@ -1,4 +1,4 @@
-package org.raisercostin.jedio;
+package org.raisercostin.jedio.impl;
 
 /**
  * A location that just points to other location. Could be created using
@@ -11,6 +11,6 @@ package org.raisercostin.jedio;
  * <li>shortcut (windows)
  * <li>redirect? etc.
  */
-public interface LinkLocation<SELF extends LinkLocation<SELF>> extends ReferenceLocation<SELF> {
+public interface LinkLocationLike<SELF extends LinkLocationLike<SELF>> extends ReferenceLocationLike<SELF> {
   SELF getTarget();
 }

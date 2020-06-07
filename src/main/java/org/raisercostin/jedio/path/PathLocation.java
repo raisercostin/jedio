@@ -30,25 +30,25 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jedio.SimpleShell;
 import org.jedio.sugar;
 import org.raisercostin.jedio.BasicDirLocation;
-import org.raisercostin.jedio.ChangeableLocation;
-import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.FileAltered;
-import org.raisercostin.jedio.FileLocation;
-import org.raisercostin.jedio.LinkLocation;
 import org.raisercostin.jedio.Locations;
 import org.raisercostin.jedio.MetaInfo;
-import org.raisercostin.jedio.NonExistingLocation;
-import org.raisercostin.jedio.ReadableDirLocation;
-import org.raisercostin.jedio.ReadableFileLocation;
-import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
-import org.raisercostin.jedio.WritableDirLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.FindFilters;
 import org.raisercostin.jedio.find.GuavaAndDirectoryStreamTraversalWithVirtualDirs;
 import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.find.TraversalFilter;
+import org.raisercostin.jedio.impl.ChangeableLocationLike;
+import org.raisercostin.jedio.impl.DirLocationLike;
+import org.raisercostin.jedio.impl.LinkLocationLike;
+import org.raisercostin.jedio.impl.NonExistingLocationLike;
+import org.raisercostin.jedio.impl.ReadableDirLocationLike;
+import org.raisercostin.jedio.impl.ReadableFileLocationLike;
+import org.raisercostin.jedio.impl.ReferenceLocationLike;
+import org.raisercostin.jedio.impl.WritableDirLocationLike;
+import org.raisercostin.jedio.impl.WritableFileLocationLike;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.CopyOptions.CopyEvent;
 import org.raisercostin.jedio.op.DeleteOptions;
@@ -65,9 +65,10 @@ import reactor.core.publisher.Flux;
  * @author raiser
  */
 @Data
-public class PathLocation implements ReadableDirLocation<PathLocation>, WritableDirLocation<PathLocation>,
-    NonExistingLocation<PathLocation>, ReadableFileLocation<PathLocation>, WritableFileLocation<PathLocation>,
-    ChangeableLocation<PathLocation>, LinkLocation<PathLocation> {
+public class PathLocation implements ReadableDirLocationLike<PathLocation>, WritableDirLocationLike<PathLocation>,
+    NonExistingLocationLike<PathLocation>, ReadableFileLocationLike<PathLocation>,
+    WritableFileLocationLike<PathLocation>,
+    ChangeableLocationLike<PathLocation>, LinkLocationLike<PathLocation> {
 
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PathLocation.class);
 
@@ -97,12 +98,12 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
 
   @Override
   public PathLocation child(RelativeLocation child) {
-    return Locations.dir(fixPath(path.resolve(child.getLocation())));
+    return Locations.path(fixPath(path.resolve(child.getLocation())));
   }
 
   @Override
   public PathLocation child(String path) {
-    return ChangeableLocation.super.child(path);
+    return ChangeableLocationLike.super.child(path);
   }
 
   public File toFile() {
@@ -160,7 +161,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   }
 
   @Override
-  public NonExistingLocation deleteDir(DeleteOptions options) {
+  public NonExistingLocationLike deleteDir(DeleteOptions options) {
     if (options.deleteByRename()) {
       deleteDirByRename();
     } else {
@@ -188,7 +189,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   }
 
   @Override
-  public NonExistingLocation deleteFile(DeleteOptions options) {
+  public NonExistingLocationLike deleteFile(DeleteOptions options) {
     if (options.deleteByRename()) {
       deleteFileByRename();
     } else {
@@ -216,7 +217,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   }
 
   @Override
-  public NonExistingLocation delete(DeleteOptions options) {
+  public NonExistingLocationLike delete(DeleteOptions options) {
     if (isDir()) {
       deleteDir(options);
     } else {
@@ -245,7 +246,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   }
 
   @Override
-  public Option<NonExistingLocation<?>> nonExisting() {
+  public Option<NonExistingLocationLike<?>> nonExisting() {
     if (!Files.exists(path)) {
       return Option.of(this);
     } else {
@@ -254,7 +255,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   }
 
   @Override
-  public NonExistingLocation nonExistingOrElse(Function<DirLocation, NonExistingLocation> fn) {
+  public NonExistingLocationLike nonExistingOrElse(Function<DirLocationLike, NonExistingLocationLike> fn) {
     if (exists()) {
       return fn.apply(this);
     } else {
@@ -268,7 +269,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   }
 
   @Override
-  public PathLocation existingOrElse(Function<NonExistingLocation<?>, DirLocation<?>> fn) {
+  public PathLocation existingOrElse(Function<NonExistingLocationLike<?>, DirLocationLike<?>> fn) {
     if (!exists()) {
       return (PathLocation) fn.apply(this);
     } else {
@@ -277,13 +278,13 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   }
 
   @Override
-  public WritableFileLocation asWritableFile() {
+  public WritableFileLocationLike asWritableFile() {
     // TODO check dir exists and file doesn't
     return this;
   }
 
   @Override
-  public ReadableFileLocation<?> asReadableFile() {
+  public ReadableFileLocationLike<?> asReadableFile() {
     return this;
   }
 
@@ -346,7 +347,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
 
   @Override
   public PathLocation write(String content, String charset) {
-    makeDirOnParentIfNeeded();
+    mkdirOnParentIfNeeded();
     try {
       FileUtils.write(toFile(), content, charset);
     } catch (IOException e) {
@@ -356,10 +357,10 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   }
 
   @Override
-  public PathLocation copyFrom(ReadableFileLocation<?> source, CopyOptions copyOptions) {
+  public PathLocation copyFrom(ReadableFileLocationLike<?> source, CopyOptions copyOptions) {
     copyOptions.reportOperationEvent(CopyEvent.CopyFileTriggered, source, this);
     if (copyOptions.makeDirIfNeeded()) {
-      makeDirOnParentIfNeeded();
+      mkdirOnParentIfNeeded();
     }
     PathLocation metaHttp = this.meta("http", "json");
     try {
@@ -425,17 +426,17 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   }
 
   @Override
-  public void rename(FileLocation destLocation) {
+  public void rename(WritableFileLocation destLocation) {
     try {
       Path src = toPath();
       Path dest = destLocation.asPathLocation().toPath();
       if (isDir()) {
         logger.info("rename dir " + src + " to " + destLocation);
-        makeDirOnParentIfNeeded();
+        mkdirOnParentIfNeeded();
         Files.move(src, dest);
       } else {
         logger.info("rename file " + src + " to " + destLocation);
-        makeDirOnParentIfNeeded();
+        mkdirOnParentIfNeeded();
         Files.move(src, dest);
       }
     } catch (IOException e) {
@@ -444,7 +445,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   }
 
   @Override
-  public PathLocation makeDirOnParentIfNeeded() {
+  public PathLocation mkdirOnParentIfNeeded() {
     parent().forEach(x -> x.createDirectories());
     return this;
   }
@@ -460,7 +461,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
 
   @Override
   // @tailrec
-  public Option<PathLocation> findAncestor(Function<ReferenceLocation<?>, Boolean> fn) {
+  public Option<PathLocation> findAncestor(Function<ReferenceLocationLike<?>, Boolean> fn) {
     if (fn.apply(this)) {
       return Option.of(this);
     } else {
@@ -473,7 +474,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
     return Option.of(path.getParent()).map(x -> create(x));
   }
 
-  public Option<RelativeLocation> relativize(DirLocation ancestor) {
+  public Option<RelativeLocation> relativize(DirLocationLike ancestor) {
     return stripAncestor(ancestor);
   }
 
@@ -489,12 +490,12 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   }
 
   @Override
-  public void junctionTo(ReferenceLocation target) {
+  public void junctionTo(ReferenceLocationLike target) {
     createJunction(toPath(), target.asPathLocation().toPath());
   }
 
   @Override
-  public void symlinkTo(ReferenceLocation target) {
+  public void symlinkTo(ReferenceLocationLike target) {
     createSymlink(toPath(), target.asPathLocation().toPath());
   }
 
@@ -529,7 +530,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   }
 
   @Override
-  public Option<LinkLocation> asSymlink() {
+  public Option<LinkLocationLike> asSymlink() {
     if (isSymlink()) {
       return Option.of(this);
     } else {
@@ -565,7 +566,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   }
 
   @Override
-  public ChangeableLocation asChangableLocation() {
+  public ChangeableLocationLike<?> asChangableLocation() {
     return this;
   }
 
@@ -816,7 +817,7 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   }
 
   @Override
-  public Flux<DirLocation<?>> findDirs(boolean recursive) {
+  public Flux<DirLocationLike<?>> findDirs(boolean recursive) {
     return find(createFilter(recursive)).flatMap(x -> {
       if (!x.isDirectory()) {
         return Flux.empty();
@@ -851,12 +852,12 @@ public class PathLocation implements ReadableDirLocation<PathLocation>, Writable
   }
 
   @Override
-  public DirLocation asDir() {
+  public DirLocationLike asDir() {
     return this;
   }
 
   public PathLocation childDir(String path) {
-    return child(path).mkdirIfNecessary();
+    return child(path).mkdirIfNeeded();
   }
 
   @Override

@@ -10,46 +10,46 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.raisercostin.jedio.DirLocation;
-import org.raisercostin.jedio.LinkLocation;
-import org.raisercostin.jedio.ReadableFileLocation;
-import org.raisercostin.jedio.ReferenceLocation;
+import org.raisercostin.jedio.impl.DirLocationLike;
+import org.raisercostin.jedio.impl.LinkLocationLike;
+import org.raisercostin.jedio.impl.ReadableFileLocationLike;
+import org.raisercostin.jedio.impl.ReferenceLocationLike;
 import reactor.core.publisher.Mono;
 
 @Data
 @Getter(value = AccessLevel.NONE)
 @Setter(value = AccessLevel.NONE)
-public class DiskCachedLocation<SELF extends DiskCachedLocation<SELF>> implements ReadableFileLocation<SELF> {
+public class DiskCachedLocation implements ReadableFileLocationLike<DiskCachedLocation> {
 
   @Data
   @Getter(value = AccessLevel.NONE)
   @Setter(value = AccessLevel.NONE)
   @AllArgsConstructor
-  private static class Root {
-    public DirLocation<?> dir;
+  public static class Root {
+    public DirLocationLike<?> dir;
     public Function1<String, String> transformer;
 
-    public DiskCachedLocation<?> cached(ReadableFileLocation<?> x) {
-      return new DiskCachedLocation<>(this, x);
+    public DiskCachedLocation cached(ReadableFileLocationLike<?> x) {
+      return new DiskCachedLocation(this, x);
     }
 
-    private String slug(ReadableFileLocation<?> location) {
+    private String slug(ReadableFileLocationLike<?> location) {
       return location.absoluteAndNormalized().replaceAll("[:\\\\/#?.&]", "-");
     }
 
-    public ReferenceLocation<?> locationFor(ReadableFileLocation<?> location) {
+    public ReferenceLocationLike<?> locationFor(ReadableFileLocationLike<?> location) {
       return dir.child(slug(location));
     }
   }
 
-  public static Root cacheAt(DirLocation dir, Function1<String, String> transformer) {
+  public static Root cacheAt(DirLocationLike dir, Function1<String, String> transformer) {
     return new Root(dir, transformer);
   }
 
   private final Root cache;
-  private final ReadableFileLocation<?> location;
+  private final ReadableFileLocationLike<?> location;
 
-  public DiskCachedLocation(Root cache, ReadableFileLocation<?> location) {
+  public DiskCachedLocation(Root cache, ReadableFileLocationLike<?> location) {
     this.cache = cache;
     this.location = location;
   }
@@ -60,7 +60,7 @@ public class DiskCachedLocation<SELF extends DiskCachedLocation<SELF>> implement
   }
 
   @Override
-  public ReadableFileLocation asReadableFile() {
+  public DiskCachedLocation asReadableFile() {
     return this;
   }
 
@@ -75,7 +75,7 @@ public class DiskCachedLocation<SELF extends DiskCachedLocation<SELF>> implement
   }
 
   @Override
-  public Option<LinkLocation> asSymlink() {
+  public Option<LinkLocationLike> asSymlink() {
     return Option.none();
   }
 
@@ -97,7 +97,7 @@ public class DiskCachedLocation<SELF extends DiskCachedLocation<SELF>> implement
 
   @Override
   public String readContent(Charset charset) {
-    ReferenceLocation cached = cache.locationFor(location);
+    ReferenceLocationLike cached = cache.locationFor(location);
     if (cached.exists()) {
       return cached.asReadableFile().readContent(charset);
     } else {
@@ -109,7 +109,7 @@ public class DiskCachedLocation<SELF extends DiskCachedLocation<SELF>> implement
 
   @Override
   public Mono<String> readContentAsync() {
-    ReferenceLocation cached = cache.locationFor(location);
+    ReferenceLocationLike cached = cache.locationFor(location);
     if (cached.exists()) {
       return cached.asReadableFile().readContentAsync();
     } else {

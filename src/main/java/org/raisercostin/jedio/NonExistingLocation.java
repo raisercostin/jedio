@@ -1,23 +1,11 @@
 package org.raisercostin.jedio;
 
-import org.jedio.sugar;
+public interface NonExistingLocation extends ReferenceLocation {
 
-/** Location that is known to exist. */
-public interface NonExistingLocation<SELF extends NonExistingLocation<SELF>> extends ReferenceLocation<SELF> {
   // TODO what if mkdir fails?
-  default DirLocation<?> mkdir() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  DirLocation mkdir();
 
-  @SuppressWarnings("unchecked")
-  @sugar
-  default SELF nonExistingChild(RelativeLocation path) {
-    return (SELF) child(path).nonExisting().get();
-  }
+  NonExistingLocation nonExistingChild(RelativeLocation path);
 
-  @SuppressWarnings("unchecked")
-  @sugar
-  default SELF nonExistingChild(String path) {
-    return (SELF) child(RelativeLocation.create(path)).nonExisting().get();
-  }
+  NonExistingLocation nonExistingChild(String path);
 }

@@ -7,6 +7,7 @@ import java.time.Duration;
 
 import io.vavr.collection.List;
 import org.junit.jupiter.api.Test;
+import org.raisercostin.jedio.impl.DirLocationLike;
 import org.raisercostin.jedio.path.PathLocation;
 
 class FindTest {
@@ -26,8 +27,10 @@ class FindTest {
   @Test
   void testFindFilesGradually() {
     assertTimeoutPreemptively(Duration.ofSeconds(2), () -> {
-      DirLocation all = Locations.existingDir("e:/work/electrica").findDirs(true).doOnNext(x -> System.out.println(x))
-          .blockFirst(Duration.ofSeconds(1));
+      DirLocationLike all = Locations.path("e:/work/electrica")
+        .findDirs(true)
+        .doOnNext(x -> System.out.println(x))
+        .blockFirst(Duration.ofSeconds(1));
       // .blockLast();
       System.out.println(all);
     });

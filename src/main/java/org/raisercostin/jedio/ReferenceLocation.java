@@ -6,271 +6,135 @@ import java.util.function.Function;
 
 import io.vavr.Function2;
 import io.vavr.control.Option;
-import lombok.SneakyThrows;
-import lombok.val;
-import org.apache.commons.io.FilenameUtils;
-import org.jedio.deprecated;
-import org.jedio.sugar;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
-import org.raisercostin.jedio.op.CopyOptions;
+import org.raisercostin.jedio.impl.DirLocationLike;
+import org.raisercostin.jedio.impl.LinkLocationLike;
+import org.raisercostin.jedio.impl.NonExistingLocationLike;
+import org.raisercostin.jedio.impl.ReadableDirLocationLike;
+import org.raisercostin.jedio.impl.ReferenceLocationLike;
+import org.raisercostin.jedio.impl.WritableDirLocationLike;
 import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 
-// TODO maybe should contain type <T> of the actual internal instance
-public interface ReferenceLocation<SELF extends ReferenceLocation<SELF>> extends Location<SELF> {
-  default SELF child(RelativeLocation path) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+public interface ReferenceLocation extends Location {
 
-  @sugar
-  default SELF child(String path) {
-    return child(RelativeLocation.create(path));
-  }
+  ReferenceLocation child(RelativeLocation path);
 
-  @Deprecated
-  default String absolute() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  ReferenceLocation child(String path);
 
-  @Deprecated
-  default String normalized() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  String absolute();
 
-  @Deprecated
-  default String canonical() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  String normalized();
 
-  default String absoluteAndNormalized() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  String canonical();
 
-  default String real() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  String absoluteAndNormalized();
 
-  default String getName() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  String real();
+
+  String getName();
 
   /** A form that is parsable back to the same type. Usually contains the schema/protocol. */
-  default String toExternalForm() {
-    return toUrl().toExternalForm();
-  }
+  String toExternalForm();
 
-  @SneakyThrows
-  default URL toUrl() {
-    return toUri().toURL();
-  }
+  URL toUrl();
 
-  default URI toUri() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  URI toUri();
 
-  @SneakyThrows
-  default org.apache.commons.httpclient.URI toApacheUri() {
-    return new org.apache.commons.httpclient.URI(toUrl().toExternalForm(), true);
-  }
+  org.apache.commons.httpclient.URI toApacheUri();
 
-  default Option<RelativeLocation> stripAncestor(BasicDirLocation<?> x) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  Option<RelativeLocation> stripAncestor(BasicDirLocation x);
 
   /**
    * Returns a new location inside `to` with the same relative path as the current item is inside `from`. For example
    * file `Location.file("c:\a\b\c.txt").relative("c:\","c:\x") equals Location.file("c:\x\a\b\c.txt")`
    */
-  @SuppressWarnings("unchecked")
-  default Option<SELF> relative(BasicDirLocation<?> from, BasicDirLocation<?> to) {
-    Option<RelativeLocation> relative = stripAncestor(from);
-    return relative.map(x -> (SELF) to.child(x));
-  }
+  //TODO override properly in ReferenceLocationLike
+  //default Option<ReferenceLocation> relativeRef(BasicDirLocation<?> from, BasicDirLocation<?> to);
+  //<T extends ReferenceLocation> Option<T> findAncestor(Function<ReferenceLocation, Boolean> fn);
 
-  default Option<SELF> findAncestor(Function<ReferenceLocation<?>, Boolean> fn) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  ReferenceLocation mkdirOnParentIfNeeded();
 
-  default SELF makeDirOnParentIfNeeded() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  <T extends ReferenceLocation> Option<T> parent();
 
-  default Option<? extends SELF> parent() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  <T extends ReferenceLocation> Option<T> existing();
 
-  default Option<SELF> existing() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  Option<NonExistingLocationLike<?>> nonExisting();
 
-  default Option<NonExistingLocation<?>> nonExisting() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  NonExistingLocationLike<?> nonExistingOrElse(Function<DirLocationLike, NonExistingLocationLike> fn);
 
-  default NonExistingLocation<?> nonExistingOrElse(Function<DirLocation, NonExistingLocation> fn) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  ReferenceLocation existingOrElse(Function<NonExistingLocationLike<?>, DirLocationLike<?>> fn);
 
-  default SELF existingOrElse(Function<NonExistingLocation<?>, DirLocation<?>> fn) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  boolean exists();
 
-  default boolean exists() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  boolean isDir();
 
-  default boolean isDir() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  boolean isFile();
 
-  default boolean isFile() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  void symlinkTo(ReferenceLocationLike<?> parent);
 
-  default void symlinkTo(ReferenceLocation<?> parent) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  void junctionTo(ReferenceLocationLike<?> parent);
 
-  default void junctionTo(ReferenceLocation<?> parent) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  Option<LinkLocationLike> asSymlink();
 
-  default Option<LinkLocation> asSymlink() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  boolean isSymlink();
 
-  default boolean isSymlink() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  ReferenceLocation mkdirIfNeeded();
 
-  @sugar
-  default SELF mkdirIfNecessary() {
-    return existingOrElse(NonExistingLocation::mkdir);
-  }
+  Flux<PathWithAttributes> find2(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore);
 
-  default Flux<PathWithAttributes> find2(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore) {
-    return find(traversal, filter, recursive, gitIgnore, true);
-  }
+  Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore,
+      boolean dirsFirst);
 
-  default Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore,
-      boolean dirsFirst) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  default SELF create(String path) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  ReferenceLocation create(String path);
 
   /** dirname(/some/path/a.test)=/some/path */
-  default String dirname() {
-    val fullname = absoluteAndNormalized();
-    return FilenameUtils.getFullPath(fullname);
-  }
+  String dirname();
 
   /** basename(/some/path/a.test)=a */
-  default String basename() {
-    val fullname = absoluteAndNormalized();
-    return FilenameUtils.getBaseName(fullname);
-  }
+  String basename();
 
   /** extension(/some/path/a.test)=.test */
-  default String extension() {
-    val fullname = absoluteAndNormalized();
-    return FilenameUtils.getExtension(fullname);
-  }
+  String extension();
 
   /** filename(/some/path/a.test)=a.text */
-  default String filename() {
-    val fullname = absoluteAndNormalized();
-    return FilenameUtils.getName(fullname);
-  }
+  String filename();
 
-  default SELF withName(String name) {
-    return create(FilenameUtils.concat(dirname(), name));
-  }
+  ReferenceLocation withName(String name);
 
-  default SELF withName(Function<String, String> newName) {
-    val fullname = absoluteAndNormalized();
-    return create(
-        FilenameUtils.concat(FilenameUtils.getFullPath(fullname), newName.apply(FilenameUtils.getName(fullname))));
-  }
+  ReferenceLocation withName(Function<String, String> newName);
 
-  default SELF withBasename(Function<String, String> newBasename) {
-    val fullname = absoluteAndNormalized();
-    return create(FilenameUtils.concat(FilenameUtils.getFullPath(fullname),
-        newBasename.apply(FilenameUtils.getBaseName(fullname)) + "." + FilenameUtils.getExtension(fullname)));
-  }
+  ReferenceLocation withBasename(Function<String, String> newBasename);
 
-  default SELF withExtension(String newExtension) {
-    val fullname = absoluteAndNormalized();
-    return create(FilenameUtils.removeExtension(fullname) + "." + newExtension);
-  }
+  ReferenceLocation withExtension(String newExtension);
 
-  default SELF withExtension(Function<String, String> newExtension) {
-    val fullname = absoluteAndNormalized();
-    return create(
-        FilenameUtils.removeExtension(fullname) + "." + newExtension.apply(FilenameUtils.getExtension(fullname)));
-  }
+  ReferenceLocation withExtension(Function<String, String> newExtension);
 
-  default SELF withBasenameAndExtension(Function2<String, String, String> newBasenameAndExtension) {
-    val fullname = absoluteAndNormalized();
-    val basename = FilenameUtils.getBaseName(fullname);
-    val extension = FilenameUtils.getExtension(fullname);
-    return create(
-        FilenameUtils.concat(FilenameUtils.getFullPath(fullname), newBasenameAndExtension.apply(basename, extension)));
-  }
+  ReferenceLocation withBasenameAndExtension(Function2<String, String, String> newBasenameAndExtension);
 
-  default SELF meta() {
-    return meta("http", "json");
-  }
+  ReferenceLocation meta();
 
-  @SuppressWarnings("unchecked")
-  default SELF meta(String meta, String extension) {
-    return CopyOptions.meta((SELF) this, meta, extension);
-  }
+  ReferenceLocation meta(String meta, String extension);
 
-  @Deprecated
-  @deprecated("use withBasename")
-  default SELF withNameAndExtension(Function<String, String> newBasename) {
-    return withBasename(newBasename);
-  }
+  ReferenceLocation withNameAndExtension(Function<String, String> newBasename);
 
-  default boolean hasExtension(String extension) {
-    return getName().endsWith("." + extension);
-  }
+  boolean hasExtension(String extension);
 
-  default boolean isEmpty() {
-    return !exists() || length() == 0;
-  }
+  boolean isEmpty();
 
-  default long length() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
+  long length();
 
-  // various forced conversions
+  WritableFileLocation asWritableFile();
 
-  default WritableFileLocation asWritableFile() {
-    return (WritableFileLocation) this;
-  }
+  ReadableFileLocation asReadableFile();
 
-  default ReadableFileLocation<?> asReadableFile() {
-    return (ReadableFileLocation<?>) this;
-  }
+  DirLocationLike asDir();
 
-  default DirLocation asDir() {
-    return (DirLocation) this;
-  }
+  ReadableDirLocationLike<?> asReadableDir();
 
-  default ReadableDirLocation<?> asReadableDir() {
-    return (ReadableDirLocation<?>) this;
-  }
+  WritableDirLocationLike asWritableDir();
 
-  default WritableDirLocation asWritableDir() {
-    return (WritableDirLocation) this;
-  }
+  PathLocation asPathLocation();
 
-  default PathLocation asPathLocation() {
-    return (PathLocation) this;
-  }
 }

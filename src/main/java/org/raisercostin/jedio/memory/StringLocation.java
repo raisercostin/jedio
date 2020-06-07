@@ -5,16 +5,17 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 
 import io.vavr.control.Option;
-import org.raisercostin.jedio.LinkLocation;
-import org.raisercostin.jedio.NonExistingLocation;
-import org.raisercostin.jedio.ReadableFileLocation;
-import org.raisercostin.jedio.WritableFileLocation;
+import org.raisercostin.jedio.impl.LinkLocationLike;
+import org.raisercostin.jedio.impl.NonExistingLocationLike;
+import org.raisercostin.jedio.impl.ReadableFileLocationLike;
+import org.raisercostin.jedio.impl.WritableFileLocationLike;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.DeleteOptions;
 import reactor.core.publisher.Mono;
 
-public class StringLocation<SELF extends StringLocation<SELF>>
-    implements ReadableFileLocation<SELF>, WritableFileLocation<SELF>, NonExistingLocation<SELF> {
+public class StringLocation
+    implements ReadableFileLocationLike<StringLocation>, WritableFileLocationLike<StringLocation>,
+    NonExistingLocationLike<StringLocation> {
   public String content;
 
   public StringLocation(String content) {
@@ -22,13 +23,13 @@ public class StringLocation<SELF extends StringLocation<SELF>>
   }
 
   @Override
-  public NonExistingLocation deleteFile(DeleteOptions options) {
+  public StringLocation deleteFile(DeleteOptions options) {
     this.content = null;
     return this;
   }
 
   @Override
-  public NonExistingLocation delete(DeleteOptions options) {
+  public StringLocation delete(DeleteOptions options) {
     this.content = null;
     return this;
   }
@@ -39,12 +40,12 @@ public class StringLocation<SELF extends StringLocation<SELF>>
   }
 
   @Override
-  public WritableFileLocation asWritableFile() {
+  public StringLocation asWritableFile() {
     return this;
   }
 
   @Override
-  public ReadableFileLocation asReadableFile() {
+  public ReadableFileLocationLike asReadableFile() {
     return this;
   }
 
@@ -59,7 +60,7 @@ public class StringLocation<SELF extends StringLocation<SELF>>
   }
 
   @Override
-  public Option<LinkLocation> asSymlink() {
+  public Option<LinkLocationLike> asSymlink() {
     return Option.none();
   }
 
@@ -95,17 +96,17 @@ public class StringLocation<SELF extends StringLocation<SELF>>
   }
 
   @Override
-  public SELF write(String content, String encoding) {
+  public StringLocation write(String content, String encoding) {
     this.content = content;
-    return (SELF) this;
+    return this;
   }
 
   @Override
-  public SELF copyFrom(ReadableFileLocation source, CopyOptions options) {
+  public StringLocation copyFrom(ReadableFileLocationLike source, CopyOptions options) {
     if (this.content != null && !options.replaceExisting()) {
       throw new RuntimeException("Cannot overwrite [" + this + "] with content from " + source);
     }
     this.content = source.readContent();
-    return (SELF) this;
+    return this;
   }
 }

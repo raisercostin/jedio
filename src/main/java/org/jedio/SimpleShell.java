@@ -14,49 +14,49 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.Locations;
-import org.raisercostin.jedio.NonExistingLocation;
-import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
+import org.raisercostin.jedio.impl.DirLocationLike;
+import org.raisercostin.jedio.impl.NonExistingLocationLike;
+import org.raisercostin.jedio.impl.ReferenceLocationLike;
 import org.raisercostin.jedio.op.DeleteOptions;
 
 // An instance must be created when is needed as is not thread safe.
 @NotThreadSafe
 public class SimpleShell implements Shell {
   private static final Pattern SPLIT_PARAMS_PATTERN = Pattern.compile("\"([^\"]*)\"|(\\S+)");
-  private Stack<DirLocation<?>> dirs = new Stack<>();
-  private DirLocation<?> current;
+  private Stack<DirLocationLike<?>> dirs = new Stack<>();
+  private DirLocationLike<?> current;
   private final Map<String, String> env;
   private Pattern sensibleRegex;
   private final DeleteOptions deleteOptions;
 
   @sugar
   public SimpleShell(String path) {
-    this(Locations.existingDir(path), DeleteOptions.deleteByRenameOption());
+    this(Locations.path(path).mkdirIfNeeded(), DeleteOptions.deleteByRenameOption());
   }
 
   @sugar
   public SimpleShell(Path path) {
-    this(Locations.existingDir(path), DeleteOptions.deleteByRenameOption());
+    this(Locations.path(path).mkdirIfNeeded(), DeleteOptions.deleteByRenameOption());
   }
 
   @sugar
   public SimpleShell() {
-    this(Locations.existingDir("."), DeleteOptions.deleteByRenameOption());
+    this(Locations.current(), DeleteOptions.deleteByRenameOption());
   }
 
   @sugar
   public SimpleShell(DeleteOptions deleteOptions) {
-    this(Locations.existingDir("."), deleteOptions);
+    this(Locations.current(), deleteOptions);
   }
 
   @sugar
-  public SimpleShell(DirLocation<?> path) {
+  public SimpleShell(DirLocationLike<?> path) {
     this(path, DeleteOptions.deleteByRenameOption());
   }
 
-  private SimpleShell(DirLocation<?> path, DeleteOptions deleteOptions) {
+  private SimpleShell(DirLocationLike<?> path, DeleteOptions deleteOptions) {
     this.deleteOptions = deleteOptions;
     env = Maps.newHashMap();
     current = path;
@@ -82,14 +82,14 @@ public class SimpleShell implements Shell {
   // https://zeroturnaround.com/rebellabs/why-we-created-yaplj-yet-another-process-library-for-java/
   // -
   // https://stackoverflow.com/questions/193166/good-java-process-control-library
-  private ProcessResult executeInternal(DirLocation<?> path, List<String> commandAndParams) {
+  private ProcessResult executeInternal(DirLocationLike<?> path, List<String> commandAndParams) {
     try {
       // File input = File.createTempFile("restfs", ".input");
       // TODO splitting command should work for "aaa bbbb" as argument
       ProcessBuilder builder = new ProcessBuilder(commandAndParams).redirectOutput(Redirect.PIPE)
-          .redirectError(Redirect.PIPE)
-          // .redirectInput(input)
-          .directory(path.asPathLocation().toFile());
+        .redirectError(Redirect.PIPE)
+        // .redirectInput(input)
+        .directory(path.asPathLocation().toFile());
       // .inheritIO();
       Map<String, String> currentEnvironment = builder.environment();
       currentEnvironment.putAll(env);
@@ -118,57 +118,57 @@ public class SimpleShell implements Shell {
   }
 
   @Override
-  public DirLocation<?> pwd() {
+  public DirLocationLike<?> pwd() {
     return current;
   }
 
   @Override
-  public DirLocation<?> cd(RelativeLocation path) {
+  public DirLocationLike<?> cd(RelativeLocation path) {
     return internalCd(child(path).existing().get().asDir());
   }
 
   @Override
-  public DirLocation<?> pushd(DirLocation<?> url) {
+  public DirLocationLike<?> pushd(DirLocationLike<?> url) {
     dirs.push(current);
     return internalCd(url);
   }
 
   @Override
-  public DirLocation<?> pushd(RelativeLocation path) {
+  public DirLocationLike<?> pushd(RelativeLocation path) {
     dirs.push(current);
     return internalCd(child(path).existing().get().asDir());
   }
 
   @Override
-  public DirLocation<?> popd() {
+  public DirLocationLike<?> popd() {
     return internalCd(dirs.pop());
   }
 
-  private DirLocation<?> internalCd(DirLocation<?> dir) {
+  private DirLocationLike<?> internalCd(DirLocationLike<?> dir) {
     current = dir;
-    dir.mkdirIfNecessary();
+    dir.mkdirIfNeeded();
     return dir;
   }
 
   @Override
   public void mkdir(RelativeLocation path) {
-    child(path).existingOrElse(NonExistingLocation::mkdir);
+    child(path).existingOrElse(NonExistingLocationLike::mkdir);
   }
 
   @Override
-  public ReferenceLocation<?> child(RelativeLocation path) {
+  public ReferenceLocationLike<?> child(RelativeLocation path) {
     return pwd().child(path);
   }
 
   @Override
   @sugar
-  public ReferenceLocation<?> child(String path) {
+  public ReferenceLocationLike<?> child(String path) {
     return child(Locations.relative(path));
   }
 
   @Override
   @sugar
-  public DirLocation<?> pushd(String path) {
+  public DirLocationLike<?> pushd(String path) {
     return pushd(Locations.relative(path));
   }
 
@@ -184,7 +184,7 @@ public class SimpleShell implements Shell {
 
   @Override
   @sugar
-  public DirLocation<?> mkdirAndPushd(String path) {
+  public DirLocationLike<?> mkdirAndPushd(String path) {
     mkdir(path);
     return pushd(path);
   }

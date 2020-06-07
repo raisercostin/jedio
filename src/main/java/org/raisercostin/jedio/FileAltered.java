@@ -16,7 +16,7 @@ public class FileAltered {
   public final WatchEvent<?> event;
 
   public ReferenceLocation location() {
-    return Locations.dir(dir.resolve((Path) event.context()));
+    return Locations.path(dir.resolve((Path) event.context()));
   }
 
   @Override

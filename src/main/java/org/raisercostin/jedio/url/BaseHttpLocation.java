@@ -10,15 +10,15 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import org.apache.commons.httpclient.URI;
-import org.raisercostin.jedio.ReadableFileLocation;
-import org.raisercostin.jedio.ReferenceLocation;
+import org.raisercostin.jedio.impl.ReadableFileLocationLike;
+import org.raisercostin.jedio.impl.ReferenceLocationLike;
 
 @Data
 @Getter(lombok.AccessLevel.NONE)
 @Setter(lombok.AccessLevel.NONE)
 @ToString
 public abstract class BaseHttpLocation<SELF extends BaseHttpLocation<SELF>>
-    implements ReferenceLocation<SELF>, ReadableFileLocation<SELF> {
+    implements ReferenceLocationLike<SELF>, ReadableFileLocationLike<SELF> {
 
   public static class UrlLocation extends BaseHttpLocation<UrlLocation> {
     @SneakyThrows

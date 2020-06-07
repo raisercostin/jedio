@@ -11,6 +11,7 @@ import org.raisercostin.jedio.ExistingLocation;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.WritableFileLocation;
+import org.raisercostin.jedio.impl.ReferenceLocationLike;
 
 public interface CopyOptions {
   org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CopyOptions.class);
@@ -27,9 +28,19 @@ public interface CopyOptions {
     return true;
   }
 
+  default void reportOperationEvent(CopyEvent event, Throwable e, ExistingLocation src,
+      ReferenceLocation dst,
+      Object... args) {
+  }
+
+  default void reportOperationEvent(CopyEvent event, ExistingLocation src, ReferenceLocation dst,
+      Object... args) {
+  }
+
   @FunctionalInterface
   public interface OperationListener {
-    void reportOperationEvent(CopyEvent event, Throwable exception, ExistingLocation<?> src, ReferenceLocation<?> dst,
+    void reportOperationEvent(CopyEvent event, Throwable exception, ExistingLocation src,
+        ReferenceLocation dst,
         Object... args);
   }
 
@@ -64,14 +75,14 @@ public interface CopyOptions {
     }
 
     @Override
-    public void reportOperationEvent(CopyEvent event, ExistingLocation<?> src, ReferenceLocation<?> dst,
+    public void reportOperationEvent(CopyEvent event, ExistingLocation src, ReferenceLocation dst,
         Object... args) {
       operationListener.reportOperationEvent(event, null, src, dst, args);
     }
 
     @Override
-    public void reportOperationEvent(CopyEvent event, Throwable exception, ExistingLocation<?> src,
-        ReferenceLocation<?> dst, Object... args) {
+    public void reportOperationEvent(CopyEvent event, Throwable exception, ExistingLocation src,
+        ReferenceLocation dst, Object... args) {
       operationListener.reportOperationEvent(event, exception, src, dst, args);
     }
 
@@ -109,10 +120,22 @@ public interface CopyOptions {
   }
 
   public enum CopyEvent {
-    Unknown, CopyFileTriggered(
-        "Copy file triggered."), IgnoreSourceDoesNotExists, IgnoreDestinationMetaExists, IgnoreDestinationExists, IgnoreContentType, CopyFileStarted, CopyReplacing(
-            "A replace of content started"), CopyFileFinished, CopyFailed, CopyDirStarted, CopyDirFinished, CopyMeta(
-                "Copy metadata. For http you will get the request and response: headers and other details. For all will get the exception and the source.")
+    Unknown,
+    CopyFileTriggered(
+        "Copy file triggered."),
+    IgnoreSourceDoesNotExists,
+    IgnoreDestinationMetaExists,
+    IgnoreDestinationExists,
+    IgnoreContentType,
+    CopyFileStarted,
+    CopyReplacing(
+        "A replace of content started"),
+    CopyFileFinished,
+    CopyFailed,
+    CopyDirStarted,
+    CopyDirFinished,
+    CopyMeta(
+        "Copy metadata. For http you will get the request and response: headers and other details. For all will get the exception and the source.")
     //
     ;
 
@@ -127,17 +150,9 @@ public interface CopyOptions {
     }
   }
 
-  default void reportOperationEvent(CopyEvent event, Throwable e, ExistingLocation<?> src, ReferenceLocation<?> dst,
-      Object... args) {
-  }
-
-  default void reportOperationEvent(CopyEvent event, ExistingLocation<?> src, ReferenceLocation<?> dst,
-      Object... args) {
-  }
-
   /** Destination can be changed based on the input and metadata. */
   @SuppressWarnings("unchecked")
-  default <T extends WritableFileLocation<?>> T amend(T dest, StreamAndMeta streamAndMeta) {
+  default <T extends WritableFileLocation> T amend(T dest, StreamAndMeta streamAndMeta) {
     int code = streamAndMeta.meta.httpMetaResponseStatusCode().get();
     if (code == 200) {
       return dest;
@@ -160,8 +175,13 @@ public interface CopyOptions {
    * com_darzar_www--http--sitemap.xml#meta-http-json com_darzar_www--http--sitemap.xml.gz
    * com_darzar_www--http--sitemap.xml.gz#meta-http-json
    */
-  static <T extends ReferenceLocation<T>> T meta(T referenceLocation, String meta, String extension) {
-    return referenceLocation.parent().get().child("." + meta).mkdirIfNecessary().child(referenceLocation
-        .withExtension(originalExtension -> originalExtension + "#meta-" + meta + "-" + extension).filename());
+  static <T extends ReferenceLocationLike<T>> T meta(T referenceLocation, String meta, String extension) {
+    return referenceLocation.parent()
+      .get()
+      .child("." + meta)
+      .mkdirIfNeeded()
+      .child(referenceLocation
+        .withExtension(originalExtension -> originalExtension + "#meta-" + meta + "-" + extension)
+        .filename());
   }
 }

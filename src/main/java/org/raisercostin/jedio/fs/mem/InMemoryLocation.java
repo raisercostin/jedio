@@ -5,9 +5,9 @@ import java.nio.charset.Charset;
 
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.raisercostin.jedio.ReadableFileLocation;
+import org.raisercostin.jedio.impl.ReadableFileLocationLike;
 
-public class InMemoryLocation<SELF extends InMemoryLocation<SELF>> implements ReadableFileLocation<SELF> {
+public class InMemoryLocation implements ReadableFileLocationLike<InMemoryLocation> {
   private String data;
 
   public InMemoryLocation(String data) {

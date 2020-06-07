@@ -31,7 +31,7 @@ import org.apache.http.protocol.HttpCoreContext;
 import org.jedio.Audit;
 import org.jedio.functions.JedioFunction;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
-import org.raisercostin.jedio.ReadableFileLocation;
+import org.raisercostin.jedio.impl.ReadableFileLocationLike;
 import org.raisercostin.jedio.url.JedioHttpClients.JedioHttpClient;
 import reactor.core.publisher.Mono;
 
@@ -79,7 +79,7 @@ public class HttpClientLocation extends BaseHttpLocation<HttpClientLocation> {
   }
 
   @Override
-  public ReadableFileLocation asReadableFile() {
+  public ReadableFileLocationLike asReadableFile() {
     return this;
   }
 

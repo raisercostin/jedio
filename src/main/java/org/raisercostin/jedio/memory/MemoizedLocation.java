@@ -8,28 +8,23 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.raisercostin.jedio.ReadableFileLocation;
+import org.raisercostin.jedio.impl.ReadableFileLocationLike;
 import reactor.core.publisher.Mono;
 
 @Data
 @Getter(value = AccessLevel.NONE)
 @Setter(value = AccessLevel.NONE)
-public class MemoizedLocation<SELF extends MemoizedLocation<SELF>> implements ReadableFileLocation<SELF> {
-  private final ReadableFileLocation<?> location;
+public class MemoizedLocation implements ReadableFileLocationLike<MemoizedLocation> {
+  private final ReadableFileLocationLike<?> location;
   private String content;
 
-  public MemoizedLocation(ReadableFileLocation<?> location) {
+  public MemoizedLocation(ReadableFileLocationLike<?> location) {
     this.location = location;
   }
 
   @Override
   public boolean exists() {
     return true;
-  }
-
-  @Override
-  public ReadableFileLocation asReadableFile() {
-    return this;
   }
 
   @Override
