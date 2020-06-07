@@ -73,7 +73,6 @@ public class MetaInfo {
   String errorAsString;
   Map<String, Object> payload;
 
-  @SuppressWarnings("unchecked")
   /** Selector is converted to lowercase before search since http header is case insensitive. */
   public Option<String> field(String pointSelector) {
     String[] keys = pointSelector.split("[.]");

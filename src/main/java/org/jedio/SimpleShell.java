@@ -14,19 +14,19 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.Locations;
+import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
-import org.raisercostin.jedio.impl.DirLocationLike;
 import org.raisercostin.jedio.impl.NonExistingLocationLike;
-import org.raisercostin.jedio.impl.ReferenceLocationLike;
 import org.raisercostin.jedio.op.DeleteOptions;
 
 // An instance must be created when is needed as is not thread safe.
 @NotThreadSafe
 public class SimpleShell implements Shell {
   private static final Pattern SPLIT_PARAMS_PATTERN = Pattern.compile("\"([^\"]*)\"|(\\S+)");
-  private Stack<DirLocationLike<?>> dirs = new Stack<>();
-  private DirLocationLike<?> current;
+  private Stack<DirLocation> dirs = new Stack<>();
+  private DirLocation current;
   private final Map<String, String> env;
   private Pattern sensibleRegex;
   private final DeleteOptions deleteOptions;
@@ -52,11 +52,11 @@ public class SimpleShell implements Shell {
   }
 
   @sugar
-  public SimpleShell(DirLocationLike<?> path) {
+  public SimpleShell(DirLocation path) {
     this(path, DeleteOptions.deleteByRenameOption());
   }
 
-  private SimpleShell(DirLocationLike<?> path, DeleteOptions deleteOptions) {
+  private SimpleShell(DirLocation path, DeleteOptions deleteOptions) {
     this.deleteOptions = deleteOptions;
     env = Maps.newHashMap();
     current = path;
@@ -82,7 +82,7 @@ public class SimpleShell implements Shell {
   // https://zeroturnaround.com/rebellabs/why-we-created-yaplj-yet-another-process-library-for-java/
   // -
   // https://stackoverflow.com/questions/193166/good-java-process-control-library
-  private ProcessResult executeInternal(DirLocationLike<?> path, List<String> commandAndParams) {
+  private ProcessResult executeInternal(DirLocation path, List<String> commandAndParams) {
     try {
       // File input = File.createTempFile("restfs", ".input");
       // TODO splitting command should work for "aaa bbbb" as argument
@@ -118,33 +118,33 @@ public class SimpleShell implements Shell {
   }
 
   @Override
-  public DirLocationLike<?> pwd() {
+  public DirLocation pwd() {
     return current;
   }
 
   @Override
-  public DirLocationLike<?> cd(RelativeLocation path) {
+  public DirLocation cd(RelativeLocation path) {
     return internalCd(child(path).existing().get().asDir());
   }
 
   @Override
-  public DirLocationLike<?> pushd(DirLocationLike<?> url) {
+  public DirLocation pushd(DirLocation url) {
     dirs.push(current);
     return internalCd(url);
   }
 
   @Override
-  public DirLocationLike<?> pushd(RelativeLocation path) {
+  public DirLocation pushd(RelativeLocation path) {
     dirs.push(current);
     return internalCd(child(path).existing().get().asDir());
   }
 
   @Override
-  public DirLocationLike<?> popd() {
+  public DirLocation popd() {
     return internalCd(dirs.pop());
   }
 
-  private DirLocationLike<?> internalCd(DirLocationLike<?> dir) {
+  private DirLocation internalCd(DirLocation dir) {
     current = dir;
     dir.mkdirIfNeeded();
     return dir;
@@ -156,19 +156,19 @@ public class SimpleShell implements Shell {
   }
 
   @Override
-  public ReferenceLocationLike<?> child(RelativeLocation path) {
+  public ReferenceLocation child(RelativeLocation path) {
     return pwd().child(path);
   }
 
   @Override
   @sugar
-  public ReferenceLocationLike<?> child(String path) {
+  public ReferenceLocation child(String path) {
     return child(Locations.relative(path));
   }
 
   @Override
   @sugar
-  public DirLocationLike<?> pushd(String path) {
+  public DirLocation pushd(String path) {
     return pushd(Locations.relative(path));
   }
 
@@ -184,7 +184,7 @@ public class SimpleShell implements Shell {
 
   @Override
   @sugar
-  public DirLocationLike<?> mkdirAndPushd(String path) {
+  public DirLocation mkdirAndPushd(String path) {
     mkdir(path);
     return pushd(path);
   }

@@ -36,6 +36,8 @@ import org.raisercostin.jedio.FileLocation;
 import org.raisercostin.jedio.Locations;
 import org.raisercostin.jedio.MetaInfo;
 import org.raisercostin.jedio.NonExistingLocation;
+import org.raisercostin.jedio.ReadableFileLocation;
+import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
@@ -79,7 +81,6 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     return new PathLocation(path, false);
   }
 
-  @SuppressWarnings("rawtypes")
   public static PathLocation efficientExistingFile(Path path) {
     return new PathLocation(path, false);
   }
@@ -281,7 +282,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public WritableFileLocationLike asWritableFile() {
+  public WritableFileLocation asWritableFile() {
     // TODO check dir exists and file doesn't
     return this;
   }
@@ -358,7 +359,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public PathLocation copyFrom(ReadableFileLocationLike<?> source, CopyOptions copyOptions) {
+  public PathLocation copyFrom(ReadableFileLocation source, CopyOptions copyOptions) {
     copyOptions.reportOperationEvent(CopyEvent.CopyFileTriggered, source, this);
     if (copyOptions.makeDirIfNeeded()) {
       mkdirOnParentIfNeeded();
@@ -491,12 +492,12 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public void junctionTo(ReferenceLocationLike target) {
+  public void junctionTo(ReferenceLocation target) {
     createJunction(toPath(), target.asPathLocation().toPath());
   }
 
   @Override
-  public void symlinkTo(ReferenceLocationLike target) {
+  public void symlinkTo(ReferenceLocation target) {
     createSymlink(toPath(), target.asPathLocation().toPath());
   }
 
@@ -795,7 +796,6 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     return findFilesAndDirs(createFilter(recursive));
   }
 
-  @SuppressWarnings("unchecked")
   public Flux<PathLocation> findFilesAndDirs(TraversalFilter filter) {
     return find(filter).map(x -> {
       if (x.isDirectory()) {

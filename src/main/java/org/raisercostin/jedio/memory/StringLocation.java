@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import io.vavr.control.Option;
 import org.raisercostin.jedio.FileLocation;
 import org.raisercostin.jedio.NonExistingLocation;
+import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.impl.LinkLocationLike;
 import org.raisercostin.jedio.impl.NonExistingLocationLike;
 import org.raisercostin.jedio.impl.ReadableFileLocationLike;
@@ -46,7 +47,7 @@ public class StringLocation implements FileLocation, NonExistingLocation, Readab
   }
 
   @Override
-  public ReadableFileLocationLike asReadableFile() {
+  public ReadableFileLocation asReadableFile() {
     return this;
   }
 
@@ -103,7 +104,7 @@ public class StringLocation implements FileLocation, NonExistingLocation, Readab
   }
 
   @Override
-  public StringLocation copyFrom(ReadableFileLocationLike source, CopyOptions options) {
+  public StringLocation copyFrom(ReadableFileLocation source, CopyOptions options) {
     if (this.content != null && !options.replaceExisting()) {
       throw new RuntimeException("Cannot overwrite [" + this + "] with content from " + source);
     }

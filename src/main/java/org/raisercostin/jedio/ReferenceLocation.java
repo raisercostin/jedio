@@ -11,9 +11,6 @@ import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.impl.DirLocationLike;
 import org.raisercostin.jedio.impl.LinkLocationLike;
 import org.raisercostin.jedio.impl.NonExistingLocationLike;
-import org.raisercostin.jedio.impl.ReadableDirLocationLike;
-import org.raisercostin.jedio.impl.ReferenceLocationLike;
-import org.raisercostin.jedio.impl.WritableDirLocationLike;
 import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 
@@ -72,9 +69,9 @@ public interface ReferenceLocation extends Location {
 
   boolean isFile();
 
-  void symlinkTo(ReferenceLocationLike<?> parent);
+  void symlinkTo(ReferenceLocation parent);
 
-  void junctionTo(ReferenceLocationLike<?> parent);
+  void junctionTo(ReferenceLocation parent);
 
   Option<LinkLocationLike> asSymlink();
 
@@ -129,11 +126,11 @@ public interface ReferenceLocation extends Location {
 
   ReadableFileLocation asReadableFile();
 
-  DirLocationLike asDir();
+  DirLocation asDir();
 
-  ReadableDirLocationLike<?> asReadableDir();
+  ReadableDirLocation asReadableDir();
 
-  WritableDirLocationLike asWritableDir();
+  WritableDirLocation asWritableDir();
 
   PathLocation asPathLocation();
 

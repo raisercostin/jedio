@@ -10,11 +10,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
-import org.raisercostin.jedio.impl.DirLocationLike;
 import org.raisercostin.jedio.impl.LinkLocationLike;
 import org.raisercostin.jedio.impl.ReadableFileLocationLike;
-import org.raisercostin.jedio.impl.ReferenceLocationLike;
 import reactor.core.publisher.Mono;
 
 @Data
@@ -27,23 +26,23 @@ public class DiskCachedLocation implements ReadableFileLocation, ReadableFileLoc
   @Setter(value = AccessLevel.NONE)
   @AllArgsConstructor
   public static class Root {
-    public DirLocationLike<?> dir;
+    public DirLocation dir;
     public Function1<String, String> transformer;
 
     public DiskCachedLocation cached(ReadableFileLocationLike<?> x) {
       return new DiskCachedLocation(this, x);
     }
 
-    private String slug(ReadableFileLocationLike<?> location) {
+    private String slug(ReadableFileLocation location) {
       return location.absoluteAndNormalized().replaceAll("[:\\\\/#?.&]", "-");
     }
 
-    public ReferenceLocationLike<?> locationFor(ReadableFileLocationLike<?> location) {
-      return dir.child(slug(location));
+    public ReadableFileLocation locationFor(ReadableFileLocation location) {
+      return dir.child(slug(location)).asReadableFile();
     }
   }
 
-  public static Root cacheAt(DirLocationLike dir, Function1<String, String> transformer) {
+  public static Root cacheAt(DirLocation dir, Function1<String, String> transformer) {
     return new Root(dir, transformer);
   }
 
@@ -98,7 +97,7 @@ public class DiskCachedLocation implements ReadableFileLocation, ReadableFileLoc
 
   @Override
   public String readContent(Charset charset) {
-    ReferenceLocationLike cached = cache.locationFor(location);
+    ReadableFileLocation cached = cache.locationFor(location);
     if (cached.exists()) {
       return cached.asReadableFile().readContent(charset);
     } else {
@@ -110,7 +109,7 @@ public class DiskCachedLocation implements ReadableFileLocation, ReadableFileLoc
 
   @Override
   public Mono<String> readContentAsync() {
-    ReferenceLocationLike cached = cache.locationFor(location);
+    ReadableFileLocation cached = cache.locationFor(location);
     if (cached.exists()) {
       return cached.asReadableFile().readContentAsync();
     } else {

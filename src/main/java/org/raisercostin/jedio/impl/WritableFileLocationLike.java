@@ -4,6 +4,7 @@ import java.io.InputStream;
 
 import org.jedio.sugar;
 import org.raisercostin.jedio.Locations;
+import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.op.CopyOptions;
 
@@ -26,7 +27,7 @@ public interface WritableFileLocationLike<SELF extends WritableFileLocationLike<
   }
 
   @Override
-  SELF copyFrom(ReadableFileLocationLike<?> source, CopyOptions options);
+  SELF copyFrom(ReadableFileLocation source, CopyOptions options);
 
   @Override
   @sugar

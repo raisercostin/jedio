@@ -152,7 +152,7 @@ public class ClasspathLocation
   }
 
   @Override
-  public ReadableFileLocationLike asReadableFile() {
+  public ReadableFileLocation asReadableFile() {
     return this;
   }
 

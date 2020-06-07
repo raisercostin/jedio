@@ -12,8 +12,10 @@ import org.apache.commons.io.FilenameUtils;
 import org.jedio.deprecated;
 import org.jedio.sugar;
 import org.raisercostin.jedio.BasicDirLocation;
+import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
+import org.raisercostin.jedio.WritableDirLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
@@ -159,12 +161,12 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
   }
 
   @Override
-  default void symlinkTo(ReferenceLocationLike<?> parent) {
+  default void symlinkTo(ReferenceLocation parent) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
-  default void junctionTo(ReferenceLocationLike<?> parent) {
+  default void junctionTo(ReferenceLocation parent) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -306,12 +308,12 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
 
   @Override
   default WritableFileLocation asWritableFile() {
-    return (WritableFileLocationLike) this;
+    return (WritableFileLocation) this;
   }
 
   @Override
-  default DirLocationLike asDir() {
-    return (DirLocationLike) this;
+  default DirLocation asDir() {
+    return (DirLocation) this;
   }
 
   @Override
@@ -320,8 +322,8 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
   }
 
   @Override
-  default WritableDirLocationLike asWritableDir() {
-    return (WritableDirLocationLike) this;
+  default WritableDirLocation asWritableDir() {
+    return (WritableDirLocation) this;
   }
 
   @Override

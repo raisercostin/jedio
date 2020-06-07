@@ -188,6 +188,12 @@
       <groupId>org.raisercostin</groupId>
       <artifactId>raisercostin-commons</artifactId>
       <version>2.27</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.raisercostin</groupId>
+          <artifactId>jedio</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- logs -->
     <dependency>
@@ -273,12 +279,42 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <!-- <version>3.8.1</version> -->
+        <!-- to use eclipse compiler like in 
+          - https://stackoverflow.com/questions/33164976/using-eclipse-java-compiler-ecj-in-maven-builds
+          - https://projectlombok.org/setup/ecj
+          - https://projectlombok.org/setup/ecj-in-maven-pom-example.xml
+          -->
         <!--$NO-MVN-MAN-VER$ -->
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-compiler-eclipse</artifactId>
+            <version>2.8.6</version>
+          </dependency>
+          <dependency>
+            <groupId>org.eclipse.jdt</groupId>
+            <artifactId>ecj</artifactId>
+            <version>3.21.0</version>
+          </dependency>
+        </dependencies>
         <configuration>
           <source>${source.java.version}</source>
           <target>${target.java.version}</target>
           <showWarnings>true</showWarnings>
           <showDeprecation>true</showDeprecation>
+          <!-- eclipse compiler -->
+          <!-- 
+            set MAVEN_OPTS=-javaagent:target/lombok.jar=ECJ-
+            <release>11</release>
+           -->
+          <!-- 
+          <compilerId>eclipse</compilerId>
+          <fork>true</fork>
+          <compilerArgs>
+            <arg>-javaagent:target/lombok.jar=ECJ</arg>
+          </compilerArgs>
+           -->
           <annotationProcessorPaths>
             <path>
               <groupId>org.projectlombok</groupId>
@@ -293,6 +329,34 @@
 					<execution> <id>java-compile</id> <phase>compile</phase> <goals> <goal>compile</goal> </goals> </execution> <execution> <id>java-test-compile</id> 
 					<phase>test-compile</phase> <goals> <goal>testCompile</goal> </goals> </execution> </executions> -->
       </plugin>
+      <!-- lombok for ecj compiler
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <id>get-lombok</id>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <phase>validate</phase>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.projectlombok</groupId>
+                  <artifactId>lombok</artifactId>
+                  <version>${lombok.version}</version>
+                  <type>jar</type>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                  <destFileName>lombok.jar</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      -->
       <plugin>
         <groupId>org.eclipse.m2e</groupId>
         <artifactId>lifecycle-mapping</artifactId>
@@ -310,7 +374,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore />
+                  <ignore/>
                 </action>
               </pluginExecution>
               <pluginExecution>
@@ -323,7 +387,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore />
+                  <ignore/>
                 </action>
               </pluginExecution>
             </pluginExecutions>
@@ -422,6 +486,24 @@
             </goals>
           </execution>
         </executions>
+        <dependencies>
+          <!-- to use eclipse compiler like in 
+          - https://stackoverflow.com/questions/33164976/using-eclipse-java-compiler-ecj-in-maven-builds
+          - https://projectlombok.org/setup/ecj
+          - https://projectlombok.org/setup/ecj-in-maven-pom-example.xml
+
+          <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-compiler-eclipse</artifactId>
+            <version>2.8.6</version>
+          </dependency>
+          <dependency>
+            <groupId>org.eclipse.jdt</groupId>
+            <artifactId>ecj</artifactId>
+            <version>3.21.0</version>
+          </dependency>
+          -->
+        </dependencies>
       </plugin>
       <plugin>
         <groupId>au.com.acegi</groupId>
@@ -523,7 +605,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore />
+                    <ignore/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>

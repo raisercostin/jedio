@@ -32,7 +32,6 @@ import org.jedio.Audit;
 import org.jedio.functions.JedioFunction;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReadableFileLocation;
-import org.raisercostin.jedio.impl.ReadableFileLocationLike;
 import org.raisercostin.jedio.url.JedioHttpClients.JedioHttpClient;
 import reactor.core.publisher.Mono;
 
@@ -80,7 +79,7 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
   }
 
   @Override
-  public ReadableFileLocationLike asReadableFile() {
+  public ReadableFileLocation asReadableFile() {
     return this;
   }
 
@@ -88,12 +87,12 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
   @SneakyThrows
   public InputStream unsafeInputStream() {
     HttpGet get1 = new HttpGet(url.toExternalForm());
-    CloseableHttpResponse lastResponse = null;
-    Throwable ignoredExceptionForRetry = null;
+    // CloseableHttpResponse lastResponse = null;
+    // Throwable ignoredExceptionForRetry = null;
     try (CloseableHttpResponse response = client.client().execute(get1)) {
-      int code = response.getStatusLine().getStatusCode();
-      String reason = response.getStatusLine().getReasonPhrase();
-      lastResponse = response;
+      // int code = response.getStatusLine().getStatusCode();
+      // String reason = response.getStatusLine().getReasonPhrase();
+      // lastResponse = response;
       return response.getEntity().getContent();
     }
     // //TODO use client
