@@ -5,10 +5,15 @@ import java.io.InputStream;
 import java.net.SocketException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.vavr.API;
 import io.vavr.collection.Map;
 import lombok.AllArgsConstructor;
@@ -36,6 +41,7 @@ import org.jedio.functions.JedioFunction;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.url.JedioHttpClients.JedioHttpClient;
+import org.raisercostin.nodes.Nodes;
 import reactor.core.publisher.Mono;
 
 @Getter(lombok.AccessLevel.NONE)
@@ -148,47 +154,52 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
     request.addHeader("Cache-Control", "no-cache");
     request.addHeader("Upgrade-Insecure-Requests", "1");
     request.addHeader("User-Agent",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36");
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36");
     request.addHeader("Accept",
-        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+      "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
     request.addHeader("Accept-Encoding", "gzip, deflate");
     // not needed anymore - request.addHeader("Accept-Charset", "utf-8, iso-8859-1;q=0.5");
     request.addHeader("Accept-Language", "en-US,en;q=0.9,ro;q=0.8");
     java.util.Map<String, Object> attrs = Maps.newConcurrentMap();
-    HttpClientContext context = HttpClientContext.adapt(new HttpContext() {
-      @Override
-      public void setAttribute(String id, Object obj) {
-        if (id == null || obj == null) {
-          // log.warn("cannot add attribute {}:{}", id, obj);
-        } else {
-          attrs.put(id, obj);
+    HttpClientContext context = HttpClientContext.adapt(new HttpContext()
+      {
+        @Override
+        public void setAttribute(String id, Object obj) {
+          if (id == null || obj == null) {
+            // log.warn("cannot add attribute {}:{}", id, obj);
+          } else {
+            attrs.put(id, obj);
+          }
         }
-      }
 
-      @Override
-      public Object removeAttribute(String id) {
-        return attrs.remove(id);
-      }
+        @Override
+        public Object removeAttribute(String id) {
+          return attrs.remove(id);
+        }
 
-      @Override
-      public Object getAttribute(String id) {
-        return attrs.get(id);
-      }
-    });
+        @Override
+        public Object getAttribute(String id) {
+          return attrs.get(id);
+        }
+      });
     try (CloseableHttpResponse response = client.client().execute(request, context)) {
       int code = response.getStatusLine().getStatusCode();
       String reason = response.getStatusLine().getReasonPhrase();
-      InputStream in = response.getEntity().getContent();
-      HttpClientLocationMetaRequest req = new HttpClientLocationMetaRequest(request.getRequestLine(),
+      //TODO do not remove this close - we need to close the stream and let the connection be (might be reused by connection pool)
+      try (InputStream in = response.getEntity().getContent()) {
+        HttpClientLocationMetaRequest req = new HttpClientLocationMetaRequest(request.getRequestLine(),
           request.getConfig(), request.getParams(), toHeaders(request.getAllHeaders()));
-      HttpClientLocationMetaResponse res = new HttpClientLocationMetaResponse(response.getStatusLine(),
+        HttpClientLocationMetaResponse res = new HttpClientLocationMetaResponse(response.getStatusLine(),
           toHeaders(response.getAllHeaders()));
-      context.removeAttribute(HttpCoreContext.HTTP_RESPONSE);
-      context.removeAttribute(HttpCoreContext.HTTP_REQUEST);
-      context.removeAttribute(HttpCoreContext.HTTP_CONNECTION);
-      context.removeAttribute("http.cookie-spec");
-      context.removeAttribute("http.cookiespec-registry");
-      return inputStreamConsumer.apply(StreamAndMeta.fromPayload(new HttpClientLocationMeta(req, res, attrs), in));
+        context.removeAttribute(HttpCoreContext.HTTP_RESPONSE);
+        context.removeAttribute(HttpCoreContext.HTTP_REQUEST);
+        context.removeAttribute(HttpCoreContext.HTTP_CONNECTION);
+        context.removeAttribute("http.cookie-spec");
+        context.removeAttribute("http.cookiespec-registry");
+        R result = inputStreamConsumer
+          .apply(StreamAndMeta.fromPayload(new HttpClientLocationMeta(req, res, attrs), in));
+        return result;
+      }
     }
   }
 
@@ -239,10 +250,17 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
   @SneakyThrows
   public String readContent(Charset charset) {
     return usingInputStreamAndMeta(false, streamAndMeta -> {
-      if (streamAndMeta.meta.httpMetaResponseStatusCodeIs200()) {
-        return IOUtils.toString(streamAndMeta.is, charset);
+      try {
+        log.info("reading from {}", this);
+        if (streamAndMeta.meta.httpMetaResponseStatusCodeIs200()) {
+          return IOUtils.toString(streamAndMeta.is, charset);
+        }
+        throw new AuditException("Http error [%s] on calling %s - meta:%s",
+          streamAndMeta.meta.httpMetaResponseStatusToString().getOrElse("-"), this,
+          Nodes.json.toString(streamAndMeta.meta));
+      } finally {
+        log.info("reading from {} done.", this);
       }
-      throw new AuditException("Error on calling %s - meta:%s", this, streamAndMeta.meta);
     });
     // return readContentOld();
     // //return readContentAsync().block();
@@ -275,8 +293,48 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
     throw new InvalidHttpResponse("Invalid call " + this, lastResponse, ignoredExceptionForRetry);
   }
 
+  private static final ExecutorService executorService = createExecutor();
+
+  private static ExecutorService createExecutor() {
+    int threads = 100;
+    log.info("Create executor ... {} threads", threads);
+    ThreadFactory builder = new ThreadFactoryBuilder().setNameFormat("jedio-%s").build();
+    //.setUncaughtExceptionHandler(fiberExceptionHandler)
+    ExecutorService result = Executors.newFixedThreadPool(threads, builder);
+    log.info("Create executor done.");
+    return result;
+  }
+
   @Override
   public Mono<String> readContentAsync() {
+    //
+    // return Mono.fromCallable(() -> {
+    // fiber.start();
+    // return fiber.get();
+    // });
+    CompletableFuture<String> yourCompletableFuture = new CompletableFuture<>();
+    // Fiber<String> fiber = new Fiber<String>(fiberForkJoinScheduler, () -> {throw new
+    // RuntimeException("yourCompletableFuture.complete(readContent())");});
+    //Thread.activeCount()
+    executorService.execute(
+      //Thread fiber = new Thread(//fiberForkJoinScheduler,
+      () -> {
+        try {
+          // throw new RuntimeException("hahahah");
+          yourCompletableFuture.complete(readContent());
+        } catch (Exception e) {
+          if (!yourCompletableFuture.completeExceptionally(e)) {
+            //throw e;
+            log.error("Error in thread", e);
+          }
+        }
+      });
+    //TODO fiber.setUncaughtExceptionHandler(fiberExceptionHandler);
+    //fiber.start();
+    return Mono.fromFuture(yourCompletableFuture);
+  }
+
+  public Mono<String> readContentAsync1() {
     return Mono.fromCallable(() -> {
       return readContent(this.charset1);
       // if (enableHardAbort) {

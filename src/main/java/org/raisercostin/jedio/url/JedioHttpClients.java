@@ -43,6 +43,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.conn.SystemDefaultDnsResolver;
 import org.apache.http.message.BasicHeaderElementIterator;
+import org.apache.http.pool.PoolStats;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
@@ -59,16 +60,22 @@ public class JedioHttpClients {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @ToString
   public static class JedioHttpClient {
-    public static JedioHttpClient from(String name, HttpClientBuilder builder) {
-      return new JedioHttpClient(name, builder, Lazy.of(() -> builder.build()));
+    public static JedioHttpClient from(String name, PoolingHttpClientConnectionManager connManager,
+        HttpClientBuilder builder) {
+      return new JedioHttpClient(name, connManager, builder, Lazy.of(() -> builder.build()));
     }
 
     public String name;
+    public PoolingHttpClientConnectionManager connManager;
     public HttpClientBuilder builder;
     public Lazy<CloseableHttpClient> client;
 
     public CloseableHttpClient client() {
       return client.get();
+    }
+
+    public PoolStats getStatus() {
+      return connManager.getTotalStats();
     }
   }
 
@@ -81,7 +88,9 @@ public class JedioHttpClients {
   private static final boolean enableHardAbort = true;
 
   public static JedioHttpClient createHighPerfHttpClient() {
-    return JedioHttpClient.from("jedio1", createHighPerfHttpClient(mgr -> {
+    PoolingHttpClientConnectionManager connManager = createConnectionManager(mgr -> {
+    });
+    return JedioHttpClient.from("jedio1", connManager, createHighPerfHttpClient(connManager, mgr -> {
     }));
   }
 
@@ -89,9 +98,9 @@ public class JedioHttpClients {
    * See - https://www.baeldung.com/httpclient-connection-management - https://www.baeldung.com/httpclient-timeout
    */
   @SneakyThrows
-  public static HttpClientBuilder createHighPerfHttpClient(Consumer<PoolingHttpClientConnectionManager> manager) {
+  public static HttpClientBuilder createHighPerfHttpClient(PoolingHttpClientConnectionManager connManager,
+      Consumer<PoolingHttpClientConnectionManager> manager) {
     ConnectionKeepAliveStrategy keepAliveStrategy = keepAliveStrategy();
-    PoolingHttpClientConnectionManager connManager = createConnectionManager(manager);
     RequestConfig requestConfig = createRequestConfig();
     HttpClientBuilder builder = HttpClients.custom()
       .setKeepAliveStrategy(keepAliveStrategy)
@@ -131,6 +140,9 @@ public class JedioHttpClients {
     // connManager.setSocketConfig(route.getTargetHost(), SocketConfig.custom().setSoTimeout(5000).build());
     // Set the maximum number of total open connections.
     connManager.setMaxTotal(ROUTES);
+    connManager.closeExpiredConnections();
+    connManager.closeIdleConnections(1000, TimeUnit.SECONDS);
+    connManager.setValidateAfterInactivity(10 * MILLIS);
     // Set the maximum number of concurrent connections per route, which is 2 by default.
     connManager.setDefaultMaxPerRoute(ROUTES);
     ConnectionConfig defaultConnectionConfig = ConnectionConfig.custom().build();
@@ -250,8 +262,8 @@ public class JedioHttpClients {
     return (exception, executionCount, context) -> {
       boolean retryable = checkRetriable(exception, executionCount, context);
       log.warn("error. try again request: {}. {} Enable debug to see fullstacktrace.", retryable,
-        exception.getMessage());
-      log.debug("error. try again request: {}. Fullstacktrace.", retryable, exception.getMessage(), exception);
+        exception.getMessage(), exception);
+      //log.debug("error. try again request: {}. Fullstacktrace.", retryable, exception.getMessage(), exception);
       return retryable;
     };
   }

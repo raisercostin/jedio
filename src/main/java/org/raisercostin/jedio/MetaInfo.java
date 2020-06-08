@@ -89,6 +89,10 @@ public class MetaInfo {
     return field("payload.response.statusLine.statusCode").map(x -> new Integer(x));
   }
 
+  private Option<String> httpMetaResponseStatusPhrase() {
+    return field("payload.response.statusLine.reasonPhrase");
+  }
+
   public boolean httpMetaResponseStatusCodeIs200() {
     return httpMetaResponseStatusCode().map(x -> x.equals(200)).getOrElse(false);
   }
@@ -103,5 +107,9 @@ public class MetaInfo {
 
   public boolean httpResponseHeaderContentTypeIsHtml() {
     return httpResponseHeaderContentType().getOrElse("").startsWith("text/html");
+  }
+
+  public Option<String> httpMetaResponseStatusToString() {
+    return httpMetaResponseStatusCode().map(x -> x + " : " + httpMetaResponseStatusPhrase().get());
   }
 }

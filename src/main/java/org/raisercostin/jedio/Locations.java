@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import io.vavr.Lazy;
 import org.apache.commons.httpclient.URI;
 import org.jedio.sugar;
 import org.raisercostin.jedio.classpath.ClasspathLocation;
@@ -17,7 +18,7 @@ import org.raisercostin.jedio.url.SimpleUrl;
 import org.raisercostin.jedio.url.WebLocation;
 
 public class Locations {
-  private static JedioHttpClient defaultClient = JedioHttpClients.createHighPerfHttpClient();
+  private static Lazy<JedioHttpClient> defaultClient = Lazy.of(() -> JedioHttpClients.createHighPerfHttpClient());
 
   @sugar
   public static RelativeLocation relative(Path path) {
@@ -58,10 +59,6 @@ public class Locations {
     return path(Paths.get(path));
   }
 
-  public static HttpClientLocation url(String url) {
-    return new HttpClientLocation(url, false, defaultClient);
-  }
-
   public static InputStreamLocation stream(InputStream inputStream) {
     return new InputStreamLocation(inputStream);
   }
@@ -70,15 +67,27 @@ public class Locations {
     return new WebLocation(true, webAddress);
   }
 
-  public static HttpClientLocation url(String sourceHyperlink, String relativeOrAbsoluteHyperlink) {
-    return HttpClientLocation.url(sourceHyperlink, relativeOrAbsoluteHyperlink, defaultClient);
-  }
-
-  public static HttpClientLocation url(SimpleUrl url) {
-    return HttpClientLocation.url(url, defaultClient);
+  public static HttpClientLocation url(String url) {
+    return new HttpClientLocation(url, false, defaultClient.get());
   }
 
   public static HttpClientLocation url(URI uri) {
     return url(new SimpleUrl(uri));
+  }
+
+  //public static HttpClientLocation url(URL url) {
+  //return url(new SimpleUrl(url));
+  //}
+
+  public static HttpClientLocation url(SimpleUrl url) {
+    return HttpClientLocation.url(url, defaultClient.get());
+  }
+
+  public static HttpClientLocation url(String sourceHyperlink, String relativeOrAbsoluteHyperlink) {
+    return HttpClientLocation.url(sourceHyperlink, relativeOrAbsoluteHyperlink, defaultClient.get());
+  }
+
+  public static HttpClientLocation url(String url, JedioHttpClient client) {
+    return new HttpClientLocation(url, false, client);
   }
 }
