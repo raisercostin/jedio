@@ -296,7 +296,7 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
   private static final ExecutorService executorService = createExecutor();
 
   private static ExecutorService createExecutor() {
-    int threads = 100;
+    int threads = 1000;
     log.info("Create executor ... {} threads", threads);
     ThreadFactory builder = new ThreadFactoryBuilder().setNameFormat("jedio-%s").build();
     //.setUncaughtExceptionHandler(fiberExceptionHandler)
