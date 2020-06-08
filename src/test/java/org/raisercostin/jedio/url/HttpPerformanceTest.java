@@ -36,7 +36,6 @@ public class HttpPerformanceTest {
     //20000 - 23s - 1000 routes & 1000 threads (available 879)
     //20000 - 21s - 1000 routes & 2000 threads
     String testUrl = "http://10.3.67.222/";
-    //"https://revobet-green-feed2-inplay.revomatico.com/inplay-soccer.json";
 
     JedioHttpClient client = JedioHttpClients.createHighPerfHttpClient();
     //    log.info("Using the following\nApacheHttpClient Settings:\n{}",

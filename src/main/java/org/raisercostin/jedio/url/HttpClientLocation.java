@@ -251,7 +251,7 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
   public String readContent(Charset charset) {
     return usingInputStreamAndMeta(false, streamAndMeta -> {
       try {
-        log.info("reading from {}", this);
+        log.debug("reading from {}", this);
         if (streamAndMeta.meta.httpMetaResponseStatusCodeIs200()) {
           return IOUtils.toString(streamAndMeta.is, charset);
         }
@@ -259,7 +259,7 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
           streamAndMeta.meta.httpMetaResponseStatusToString().getOrElse("-"), this,
           Nodes.json.toString(streamAndMeta.meta));
       } finally {
-        log.info("reading from {} done.", this);
+        log.debug("reading from {} done.", this);
       }
     });
     // return readContentOld();

@@ -65,6 +65,12 @@ public class JedioHttpClients {
       return new JedioHttpClient(name, connManager, builder, Lazy.of(() -> builder.build()));
     }
 
+    public static JedioHttpClient from(String name, HttpClientBuilder builder) {
+      PoolingHttpClientConnectionManager connManager = createConnectionManager(mgr -> {
+      });
+      return new JedioHttpClient(name, connManager, builder, Lazy.of(() -> builder.build()));
+    }
+
     public String name;
     public PoolingHttpClientConnectionManager connManager;
     public HttpClientBuilder builder;
@@ -92,6 +98,11 @@ public class JedioHttpClients {
     });
     return JedioHttpClient.from("jedio1", connManager, createHighPerfHttpClient(connManager, mgr -> {
     }));
+  }
+
+  @SneakyThrows
+  public static HttpClientBuilder createHighPerfHttpClient(Consumer<PoolingHttpClientConnectionManager> manager) {
+    return createHighPerfHttpClient(createConnectionManager(manager), manager);
   }
 
   /**
