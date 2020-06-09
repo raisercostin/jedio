@@ -5,15 +5,10 @@ import java.io.InputStream;
 import java.net.SocketException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.vavr.API;
 import io.vavr.collection.Map;
 import lombok.AllArgsConstructor;
@@ -40,7 +35,6 @@ import org.jedio.Audit.AuditException;
 import org.jedio.functions.JedioFunction;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReadableFileLocation;
-import org.raisercostin.jedio.url.JedioHttpClients.JedioHttpClient;
 import org.raisercostin.nodes.Nodes;
 import reactor.core.publisher.Mono;
 
@@ -79,7 +73,7 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
 
   @Override
   public String toString() {
-    return String.format("HttpClientLocation(%s, client=%s)", url, client.name);
+    return String.format("HttpClientLocation(%s, client=%s)", url, client.config.name);
   }
 
   @Override
@@ -185,7 +179,8 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
     try (CloseableHttpResponse response = client.client().execute(request, context)) {
       int code = response.getStatusLine().getStatusCode();
       String reason = response.getStatusLine().getReasonPhrase();
-      //TODO do not remove this close - we need to close the stream and let the connection be (might be reused by connection pool)
+      // TODO do not remove this close - we need to close the stream and let the connection be (might be reused by
+      // connection pool)
       try (InputStream in = response.getEntity().getContent()) {
         HttpClientLocationMetaRequest req = new HttpClientLocationMetaRequest(request.getRequestLine(),
           request.getConfig(), request.getParams(), toHeaders(request.getAllHeaders()));
@@ -215,11 +210,11 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
     // CloseableHttpResponse response = client.execute(get1);
   }
 
-  public Mono<String> readContentAsyncOld() {
+  public Mono<String> readContentAsyncOld(Charset charset) {
     HttpGet get1 = new HttpGet(url.toExternalForm());
     return Mono.fromCallable(() -> {
       try (CloseableHttpResponse response = client.client().execute(get1)) {
-        return IOUtils.toString(response.getEntity().getContent());
+        return IOUtils.toString(response.getEntity().getContent(), charset);
       }
     });
     // response.getEntity().
@@ -248,26 +243,26 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
 
   @Override
   @SneakyThrows
-  public String readContent(Charset charset) {
+  public String readContentSync(Charset charset) {
     return usingInputStreamAndMeta(false, streamAndMeta -> {
       try {
         log.debug("reading from {}", this);
         if (streamAndMeta.meta.httpMetaResponseStatusCodeIs200()) {
           return IOUtils.toString(streamAndMeta.is, charset);
         }
-        throw new AuditException("Http error [%s] on calling %s - meta:%s",
-          streamAndMeta.meta.httpMetaResponseStatusToString().getOrElse("-"), this,
-          Nodes.json.toString(streamAndMeta.meta));
+        throw new AuditException(new AuditException("Error full meta %s", Nodes.json.toString(streamAndMeta.meta)),
+          "Http error [%s] on calling %s. Full meta in root cause.",
+          streamAndMeta.meta.httpMetaResponseStatusToString().getOrElse("-"),
+          this);
       } finally {
         log.debug("reading from {} done.", this);
       }
     });
     // return readContentOld();
-    // //return readContentAsync().block();
     // return HttpUtils.getFromURL(this.toExternalForm());
   }
 
-  private String readContentOld() throws IOException, ClientProtocolException {
+  private String readContentOld(Charset charset) throws IOException, ClientProtocolException {
     HttpGet get1 = new HttpGet(url.toExternalForm());
     CloseableHttpResponse lastResponse = null;
     Throwable ignoredExceptionForRetry = null;
@@ -278,7 +273,7 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
         lastResponse = response;
         if (code == 200) {
           final InputStream content = response.getEntity().getContent();
-          return IOUtils.toString(content);
+          return IOUtils.toString(content, charset);
         } else if (code == 502 || code == 520) {
           log.info("Attempt {} to {} failed: {}", attempt, url, response);
         } else {
@@ -293,50 +288,14 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
     throw new InvalidHttpResponse("Invalid call " + this, lastResponse, ignoredExceptionForRetry);
   }
 
-  private static final ExecutorService executorService = createExecutor();
-
-  private static ExecutorService createExecutor() {
-    int threads = 1000;
-    log.info("Create executor ... {} threads", threads);
-    ThreadFactory builder = new ThreadFactoryBuilder().setNameFormat("jedio-%s").build();
-    //.setUncaughtExceptionHandler(fiberExceptionHandler)
-    ExecutorService result = Executors.newFixedThreadPool(threads, builder);
-    log.info("Create executor done.");
-    return result;
-  }
-
   @Override
-  public Mono<String> readContentAsync() {
-    //
-    // return Mono.fromCallable(() -> {
-    // fiber.start();
-    // return fiber.get();
-    // });
-    CompletableFuture<String> yourCompletableFuture = new CompletableFuture<>();
-    // Fiber<String> fiber = new Fiber<String>(fiberForkJoinScheduler, () -> {throw new
-    // RuntimeException("yourCompletableFuture.complete(readContent())");});
-    //Thread.activeCount()
-    executorService.execute(
-      //Thread fiber = new Thread(//fiberForkJoinScheduler,
-      () -> {
-        try {
-          // throw new RuntimeException("hahahah");
-          yourCompletableFuture.complete(readContent());
-        } catch (Exception e) {
-          if (!yourCompletableFuture.completeExceptionally(e)) {
-            //throw e;
-            log.error("Error in thread", e);
-          }
-        }
-      });
-    //TODO fiber.setUncaughtExceptionHandler(fiberExceptionHandler);
-    //fiber.start();
-    return Mono.fromFuture(yourCompletableFuture);
+  public Mono<String> readContentAsync(Charset charset) {
+    return client.execute(() -> readContentSync(charset));
   }
 
-  public Mono<String> readContentAsync1() {
+  public Mono<String> readContentAsync1(Charset charset) {
     return Mono.fromCallable(() -> {
-      return readContent(this.charset1);
+      return readContentSync(charset);
       // if (enableHardAbort) {
       // scheduler.schedule(() -> {
       // // redundant null check

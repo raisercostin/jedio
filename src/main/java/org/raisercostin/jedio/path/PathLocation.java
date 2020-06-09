@@ -293,7 +293,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public String readContent(Charset charset) {
+  public String readContentSync(Charset charset) {
     try (BufferedReader b = reader(toPath(), charset)) {
       return IOUtils.toString(b);
     } catch (IOException e) {

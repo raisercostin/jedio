@@ -60,17 +60,17 @@ public class MemoizedLocation implements ReadableFileLocation, ReadableFileLocat
   }
 
   @Override
-  public String readContent(Charset charset) {
+  public String readContentSync(Charset charset) {
     if (content == null) {
-      content = location.readContent(charset);
+      content = location.readContentSync(charset);
     }
     return content;
   }
 
   @Override
-  public Mono<String> readContentAsync() {
+  public Mono<String> readContentAsync(Charset charset) {
     if (content == null) {
-      return location.readContentAsync().map(x -> content = x);
+      return location.readContentAsync(charset).map(x -> content = x);
     } else {
       return Mono.just(content);
     }

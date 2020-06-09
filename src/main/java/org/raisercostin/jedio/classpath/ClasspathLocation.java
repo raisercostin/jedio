@@ -138,7 +138,7 @@ public class ClasspathLocation
   }
 
   @Override
-  public String readContent(Charset charset) {
+  public String readContentSync(Charset charset) {
     try (BufferedInputStream b = new BufferedInputStream(unsafeInputStream())) {
       return IOUtils.toString(b, charset);
     } catch (IOException e) {

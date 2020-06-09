@@ -50,7 +50,7 @@ public class HttpStandardJavaLocation extends BaseHttpLocationLike<HttpStandardJ
   }
 
   @Override
-  public String readContent(Charset charset) {
+  public String readContentSync(Charset charset) {
     return HttpUtils.getFromURL(url.toExternalForm());
   }
 

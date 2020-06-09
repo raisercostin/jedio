@@ -19,7 +19,7 @@ public class InputStreamLocation implements ReadableFileLocation, ReadableFileLo
   }
 
   @Override
-  public String readContent(Charset charset) {
+  public String readContentSync(Charset charset) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 }

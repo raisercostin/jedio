@@ -96,24 +96,24 @@ public class DiskCachedLocation implements ReadableFileLocation, ReadableFileLoc
   }
 
   @Override
-  public String readContent(Charset charset) {
+  public String readContentSync(Charset charset) {
     ReadableFileLocation cached = cache.locationFor(location);
     if (cached.exists()) {
-      return cached.asReadableFile().readContent(charset);
+      return cached.asReadableFile().readContentSync(charset);
     } else {
-      String content = location.readContent(charset);
+      String content = location.readContentSync(charset);
       cached.asWritableFile().write(cache.transformer.apply(content));
       return content;
     }
   }
 
   @Override
-  public Mono<String> readContentAsync() {
+  public Mono<String> readContentAsync(Charset charset) {
     ReadableFileLocation cached = cache.locationFor(location);
     if (cached.exists()) {
-      return cached.asReadableFile().readContentAsync();
+      return cached.asReadableFile().readContentAsync(charset);
     } else {
-      return location.readContentAsync().map(content -> {
+      return location.readContentAsync(charset).map(content -> {
         cached.asWritableFile().write(cache.transformer.apply(content));
         return content;
       });

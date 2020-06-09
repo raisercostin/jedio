@@ -88,12 +88,12 @@ public class StringLocation implements FileLocation, NonExistingLocation, Readab
   }
 
   @Override
-  public String readContent(Charset charset) {
+  public String readContentSync(Charset charset) {
     return content;
   }
 
   @Override
-  public Mono<String> readContentAsync() {
+  public Mono<String> readContentAsync(Charset charset) {
     return Mono.just(content);
   }
 

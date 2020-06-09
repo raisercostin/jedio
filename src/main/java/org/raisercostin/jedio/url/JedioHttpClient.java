@@ -5,6 +5,10 @@ import java.io.InterruptedIOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -13,14 +17,22 @@ import javax.net.ssl.SSLSession;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.vavr.Function0;
 import io.vavr.Lazy;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.ToString;
+import lombok.Value;
+import lombok.With;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -47,70 +59,144 @@ import org.apache.http.pool.PoolStats;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
+import reactor.core.publisher.Mono;
 
-public class JedioHttpClients {
+@Data
+@Getter(lombok.AccessLevel.NONE)
+@Setter(lombok.AccessLevel.NONE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@ToString
+/**
+ * Default client configuration that takes care of all http call details:
+ * - [x] connection pool: `PoolingHttpClientConnectionManager`
+ * - [x] thread pool: `ExecutorService result = Executors.newFixedThreadPool`
+ */
+@Slf4j
+public class JedioHttpClient {
   private static final String SOCKET_REMOTE_ADDRESS = "socket-remote-address";
   private static final String SOCKET_LOCAL_ADDRESS = "socket-local-address";
+  private static final int MILLIS = 1000;
+  private static final int timeoutBase = 20;
 
-  @Data
+  @Value
+  @With
+  @Builder
+  @NoArgsConstructor(access = AccessLevel.PRIVATE, force = true)
+  @AllArgsConstructor
   @Getter(lombok.AccessLevel.NONE)
   @Setter(lombok.AccessLevel.NONE)
-  @AllArgsConstructor(access = AccessLevel.PRIVATE)
-  @ToString
-  public static class JedioHttpClient {
-    public static JedioHttpClient from(String name, PoolingHttpClientConnectionManager connManager,
-        HttpClientBuilder builder) {
-      return new JedioHttpClient(name, connManager, builder, Lazy.of(() -> builder.build()));
+  @FieldDefaults(makeFinal = true, level = AccessLevel.PUBLIC)
+  public static class JedioHttpConfig {
+    public static JedioHttpConfig create() {
+      return new JedioHttpConfig();
     }
 
-    public static JedioHttpClient from(String name, HttpClientBuilder builder) {
-      PoolingHttpClientConnectionManager connManager = createConnectionManager(mgr -> {
-      });
-      return new JedioHttpClient(name, connManager, builder, Lazy.of(() -> builder.build()));
-    }
+    String name;
+    @Builder.Default
+    /**Number of threads in the thread pool. Caps the available connections since the connection one creates one per thread.*/
+    int threads = 100;
+    @Builder.Default
+    int maxTotal = 1000;
+    @Builder.Default
+    int maxPerRoute = 1000;
+    @Builder.Default
+    int soTimeoutInMilllis = timeoutBase * MILLIS;
+    /**Defines period of inactivity in milliseconds after which persistent connections mustbe re-validated prior to being leased to the consumer.
+     * Non-positive value passedto this method disables connection validation. This check helps detect connectionsthat have become stale
+     * (half-closed) while kept inactive in the pool.*/
+    @Builder.Default
+    int validateAfterInactivityInMilllis = timeoutBase * MILLIS;
 
-    public String name;
-    public PoolingHttpClientConnectionManager connManager;
-    public HttpClientBuilder builder;
-    public Lazy<CloseableHttpClient> client;
+    //    public HttpClientBuilder toHttpClientBuilder() {
+    //      throw new RuntimeException("Not implemented yet!!!");
+    //    }
 
-    public CloseableHttpClient client() {
-      return client.get();
-    }
-
-    public PoolStats getStatus() {
-      return connManager.getTotalStats();
+    public JedioHttpClient createClient() {
+      return new JedioHttpClient(this);
     }
   }
-
-  private static final int timeout = 20;
-  // private static final int hardTimeout = 5 * timeout; // seconds
-  private static final int MILLIS = 1000;
-  private static final int ROUTES = 1000;
-  private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BaseHttpLocationLike.class);
-  private static final Scheduler scheduler = Schedulers.newParallel("http-hard-abort", 100);
-  private static final boolean enableHardAbort = true;
 
   public static JedioHttpClient createHighPerfHttpClient() {
-    PoolingHttpClientConnectionManager connManager = createConnectionManager(mgr -> {
-    });
-    return JedioHttpClient.from("jedio1", connManager, createHighPerfHttpClient(connManager, mgr -> {
-    }));
+    return JedioHttpConfig.create().withName("jedio1").createClient();
   }
 
-  @SneakyThrows
-  public static HttpClientBuilder createHighPerfHttpClient(Consumer<PoolingHttpClientConnectionManager> manager) {
-    return createHighPerfHttpClient(createConnectionManager(manager), manager);
+  public static JedioHttpClient from(JedioHttpConfig config) {
+    return new JedioHttpClient(config);
+  }
+
+  public final JedioHttpConfig config;
+  private final PoolingHttpClientConnectionManager connManager;
+  private final HttpClientBuilder builder;
+  private final Lazy<CloseableHttpClient> client;
+  private final ExecutorService executorService;
+
+  //  private static final int timeout = 20;
+  //  // private static final int hardTimeout = 5 * timeout; // seconds
+  //  private static final int ROUTES = 1000;
+  //  private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BaseHttpLocationLike.class);
+  //  private static final Scheduler scheduler = Schedulers.newParallel("http-hard-abort", 100);
+  //  private static final boolean enableHardAbort = true;
+
+  public JedioHttpClient(JedioHttpConfig config) {
+    this.config = config;
+    this.connManager = createConnectionManager();
+    this.builder = createHttpBuilder();
+    this.executorService = createExecutor();
+    this.client = Lazy.of(() -> builder.build());
+  }
+
+  public CloseableHttpClient client() {
+    return client.get();
+  }
+
+  public PoolStats getStatus() {
+    return connManager.getTotalStats();
+  }
+
+  private ExecutorService createExecutor() {
+    log.info("Create executor ... {} threads", this.config.threads);
+    ThreadFactory builder = new ThreadFactoryBuilder().setNameFormat(this.config.name + "-%s").build();
+    // .setUncaughtExceptionHandler(fiberExceptionHandler)
+    ExecutorService result = Executors.newFixedThreadPool(this.config.threads, builder);
+    log.info("Create executor done.");
+    return result;
+  }
+
+  private PoolingHttpClientConnectionManager createConnectionManager() {
+    PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(
+      createSocketFactoryRegistry(), SystemDefaultDnsResolver.INSTANCE);
+    // HttpHost host = new HttpHost("hostname", 80);
+    // HttpRoute route = new HttpRoute(host);
+    // connManager.setSocketConfig(route.getTargetHost(), SocketConfig.custom().setSoTimeout(5000).build());
+    // Set the maximum number of total open connections.
+    connManager.setMaxTotal(config.maxTotal);
+    connManager.closeExpiredConnections();
+    connManager.closeIdleConnections(1000, TimeUnit.SECONDS);
+    connManager.setValidateAfterInactivity(10 * MILLIS);
+    // Set the maximum number of concurrent connections per route, which is 2 by default.
+    connManager.setDefaultMaxPerRoute(config.maxPerRoute);
+    ConnectionConfig defaultConnectionConfig = ConnectionConfig.custom().build();
+    // Set the total number of concurrent connections to a specific route, which is 2 by default.
+    // connManager.setMaxPerRoute(route, 5);
+    connManager.setDefaultConnectionConfig(defaultConnectionConfig);
+    SocketConfig defaultSocketConfig = SocketConfig.custom().setSoTimeout(config.soTimeoutInMilllis).build();
+    connManager.setDefaultSocketConfig(defaultSocketConfig);
+    connManager.setValidateAfterInactivity(config.validateAfterInactivityInMilllis);
+    return connManager;
+  }
+
+  private Registry<ConnectionSocketFactory> createSocketFactoryRegistry() {
+    return RegistryBuilder.<ConnectionSocketFactory>create()
+      .register("http", createPlainConnectionSocketFactory())
+      .register("https", createSSLConnectionSocketFactory())
+      .build();
   }
 
   /**
    * See - https://www.baeldung.com/httpclient-connection-management - https://www.baeldung.com/httpclient-timeout
    */
   @SneakyThrows
-  public static HttpClientBuilder createHighPerfHttpClient(PoolingHttpClientConnectionManager connManager,
-      Consumer<PoolingHttpClientConnectionManager> manager) {
+  private HttpClientBuilder createHttpBuilder() {
     ConnectionKeepAliveStrategy keepAliveStrategy = keepAliveStrategy();
     RequestConfig requestConfig = createRequestConfig();
     HttpClientBuilder builder = HttpClients.custom()
@@ -132,46 +218,13 @@ public class JedioHttpClients {
     return builder;
   }
 
-  private static RequestConfig createRequestConfig() {
+  private RequestConfig createRequestConfig() {
     return RequestConfig.custom()
       // .setStaleConnectionCheckEnabled(true) - used setValidateAfterInactivity
-      .setConnectTimeout(timeout * MILLIS)
-      .setConnectionRequestTimeout(timeout * MILLIS)
-      .setSocketTimeout(timeout * MILLIS)
+      .setConnectTimeout(timeoutBase * MILLIS)
+      .setConnectionRequestTimeout(timeoutBase * MILLIS)
+      .setSocketTimeout(timeoutBase * MILLIS)
       .setContentCompressionEnabled(true)
-      .build();
-  }
-
-  private static PoolingHttpClientConnectionManager createConnectionManager(
-      Consumer<PoolingHttpClientConnectionManager> manager) {
-    PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(
-      createSocketFactoryRegistry(), SystemDefaultDnsResolver.INSTANCE);
-    // HttpHost host = new HttpHost("hostname", 80);
-    // HttpRoute route = new HttpRoute(host);
-    // connManager.setSocketConfig(route.getTargetHost(), SocketConfig.custom().setSoTimeout(5000).build());
-    // Set the maximum number of total open connections.
-    connManager.setMaxTotal(ROUTES);
-    connManager.closeExpiredConnections();
-    connManager.closeIdleConnections(1000, TimeUnit.SECONDS);
-    connManager.setValidateAfterInactivity(10 * MILLIS);
-    // Set the maximum number of concurrent connections per route, which is 2 by default.
-    connManager.setDefaultMaxPerRoute(ROUTES);
-    ConnectionConfig defaultConnectionConfig = ConnectionConfig.custom().build();
-    // Set the total number of concurrent connections to a specific route, which is 2 by default.
-    // connManager.setMaxPerRoute(route, 5);
-    connManager.setDefaultConnectionConfig(defaultConnectionConfig);
-    final int soTimeoutInMilllis = timeout * MILLIS;
-    SocketConfig defaultSocketConfig = SocketConfig.custom().setSoTimeout(soTimeoutInMilllis).build();
-    connManager.setDefaultSocketConfig(defaultSocketConfig);
-    connManager.setValidateAfterInactivity(timeout * MILLIS);
-    manager.accept(connManager);
-    return connManager;
-  }
-
-  private static Registry<ConnectionSocketFactory> createSocketFactoryRegistry() {
-    return RegistryBuilder.<ConnectionSocketFactory>create()
-      .register("http", createPlainConnectionSocketFactory())
-      .register("https", createSSLConnectionSocketFactory())
       .build();
   }
 
@@ -265,7 +318,7 @@ public class JedioHttpClients {
           return Long.parseLong(value) * MILLIS;
         }
       }
-      return timeout * MILLIS;
+      return timeoutBase * MILLIS;
     };
   }
 
@@ -274,7 +327,7 @@ public class JedioHttpClients {
       boolean retryable = checkRetriable(exception, executionCount, context);
       log.warn("error. try again request: {}. {} Enable debug to see fullstacktrace.", retryable,
         exception.getMessage(), exception);
-      //log.debug("error. try again request: {}. Fullstacktrace.", retryable, exception.getMessage(), exception);
+      // log.debug("error. try again request: {}. Fullstacktrace.", retryable, exception.getMessage(), exception);
       return retryable;
     };
   }
@@ -316,7 +369,7 @@ public class JedioHttpClients {
         String param = he.getName();
         String value = he.getValue();
         if (value != null && param.equalsIgnoreCase("timeout")) {
-          return Long.parseLong(value) * 1000;
+          return Long.parseLong(value) * MILLIS;
         }
       }
       return 5 * 1000;
@@ -334,5 +387,33 @@ public class JedioHttpClients {
     manager.accept(connManager);
     HttpClientBuilder builder = HttpClients.custom().setKeepAliveStrategy(myStrategy).setConnectionManager(connManager);
     return builder;
+  }
+
+  public <T> Mono<T> execute(Function0<T> supplier) {
+    //
+    // return Mono.fromCallable(() -> {
+    // fiber.start();
+    // return fiber.get();
+    // });
+    CompletableFuture<T> yourCompletableFuture = new CompletableFuture<>();
+    // Fiber<String> fiber = new Fiber<String>(fiberForkJoinScheduler, () -> {throw new
+    // RuntimeException("yourCompletableFuture.complete(readContent())");});
+    // Thread.activeCount()
+    executorService.execute(
+      // Thread fiber = new Thread(//fiberForkJoinScheduler,
+      () -> {
+        try {
+          // throw new RuntimeException("hahahah");
+          yourCompletableFuture.complete(supplier.apply());
+        } catch (Exception e) {
+          if (!yourCompletableFuture.completeExceptionally(e)) {
+            // throw e;
+            log.error("Error in thread", e);
+          }
+        }
+      });
+    // TODO fiber.setUncaughtExceptionHandler(fiberExceptionHandler);
+    // fiber.start();
+    return Mono.fromFuture(yourCompletableFuture);
   }
 }

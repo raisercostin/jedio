@@ -10,6 +10,9 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
 ## Usage
 
 ## ToDo
+- [ ] async first library 
+  - [ ] readContent should always do a readContentAsync.block to force reading async
+  - [ ] readContentSync - forces reading in current thread
 - [x] ignore ssl validation
 - [ ] copy meta info
   - [ ] for UrlLocations entire header and other details with suffix: `.meta.json`, `-1.meta.json`, etc.

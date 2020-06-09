@@ -1,7 +1,6 @@
 package org.raisercostin.jedio.impl;
 
 import java.io.InputStream;
-import java.nio.charset.Charset;
 
 import io.vavr.control.Option;
 import org.jedio.ExceptionUtils;
@@ -15,7 +14,6 @@ import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.nodes.Nodes;
-import reactor.core.publisher.Mono;
 
 public interface ReadableFileLocationLike<SELF extends ReadableFileLocationLike<SELF>>
     extends ReadableFileLocation, BasicFileLocationLike<SELF> {
@@ -78,22 +76,6 @@ public interface ReadableFileLocationLike<SELF extends ReadableFileLocationLike<
   @Override
   @Deprecated
   @deprecated("If the content is too big String might be a bad container")
-  default String readContent() {
-    try {
-      return readContent(charset1);
-    } catch (Exception e) {
-      try {
-        return readContent(charset2);
-      } catch (Exception e2) {
-        throw ExceptionUtils.nowrap(e, "While reading %s with charsets %s and %s. Others could exist %s", this,
-            charset1, charset2, Charset.availableCharsets().keySet());
-      }
-    }
-  }
-
-  @Override
-  @Deprecated
-  @deprecated("If the content is too big String might be a bad container")
   default String readMetaContent() {
     return meta().readContent();
   }
@@ -105,11 +87,6 @@ public interface ReadableFileLocationLike<SELF extends ReadableFileLocationLike<
     } catch (Exception e) {
       throw ExceptionUtils.nowrap(e, "While reading metadata of %s", this);
     }
-  }
-
-  @Override
-  default Mono<String> readContentAsync() {
-    return Mono.fromSupplier(() -> readContent());
   }
 
   @Override

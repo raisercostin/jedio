@@ -21,7 +21,7 @@ public class InMemoryLocation implements ReadableFileLocation, ReadableFileLocat
   }
 
   @Override
-  public String readContent(Charset charset) {
+  public String readContentSync(Charset charset) {
     return data;
   }
 }

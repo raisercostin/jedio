@@ -12,13 +12,12 @@ import org.raisercostin.jedio.classpath.ClasspathLocation;
 import org.raisercostin.jedio.fs.stream.InputStreamLocation;
 import org.raisercostin.jedio.path.PathLocation;
 import org.raisercostin.jedio.url.HttpClientLocation;
-import org.raisercostin.jedio.url.JedioHttpClients;
-import org.raisercostin.jedio.url.JedioHttpClients.JedioHttpClient;
+import org.raisercostin.jedio.url.JedioHttpClient;
 import org.raisercostin.jedio.url.SimpleUrl;
 import org.raisercostin.jedio.url.WebLocation;
 
 public class Locations {
-  private static Lazy<JedioHttpClient> defaultClient = Lazy.of(() -> JedioHttpClients.createHighPerfHttpClient());
+  private static Lazy<JedioHttpClient> defaultClient = Lazy.of(() -> JedioHttpClient.createHighPerfHttpClient());
 
   @sugar
   public static RelativeLocation relative(Path path) {
@@ -75,9 +74,9 @@ public class Locations {
     return url(new SimpleUrl(uri));
   }
 
-  //public static HttpClientLocation url(URL url) {
-  //return url(new SimpleUrl(url));
-  //}
+  // public static HttpClientLocation url(URL url) {
+  // return url(new SimpleUrl(url));
+  // }
 
   public static HttpClientLocation url(SimpleUrl url) {
     return HttpClientLocation.url(url, defaultClient.get());
