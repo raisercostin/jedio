@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 
 import io.vavr.control.Option;
 import org.jedio.ExceptionUtils;
@@ -38,10 +39,16 @@ public interface ReadableFileLocation extends BasicFileLocation {
   /**
    * Reading async. Uses both internal connection pool and internal thread pool.
    */
-  //@deprecated(use = "no suggestion. not implemented yet.", message = "if the content is too big String might be a bad container")
-  //TOOD should implement a readContentAsync with a input stream
+  // @deprecated(use = "no suggestion. not implemented yet.", message = "if the content is too big String might be a bad
+  // container")
+  // TOOD should implement a readContentAsync with a input stream
   default Mono<String> readContentAsync(Charset charset) {
     return Mono.fromSupplier(() -> readContentSync(charset));
+  }
+
+  default CompletableFuture<String> readContentAsyncCompletableFuture(Charset charset) {
+    return readContentAsync(charset).toFuture();
+    //CompletableFuture.
   }
 
   /**
@@ -87,8 +94,8 @@ public interface ReadableFileLocation extends BasicFileLocation {
   }
 
   /**
-   * Reading async if possible and block on current thread. This will force the clients that use async consumers to use the readContentAsync.
-   * Reading should happen in 30s. If more control is needed please use readContentAsync().
+   * Reading async if possible and block on current thread. This will force the clients that use async consumers to use
+   * the readContentAsync. Reading should happen in 30s. If more control is needed please use readContentAsync().
    */
   @sugar("readContentAsync() and ulterior handling should be used.")
   default String readContent(Charset charset) {

@@ -1,10 +1,9 @@
 package org.raisercostin.jedio.url;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.SocketException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,16 +20,13 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.RequestLine;
 import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.execchain.RequestAbortedException;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
-import org.jedio.Audit;
 import org.jedio.Audit.AuditException;
 import org.jedio.functions.JedioFunction;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
@@ -149,11 +145,11 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
     request.addHeader("Upgrade-Insecure-Requests", "1");
     request.addHeader("User-Agent",
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36");
-    request.addHeader("Accept",
-      "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
-    request.addHeader("Accept-Encoding", "gzip, deflate");
+    request.addHeader("Accept", "*/*");
+    //"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+    request.addHeader("Accept-Encoding", "gzip, deflate, sdch");
     // not needed anymore - request.addHeader("Accept-Charset", "utf-8, iso-8859-1;q=0.5");
-    request.addHeader("Accept-Language", "en-US,en;q=0.9,ro;q=0.8");
+    //request.addHeader("Accept-Language", "en-US,en;q=0.9");
     java.util.Map<String, Object> attrs = Maps.newConcurrentMap();
     HttpClientContext context = HttpClientContext.adapt(new HttpContext()
       {
@@ -252,8 +248,7 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
         }
         throw new AuditException(new AuditException("Error full meta %s", Nodes.json.toString(streamAndMeta.meta)),
           "Http error [%s] on calling %s. Full meta in root cause.",
-          streamAndMeta.meta.httpMetaResponseStatusToString().getOrElse("-"),
-          this);
+          streamAndMeta.meta.httpMetaResponseStatusToString().getOrElse("-"), this);
       } finally {
         log.debug("reading from {} done.", this);
       }
@@ -261,59 +256,41 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
     // return readContentOld();
     // return HttpUtils.getFromURL(this.toExternalForm());
   }
-
-  private String readContentOld(Charset charset) throws IOException, ClientProtocolException {
-    HttpGet get1 = new HttpGet(url.toExternalForm());
-    CloseableHttpResponse lastResponse = null;
-    Throwable ignoredExceptionForRetry = null;
-    for (int attempt = 1; attempt <= retries; attempt++) {
-      try (CloseableHttpResponse response = client.client().execute(get1)) {
-        int code = response.getStatusLine().getStatusCode();
-        String reason = response.getStatusLine().getReasonPhrase();
-        lastResponse = response;
-        if (code == 200) {
-          final InputStream content = response.getEntity().getContent();
-          return IOUtils.toString(content, charset);
-        } else if (code == 502 || code == 520) {
-          log.info("Attempt {} to {} failed: {}", attempt, url, response);
-        } else {
-          throw new InvalidHttpResponse("Invalid call " + this, response, null);
-        }
-      } catch (SocketException e) {
-        ignoredExceptionForRetry = Audit.warnAndRetrhrowIfNotKnown("While reading %s", e, get1);
-      } catch (RequestAbortedException e) {
-        ignoredExceptionForRetry = Audit.warnAndRetrhrowIfNotKnown("While reading %s", e, get1);
-      }
-    }
-    throw new InvalidHttpResponse("Invalid call " + this, lastResponse, ignoredExceptionForRetry);
-  }
+  //
+  //  private String readContentOld(Charset charset) throws IOException, ClientProtocolException {
+  //    HttpGet get1 = new HttpGet(url.toExternalForm());
+  //    CloseableHttpResponse lastResponse = null;
+  //    Throwable ignoredExceptionForRetry = null;
+  //    for (int attempt = 1; attempt <= retries; attempt++) {
+  //      try (CloseableHttpResponse response = client.client().execute(get1)) {
+  //        int code = response.getStatusLine().getStatusCode();
+  //        String reason = response.getStatusLine().getReasonPhrase();
+  //        lastResponse = response;
+  //        if (code == 200) {
+  //          final InputStream content = response.getEntity().getContent();
+  //          return IOUtils.toString(content, charset);
+  //        } else if (code == 502 || code == 520) {
+  //          log.info("Attempt {} to {} failed: {}", attempt, url, response);
+  //        } else {
+  //          throw new InvalidHttpResponse("Invalid call " + this, response, null);
+  //        }
+  //      } catch (SocketException e) {
+  //        ignoredExceptionForRetry = Audit.warnAndRetrhrowIfNotKnown("While reading %s", e, get1);
+  //      } catch (RequestAbortedException e) {
+  //        ignoredExceptionForRetry = Audit.warnAndRetrhrowIfNotKnown("While reading %s", e, get1);
+  //      }
+  //    }
+  //    throw new InvalidHttpResponse("Invalid call " + this, lastResponse, ignoredExceptionForRetry);
+  //  }
 
   @Override
   public Mono<String> readContentAsync(Charset charset) {
     return client.execute(() -> readContentSync(charset));
   }
 
-  public Mono<String> readContentAsync1(Charset charset) {
-    return Mono.fromCallable(() -> {
-      return readContentSync(charset);
-      // if (enableHardAbort) {
-      // scheduler.schedule(() -> {
-      // // redundant null check
-      // // if (get1 != null) {
-      // get1.abort();
-      // // }
-      // }, hardTimeout, TimeUnit.SECONDS);
-      // }
-    }).checkpoint("read", true);
-    // response.getEntity().
-    // EntityUtils.Future
-    // <HttpResponse<String>> res = Unirest.get(url)
-    // // .header("User-Agent", USER_AGENT).header("Accept", "*/*")
-    // // .header("Content-Type", "application/json; charset=UTF-8").header("Accept-Encoding", "gzip,deflate,sdch")
-    // // .asStringAsync(callback)();
-    // .asStringAsync();
-    //
-    // return Mono.fromCallable(() -> res.get().getBody());
+  @Override
+  public CompletableFuture<String> readContentAsyncCompletableFuture(Charset charset) {
+    return client.executeCompletableFuture(() -> readContentSync(charset));
   }
 
   @Override

@@ -5,12 +5,12 @@ import java.io.InterruptedIOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
@@ -67,9 +67,8 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @ToString
 /**
- * Default client configuration that takes care of all http call details:
- * - [x] connection pool: `PoolingHttpClientConnectionManager`
- * - [x] thread pool: `ExecutorService result = Executors.newFixedThreadPool`
+ * Default client configuration that takes care of all http call details: - [x] connection pool:
+ * `PoolingHttpClientConnectionManager` - [x] thread pool: `ExecutorService result = Executors.newFixedThreadPool`
  */
 @Slf4j
 public class JedioHttpClient {
@@ -93,23 +92,72 @@ public class JedioHttpClient {
 
     String name;
     @Builder.Default
-    /**Number of threads in the thread pool. Caps the available connections since the connection one creates one per thread.*/
+    /**
+     * Number of threads in the thread pool. Caps the available connections since the connection one creates one per
+     * thread.
+     */
     int threads = 100;
+    /**Set the maximum number of total open connections.*/
     @Builder.Default
     int maxTotal = 1000;
+    /** The maximum number of concurrent connections per route, which is 2 by default.*/
     @Builder.Default
-    int maxPerRoute = 1000;
+    int maxPerRoute = 2;
     @Builder.Default
-    int soTimeoutInMilllis = timeoutBase * MILLIS;
-    /**Defines period of inactivity in milliseconds after which persistent connections mustbe re-validated prior to being leased to the consumer.
-     * Non-positive value passedto this method disables connection validation. This check helps detect connectionsthat have become stale
-     * (half-closed) while kept inactive in the pool.*/
+    Duration soTimeout = Duration.ofSeconds(22);
+    /**
+     * Defines period of inactivity in milliseconds after which persistent connections mustbe re-validated prior to
+     * being leased to the consumer. Non-positive value passedto this method disables connection validation. This check
+     * helps detect connectionsthat have become stale (half-closed) while kept inactive in the pool.
+     */
     @Builder.Default
-    int validateAfterInactivityInMilllis = timeoutBase * MILLIS;
+    Duration validateAfterInactivity = Duration.ofSeconds(timeoutBase);
 
-    //    public HttpClientBuilder toHttpClientBuilder() {
-    //      throw new RuntimeException("Not implemented yet!!!");
-    //    }
+    /**
+     * Determines if a method should be retried after an IOException
+     * occurs during execution.
+     *
+     * @see HttpRequestRetryHandler
+     *
+     * @param exception the exception that occurred
+     * @param executionCount the number of times this method has been
+     * unsuccessfully executed
+     */
+    @Builder.Default
+    int maxRetry = 5;
+    @Builder.Default
+    Duration closeIdleConnections = Duration.ofSeconds(120);
+
+    /**
+     * Interface for deciding how long a connection can remain
+     * idle before being reused.
+     * <p>
+     * Implementations of this interface must be thread-safe. Access to shared
+     * data must be synchronized as methods of this interface may be executed
+     * from multiple threads.
+     *
+     * @see ConnectionKeepAliveStrategy
+     *
+     * Returns the duration of time which this connection can be safely kept
+     * idle. If the connection is left idle for longer than this period of time,
+     * it MUST not reused. A value of 0 or less may be returned to indicate that
+     * there is no suitable suggestion.
+     *
+     * When coupled with a {@link org.apache.http.ConnectionReuseStrategy}, if
+     * {@link org.apache.http.ConnectionReuseStrategy#keepAlive(
+     *   HttpResponse, HttpContext)} returns true, this allows you to control
+     * how long the reuse will last. If keepAlive returns false, this should
+     * have no meaningful impact
+     *
+     * @return the duration in ms for which it is safe to keep the connection
+     *         idle, or &lt;=0 if no suggested duration.
+     */
+    @Builder.Default
+    Duration defaultKeepAlive = Duration.ofSeconds(20);
+
+    // public HttpClientBuilder toHttpClientBuilder() {
+    // throw new RuntimeException("Not implemented yet!!!");
+    // }
 
     public JedioHttpClient createClient() {
       return new JedioHttpClient(this);
@@ -130,12 +178,9 @@ public class JedioHttpClient {
   private final Lazy<CloseableHttpClient> client;
   private final ExecutorService executorService;
 
-  //  private static final int timeout = 20;
-  //  // private static final int hardTimeout = 5 * timeout; // seconds
-  //  private static final int ROUTES = 1000;
-  //  private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BaseHttpLocationLike.class);
-  //  private static final Scheduler scheduler = Schedulers.newParallel("http-hard-abort", 100);
-  //  private static final boolean enableHardAbort = true;
+  // // private static final int hardTimeout = 5 * timeout; // seconds
+  // private static final Scheduler scheduler = Schedulers.newParallel("http-hard-abort", 100);
+  // private static final boolean enableHardAbort = true;
 
   public JedioHttpClient(JedioHttpConfig config) {
     this.config = config;
@@ -168,20 +213,20 @@ public class JedioHttpClient {
     // HttpHost host = new HttpHost("hostname", 80);
     // HttpRoute route = new HttpRoute(host);
     // connManager.setSocketConfig(route.getTargetHost(), SocketConfig.custom().setSoTimeout(5000).build());
-    // Set the maximum number of total open connections.
     connManager.setMaxTotal(config.maxTotal);
     connManager.closeExpiredConnections();
-    connManager.closeIdleConnections(1000, TimeUnit.SECONDS);
-    connManager.setValidateAfterInactivity(10 * MILLIS);
-    // Set the maximum number of concurrent connections per route, which is 2 by default.
+    connManager.closeIdleConnections(config.closeIdleConnections.toMillis(), TimeUnit.MILLISECONDS);
     connManager.setDefaultMaxPerRoute(config.maxPerRoute);
     ConnectionConfig defaultConnectionConfig = ConnectionConfig.custom().build();
     // Set the total number of concurrent connections to a specific route, which is 2 by default.
     // connManager.setMaxPerRoute(route, 5);
     connManager.setDefaultConnectionConfig(defaultConnectionConfig);
-    SocketConfig defaultSocketConfig = SocketConfig.custom().setSoTimeout(config.soTimeoutInMilllis).build();
+    //see java.net.SocketOptions
+    SocketConfig defaultSocketConfig = SocketConfig.custom()
+      .setSoTimeout(Math.toIntExact(config.soTimeout.toMillis()))
+      .build();
     connManager.setDefaultSocketConfig(defaultSocketConfig);
-    connManager.setValidateAfterInactivity(config.validateAfterInactivityInMilllis);
+    connManager.setValidateAfterInactivity(Math.toIntExact(config.validateAfterInactivity.toMillis()));
     return connManager;
   }
 
@@ -190,6 +235,41 @@ public class JedioHttpClient {
       .register("http", createPlainConnectionSocketFactory())
       .register("https", createSSLConnectionSocketFactory())
       .build();
+  }
+
+  private static ConnectionSocketFactory createPlainConnectionSocketFactory() {
+    // return PlainConnectionSocketFactory.getSocketFactory();
+    return new PlainConnectionSocketFactory()
+      {
+        @Override
+        public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
+            InetSocketAddress localAddress, HttpContext context) throws IOException {
+          context.setAttribute(SOCKET_LOCAL_ADDRESS, SerializableInetSocketAddress.from(localAddress));
+          context.setAttribute(SOCKET_REMOTE_ADDRESS, SerializableInetSocketAddress.from(remoteAddress));
+          return super.connectSocket(connectTimeout, socket, host, remoteAddress, localAddress, context);
+        }
+      };
+  }
+
+  @SneakyThrows
+  private static SSLConnectionSocketFactory createSSLConnectionSocketFactory() {
+    SSLContextBuilder builder = new SSLContextBuilder();
+    builder.loadTrustMaterial(null, (chain, authType) -> true);
+    SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build(),
+      (String hostname, SSLSession session) -> {
+        log.debug("checking hostname {}", hostname);
+        return true;
+      })
+      {
+        @Override
+        public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
+            InetSocketAddress localAddress, HttpContext context) throws IOException {
+          context.setAttribute(SOCKET_LOCAL_ADDRESS, SerializableInetSocketAddress.from(localAddress));
+          context.setAttribute(SOCKET_REMOTE_ADDRESS, SerializableInetSocketAddress.from(remoteAddress));
+          return super.connectSocket(connectTimeout, socket, host, remoteAddress, localAddress, context);
+        }
+      };
+    return sslsf;
   }
 
   /**
@@ -216,6 +296,21 @@ public class JedioHttpClient {
     // HttpClient httpClient = new DefaultHttpClient(params);
     //
     return builder;
+  }
+
+  private ConnectionKeepAliveStrategy keepAliveStrategy() {
+    return (response, context) -> {
+      HeaderElementIterator it = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+      while (it.hasNext()) {
+        HeaderElement he = it.nextElement();
+        String param = he.getName();
+        String value = he.getValue();
+        if (value != null && param.equalsIgnoreCase("timeout")) {
+          return Long.parseLong(value) * MILLIS;
+        }
+      }
+      return config.defaultKeepAlive.toMillis();
+    };
   }
 
   private RequestConfig createRequestConfig() {
@@ -272,57 +367,7 @@ public class JedioHttpClient {
     }
   }
 
-  private static ConnectionSocketFactory createPlainConnectionSocketFactory() {
-    // return PlainConnectionSocketFactory.getSocketFactory();
-    return new PlainConnectionSocketFactory()
-      {
-        @Override
-        public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
-            InetSocketAddress localAddress, HttpContext context) throws IOException {
-          context.setAttribute(SOCKET_LOCAL_ADDRESS, SerializableInetSocketAddress.from(localAddress));
-          context.setAttribute(SOCKET_REMOTE_ADDRESS, SerializableInetSocketAddress.from(remoteAddress));
-          return super.connectSocket(connectTimeout, socket, host, remoteAddress, localAddress, context);
-        }
-      };
-  }
-
-  @SneakyThrows
-  private static SSLConnectionSocketFactory createSSLConnectionSocketFactory() {
-    SSLContextBuilder builder = new SSLContextBuilder();
-    builder.loadTrustMaterial(null, (chain, authType) -> true);
-    SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build(),
-      (String hostname, SSLSession session) -> {
-        log.debug("checking hostname {}", hostname);
-        return true;
-      })
-      {
-        @Override
-        public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
-            InetSocketAddress localAddress, HttpContext context) throws IOException {
-          context.setAttribute(SOCKET_LOCAL_ADDRESS, SerializableInetSocketAddress.from(localAddress));
-          context.setAttribute(SOCKET_REMOTE_ADDRESS, SerializableInetSocketAddress.from(remoteAddress));
-          return super.connectSocket(connectTimeout, socket, host, remoteAddress, localAddress, context);
-        }
-      };
-    return sslsf;
-  }
-
-  private static ConnectionKeepAliveStrategy keepAliveStrategy() {
-    return (response, context) -> {
-      HeaderElementIterator it = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
-      while (it.hasNext()) {
-        HeaderElement he = it.nextElement();
-        String param = he.getName();
-        String value = he.getValue();
-        if (value != null && param.equalsIgnoreCase("timeout")) {
-          return Long.parseLong(value) * MILLIS;
-        }
-      }
-      return timeoutBase * MILLIS;
-    };
-  }
-
-  private static HttpRequestRetryHandler retryHandler() {
+  private HttpRequestRetryHandler retryHandler() {
     return (exception, executionCount, context) -> {
       boolean retryable = checkRetriable(exception, executionCount, context);
       log.warn("error. try again request: {}. {} Enable debug to see fullstacktrace.", retryable,
@@ -332,8 +377,8 @@ public class JedioHttpClient {
     };
   }
 
-  private static boolean checkRetriable(IOException exception, int executionCount, HttpContext context) {
-    if (executionCount >= 5) {
+  private boolean checkRetriable(IOException exception, int executionCount, HttpContext context) {
+    if (executionCount >= config.maxRetry) {
       // Do not retry if over max retry count
       return false;
     }
@@ -360,36 +405,11 @@ public class JedioHttpClient {
     return false;
   }
 
-  @Deprecated // use createHighPerfHttpClient
-  public static HttpClientBuilder createHighPerfHttpClientOld(Consumer<PoolingHttpClientConnectionManager> manager) {
-    ConnectionKeepAliveStrategy myStrategy = (response, context) -> {
-      HeaderElementIterator it = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
-      while (it.hasNext()) {
-        HeaderElement he = it.nextElement();
-        String param = he.getName();
-        String value = he.getValue();
-        if (value != null && param.equalsIgnoreCase("timeout")) {
-          return Long.parseLong(value) * MILLIS;
-        }
-      }
-      return 5 * 1000;
-    };
-    PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
-    // HttpHost host = new HttpHost("hostname", 80);
-    // HttpRoute route = new HttpRoute(host);
-    // connManager.setSocketConfig(route.getTargetHost(), SocketConfig.custom().setSoTimeout(5000).build());
-    // Set the maximum number of total open connections.
-    connManager.setMaxTotal(1000);
-    // Set the maximum number of concurrent connections per route, which is 2 by default.
-    connManager.setDefaultMaxPerRoute(1000);
-    // Set the total number of concurrent connections to a specific route, which is 2 by default.
-    // connManager.setMaxPerRoute(route, 5);
-    manager.accept(connManager);
-    HttpClientBuilder builder = HttpClients.custom().setKeepAliveStrategy(myStrategy).setConnectionManager(connManager);
-    return builder;
+  public <T> Mono<T> execute(Function0<T> supplier) {
+    return Mono.fromFuture(executeCompletableFuture(supplier));
   }
 
-  public <T> Mono<T> execute(Function0<T> supplier) {
+  public <T> CompletableFuture<T> executeCompletableFuture(Function0<T> supplier) {
     //
     // return Mono.fromCallable(() -> {
     // fiber.start();
@@ -414,6 +434,6 @@ public class JedioHttpClient {
       });
     // TODO fiber.setUncaughtExceptionHandler(fiberExceptionHandler);
     // fiber.start();
-    return Mono.fromFuture(yourCompletableFuture);
+    return yourCompletableFuture;
   }
 }
