@@ -4,6 +4,7 @@ import java.io.InputStream;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
+import io.vavr.API;
 import io.vavr.collection.Map;
 import io.vavr.control.Option;
 import lombok.AccessLevel;
@@ -33,6 +34,10 @@ public class MetaInfo {
 
   public static MetaInfo payload(Map<String, Object> payload) {
     return new MetaInfo(true, null, null, payload);
+  }
+
+  public static MetaInfo success(ReadableFileLocation source) {
+    return new MetaInfo(true, null, null, API.Map("source", source));
   }
 
   @AllArgsConstructor

@@ -2,11 +2,7 @@ package org.raisercostin.jedio.op;
 
 import java.time.Duration;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.With;
+import com.google.common.base.Predicates;
 import org.raisercostin.jedio.ExistingLocation;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReferenceLocation;
@@ -14,7 +10,24 @@ import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.impl.ReferenceLocationLike;
 
 public interface CopyOptions {
-  org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CopyOptions.class);
+  // case class CopyOptions(overwriteIfAlreadyExists: Boolean = false, copyMeta:
+  // Boolean, optionalMeta: Boolean, monitor: OperationMonitor =
+  // LoggingOperationMonitor)
+
+  /**Default copy:
+   * Report each step in log, do not overwrite but throw exception.
+   */
+  static SimpleCopyOptions copyDefault() {
+    return copyDoNotOverwrite();
+  }
+
+  static SimpleCopyOptions copyDoNotOverwrite() {
+    return new SimpleCopyOptions(false, false, true, Predicates.alwaysTrue(), OperationListener.defaultListener);
+  }
+
+  static SimpleCopyOptions copyOverwrite() {
+    return new SimpleCopyOptions(true, false, true, Predicates.alwaysTrue(), OperationListener.defaultListener);
+  }
 
   Duration timeoutOnItem = Duration.ofSeconds(1);
   Duration timeoutTotal = Duration.ofSeconds(60);
@@ -22,7 +35,11 @@ public interface CopyOptions {
 
   boolean replaceExisting();
 
+  boolean throwOnError();
+
   boolean copyMeta();
+
+  boolean acceptStreamAndMeta(StreamAndMeta streamAndMeta);
 
   default boolean makeDirIfNeeded() {
     return true;
@@ -33,78 +50,6 @@ public interface CopyOptions {
   }
 
   default void reportOperationEvent(CopyEvent event, ExistingLocation src, ReferenceLocation dst, Object... args) {
-  }
-
-  @FunctionalInterface
-  public interface OperationListener {
-    void reportOperationEvent(CopyEvent event, Throwable exception, ExistingLocation src, ReferenceLocation dst,
-        Object... args);
-  }
-
-  @Data
-  @Getter(value = AccessLevel.NONE)
-  @Setter(value = AccessLevel.NONE)
-  @With
-  public class SimpleCopyOptions implements CopyOptions {
-    public final boolean replaceExisting;
-    public final OperationListener operationListener;
-    public final boolean copyMeta;
-
-    @Override
-    public boolean replaceExisting() {
-      return replaceExisting;
-    }
-
-    public CopyOptions withDefaultReporting() {
-      return withOperationListener((event, exception, src, dst, args) -> {
-        if (exception != null) {
-          log.warn("copy {}: {} -> {} details:{}. Enable debug for stacktrace.", event, src, dst, args);
-          log.debug("copy {}: {} -> {} details:{}. Error with stacktrace.", event, src, dst, args, exception);
-        } else {
-          log.info("copy {}: {} -> {} details:{}.", event, src, dst, args);
-        }
-      });
-    }
-
-    @Override
-    public boolean reportSteps() {
-      return operationListener != null;
-    }
-
-    @Override
-    public void reportOperationEvent(CopyEvent event, ExistingLocation src, ReferenceLocation dst, Object... args) {
-      if (operationListener != null) {
-        operationListener.reportOperationEvent(event, null, src, dst, args);
-      }
-    }
-
-    @Override
-    public void reportOperationEvent(CopyEvent event, Throwable exception, ExistingLocation src, ReferenceLocation dst,
-        Object... args) {
-      if (operationListener != null) {
-        operationListener.reportOperationEvent(event, exception, src, dst, args);
-      }
-    }
-
-    @Override
-    public boolean copyMeta() {
-      return copyMeta;
-    }
-  }
-  // case class CopyOptions(overwriteIfAlreadyExists: Boolean = false, copyMeta:
-  // Boolean, optionalMeta: Boolean, monitor: OperationMonitor =
-  // LoggingOperationMonitor)
-
-  static SimpleCopyOptions copyDefault() {
-    return copyDoNotOverwrite();
-  }
-
-  static SimpleCopyOptions copyDoNotOverwrite() {
-    return new SimpleCopyOptions(false, null, true);
-  }
-
-  static SimpleCopyOptions copyOverwrite() {
-    return new SimpleCopyOptions(true, null, true);
   }
 
   default Duration timeoutOnItem() {
@@ -119,41 +64,11 @@ public interface CopyOptions {
     return reportSteps;
   }
 
-  public enum CopyEvent {
-    Unknown,
-    CopyFileTriggered(
-        "Copy file triggered."),
-    IgnoreSourceDoesNotExists,
-    IgnoreDestinationMetaExists,
-    IgnoreDestinationExists,
-    IgnoreContentType,
-    CopyFileStarted,
-    CopyReplacing(
-        "A replace of content started"),
-    CopyFileFinished,
-    CopyFailed,
-    CopyDirStarted,
-    CopyDirFinished,
-    CopyMeta(
-        "Copy metadata. For http you will get the request and response: headers and other details. For all will get the exception and the source.")
-    //
-    ;
-
-    String description;
-
-    CopyEvent() {
-      description = name();
-    }
-
-    CopyEvent(String description) {
-      this.description = description;
-    }
-  }
-
   /** Destination can be changed based on the input and metadata. */
   @SuppressWarnings("unchecked")
   default <T extends WritableFileLocation> T amend(T dest, StreamAndMeta streamAndMeta) {
-    int code = streamAndMeta.meta.httpMetaResponseStatusCode().get();
+    //if there is no http response status code might be a simple copy from other sources
+    int code = streamAndMeta.meta.httpMetaResponseStatusCode().getOrElse(200);
     if (code == 200) {
       return dest;
     } else {

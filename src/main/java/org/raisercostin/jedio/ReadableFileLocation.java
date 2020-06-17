@@ -60,9 +60,12 @@ public interface ReadableFileLocation extends BasicFileLocation {
 
   MetaInfo readMeta();
 
-  WritableFileLocation copyTo(WritableFileLocation destination);
+  @sugar
+  default ReadableFileLocation copyToFile(WritableFileLocation destination) {
+    return copyToFile(destination, CopyOptions.copyDefault());
+  }
 
-  WritableFileLocation copyTo(WritableFileLocation destination, CopyOptions options);
+  ReadableFileLocation copyToFile(WritableFileLocation destination, CopyOptions options);
 
   Charset charset1_UTF8 = StandardCharsets.UTF_8;
   Charset charset2_ISO_8859_1 = StandardCharsets.ISO_8859_1;
@@ -88,7 +91,7 @@ public interface ReadableFileLocation extends BasicFileLocation {
         return readContent(charset2_ISO_8859_1);
       } catch (Exception e2) {
         throw ExceptionUtils.nowrap(e, "While reading %s with charsets %s and %s. Others could exist %s", this,
-            charset1_UTF8, charset2_ISO_8859_1, Charset.availableCharsets().keySet());
+          charset1_UTF8, charset2_ISO_8859_1, Charset.availableCharsets().keySet());
       }
     }
   }

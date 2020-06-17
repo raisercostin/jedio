@@ -18,6 +18,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.function.Function;
 
 import com.google.common.base.Preconditions;
+import io.vavr.API;
 import io.vavr.collection.Iterator;
 import io.vavr.control.Option;
 import lombok.Data;
@@ -27,11 +28,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.SystemUtils;
+import org.jedio.Audit;
 import org.jedio.SimpleShell;
 import org.jedio.sugar;
 import org.raisercostin.jedio.BasicDirLocation;
 import org.raisercostin.jedio.ChangeableLocation;
 import org.raisercostin.jedio.DirLocation;
+import org.raisercostin.jedio.ExistingLocation;
 import org.raisercostin.jedio.FileAltered;
 import org.raisercostin.jedio.FileLocation;
 import org.raisercostin.jedio.Locations;
@@ -54,8 +57,8 @@ import org.raisercostin.jedio.impl.ReadableFileLocationLike;
 import org.raisercostin.jedio.impl.ReferenceLocationLike;
 import org.raisercostin.jedio.impl.WritableDirLocationLike;
 import org.raisercostin.jedio.impl.WritableFileLocationLike;
+import org.raisercostin.jedio.op.CopyEvent;
 import org.raisercostin.jedio.op.CopyOptions;
-import org.raisercostin.jedio.op.CopyOptions.CopyEvent;
 import org.raisercostin.jedio.op.DeleteOptions;
 import org.raisercostin.nodes.ExceptionUtils;
 import org.raisercostin.nodes.Nodes;
@@ -298,7 +301,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
       return IOUtils.toString(b);
     } catch (IOException e) {
       throw ExceptionUtils.nowrap(e, "While reading %s with charset %s. Others could exist %s", this, charset,
-          Charset.availableCharsets().keySet());
+        Charset.availableCharsets().keySet());
     }
   }
 
@@ -306,7 +309,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   private BufferedReader reader(Path path, Charset charset) {
     CharsetDecoder decoder = charset.newDecoder();
     Reader reader = new InputStreamReader(new BOMInputStream(Files.newInputStream(path), ByteOrderMark.UTF_8,
-        ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE), decoder);
+      ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE), decoder);
     return new BufferedReader(reader);
   }
 
@@ -369,28 +372,28 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
       boolean sourceExists = source.exists();
       boolean metaShouldBeCreated = copyOptions.copyMeta() && !metaHttp.exists();
       boolean destAndHttpMetaExists = metaHttp.exists() && exists() && !metaShouldBeCreated;
-      if (metaHttp.exists()) {
-        copyOptions.reportOperationEvent(CopyEvent.IgnoreDestinationMetaExists, source, metaHttp);
+      if (metaShouldBeCreated && metaHttp.exists()) {
+        reportOperationEvent(copyOptions, true, CopyEvent.CopyIgnoreDestinationMetaExists, source, metaHttp);
       } else if (destAndHttpMetaExists && !copyOptions.replaceExisting()) {
-        copyOptions.reportOperationEvent(CopyEvent.IgnoreDestinationExists, source, this);
+        reportOperationEvent(copyOptions, true, CopyEvent.CopyIgnoreDestinationExists, source, this);
       } else {
         // source is analysed for existance only if will actually try to copy
         if (!sourceExists) {
-          copyOptions.reportOperationEvent(CopyEvent.IgnoreSourceDoesNotExists, source, this);
+          reportOperationEvent(copyOptions, true, CopyEvent.CopyIgnoreSourceDoesNotExists, source, this);
         } else {
-          copyOptions.reportOperationEvent(CopyEvent.CopyFileStarted, source, this);
+          reportOperationEvent(copyOptions, false, CopyEvent.CopyFileStarted, source, this);
           source.usingInputStreamAndMeta(true, streamAndMeta -> {
             if (streamAndMeta.meta.isSuccess) {
               PathLocation actualDest = copyOptions.amend(this, streamAndMeta);
-              if (streamAndMeta.meta.httpResponseHeaderContentTypeIsHtml()) {
+              if (copyOptions.acceptStreamAndMeta(streamAndMeta)) {
                 if (copyOptions.replaceExisting()) {
-                  copyOptions.reportOperationEvent(CopyEvent.CopyReplacing, source, this);
+                  reportOperationEvent(copyOptions, false, CopyEvent.CopyReplacing, source, this);
                   Files.copy(streamAndMeta.is, actualDest.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 } else {
                   Files.copy(streamAndMeta.is, actualDest.toPath());
                 }
               } else {
-                copyOptions.reportOperationEvent(CopyEvent.IgnoreContentType, source, this, metaHttp);
+                reportOperationEvent(copyOptions, true, CopyEvent.CopyIgnoreContentType, source, this, metaHttp);
               }
               // write meta
               if (copyOptions.copyMeta()) {
@@ -398,23 +401,35 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
                 // mapper.mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, false);
                 String str = mapper.excluding("parent", "otherParents", "impl").toString(streamAndMeta.meta);
                 metaHttp.write(str);
-                copyOptions.reportOperationEvent(CopyEvent.CopyMeta, source, this, metaHttp);
+                reportOperationEvent(copyOptions, false, CopyEvent.CopyMeta, source, this, metaHttp);
               }
-              return null;
+              return this;
             } else {
-              copyOptions.reportOperationEvent(CopyEvent.CopyFailed, streamAndMeta.meta.error, source, this);
               metaHttp.write(Nodes.json.toString(streamAndMeta.meta));
-              return null;
+              copyOptions.reportOperationEvent(CopyEvent.CopyFailed, streamAndMeta.meta.error, source, this);
+              return this;
             }
           });
-          copyOptions.reportOperationEvent(CopyEvent.CopyFileFinished, source, this);
+          reportOperationEvent(copyOptions, false, CopyEvent.CopyFileFinished, source, this);
         }
       }
     } catch (Throwable e) {
       metaHttp.write(Nodes.json.toString(MetaInfo.error(e)));
       copyOptions.reportOperationEvent(CopyEvent.CopyFailed, e, source, this);
+      if (copyOptions.throwOnError()) {
+        throw e;
+      }
     }
     return this;
+  }
+
+  private void reportOperationEvent(CopyOptions copyOptions, boolean operationIgnored, CopyEvent event,
+      ExistingLocation src,
+      ReferenceLocation dst, Object... args) {
+    copyOptions.reportOperationEvent(event, src, dst, args);
+    if (operationIgnored && copyOptions.throwOnError()) {
+      throw new Audit.AuditException("CopyOperation result: %s (src=%s, dst=%s) %s", event, src, dst, API.List(args));
+    }
   }
 
   @Override
@@ -507,7 +522,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   private void createWindowsJunction(Path place, Path symlink, Path target) {
     new SimpleShell(place.getParent())
-        .execute("cmd /C mklink /J \"" + symlink + "\" \"" + target.toFile().getName() + "\"");
+      .execute("cmd /C mklink /J \"" + symlink + "\" \"" + target.toFile().getName() + "\"");
   }
 
   private void createSymlink(Path symlink, Path target) {
@@ -520,7 +535,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   private void createWindowsSymlink(Path place, String symlink, String targetName) {
     new SimpleShell(place.getParent())
-        .execute("cmd /C sudo cmd /C mklink /D \"" + symlink + "\" \"" + targetName + "\"");
+      .execute("cmd /C sudo cmd /C mklink /D \"" + symlink + "\" \"" + targetName + "\"");
   }
 
   private void createLinuxSymlink(Path place, String symlink, String targetPath) {
@@ -781,7 +796,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   // };
 
   static GuavaAndDirectoryStreamTraversalWithVirtualDirs traversal = new GuavaAndDirectoryStreamTraversalWithVirtualDirs(
-      true, x -> false);
+    true, x -> false);
 
   private TraversalFilter createFilter(boolean recursive) {
     return FindFilters.createFindFilter("", "", false, recursive);

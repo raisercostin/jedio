@@ -5,8 +5,8 @@ import org.jedio.sugar;
 import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.ReadableDirLocation;
 import org.raisercostin.jedio.WritableFileLocation;
+import org.raisercostin.jedio.op.CopyEvent;
 import org.raisercostin.jedio.op.CopyOptions;
-import org.raisercostin.jedio.op.CopyOptions.CopyEvent;
 import reactor.core.publisher.Flux;
 
 /** ReadableDir means you can find children (you can list). */
@@ -39,14 +39,17 @@ public interface ReadableDirLocationLike<SELF extends ReadableDirLocationLike<SE
   @Override
   default void copyTo(DirLocation dir, CopyOptions copyOptions) {
     findFilesAsFlux(true).doOnSubscribe(s -> copyOptions.reportOperationEvent(CopyEvent.CopyDirStarted, this, dir))
-        // .filter(item -> !item.equals(dir))
-        .map(item -> {
-          WritableFileLocation copied = item.asReadableFile().copyTo(item.relative(this, dir).get().asWritableFile(),
-              copyOptions);
-          return copied;
-        }).timeout(copyOptions.timeoutOnItem())
-        .doOnComplete(() -> copyOptions.reportOperationEvent(CopyEvent.CopyDirFinished, this, dir))
-        .blockLast(copyOptions.timeoutTotal());
+      // .filter(item -> !item.equals(dir))
+      .map(item -> {
+        WritableFileLocation copied = item.relative(this, dir)
+          .get()
+          .asWritableFile()
+          .copyFrom(item.asReadableFile(), copyOptions);
+        return copied;
+      })
+      .timeout(copyOptions.timeoutOnItem())
+      .doOnComplete(() -> copyOptions.reportOperationEvent(CopyEvent.CopyDirFinished, this, dir))
+      .blockLast(copyOptions.timeoutTotal());
   }
 
   Flux<SELF> findFilesAndDirs(boolean recursive);

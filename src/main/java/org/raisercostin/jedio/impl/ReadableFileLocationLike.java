@@ -70,7 +70,7 @@ public interface ReadableFileLocationLike<SELF extends ReadableFileLocationLike<
   @Deprecated
   @deprecated("Use usingInputStreamAndMeta. This is needed by implementors.")
   default StreamAndMeta unsafeInputStreamAndMeta() {
-    return new StreamAndMeta(null, unsafeInputStream());
+    return new StreamAndMeta(MetaInfo.success(this), unsafeInputStream());
   }
 
   @Override
@@ -91,13 +91,8 @@ public interface ReadableFileLocationLike<SELF extends ReadableFileLocationLike<
 
   @Override
   @sugar
-  default WritableFileLocation copyTo(WritableFileLocation destination) {
-    return copyTo(destination, CopyOptions.copyDefault());
-  }
-
-  @Override
-  @sugar
-  default WritableFileLocation copyTo(WritableFileLocation destination, CopyOptions options) {
-    return destination.copyFrom(this, options);
+  default ReadableFileLocationLike<SELF> copyToFile(WritableFileLocation destination, CopyOptions options) {
+    destination.copyFrom(this, options);
+    return this;
   }
 }
