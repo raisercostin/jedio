@@ -33,7 +33,7 @@ public class FindFilters {
       throw new IllegalArgumentException("Strange split for " + totalCommanderFilter);
     }
     return filter(createTotalCommanderExpression(first), createTotalCommanderExpression(second), true, false,
-        recursive);
+      recursive);
   }
 
   public static TraversalFilter globFilter(String matcher, String prunningMatcher, boolean ignoreCase,
@@ -58,32 +58,33 @@ public class FindFilters {
 
   public static TraversalFilter filter(PathMatcher matcher, PathMatcher pruningMatcher, boolean ignoreCase,
       boolean dirsFirstInRecursive, boolean recursive) {
-    return new TraversalFilter() {
-      @Override
-      public PathMatcher matcher() {
-        return matcher;
-      }
+    return new TraversalFilter()
+      {
+        @Override
+        public PathMatcher matcher() {
+          return matcher;
+        }
 
-      @Override
-      public PathMatcher pruningMatcher() {
-        return pruningMatcher;
-      }
+        @Override
+        public PathMatcher pruningMatcher() {
+          return pruningMatcher;
+        }
 
-      @Override
-      public boolean ignoreCase() {
-        return ignoreCase;
-      }
+        @Override
+        public boolean ignoreCase() {
+          return ignoreCase;
+        }
 
-      @Override
-      public boolean dirsFirstInRecursive() {
-        return dirsFirstInRecursive;
-      }
+        @Override
+        public boolean dirsFirstInRecursive() {
+          return dirsFirstInRecursive;
+        }
 
-      @Override
-      public boolean recursive() {
-        return recursive;
-      }
-    };
+        @Override
+        public boolean recursive() {
+          return recursive;
+        }
+      };
   }
 
   // TODO filesFirst too, if both are true, or both false whatever.
@@ -102,7 +103,7 @@ public class FindFilters {
     }
     boolean ignoreCase = true;
     final TraversalFilter filter2 = FindFilters.filter(matcher, Filters.createGitFilter(gitIgnore, ignoreCase),
-        ignoreCase, dirsFirst, recursive);
+      ignoreCase, dirsFirst, recursive);
     return filter2;
   }
 

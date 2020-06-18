@@ -83,8 +83,8 @@ public class FileTraversals {
 
     private OrFileFilter createFilter(String gitIgnores, boolean ignoreCase) {
       Stream<IOFileFilter> or = Streams.stream(Splitter.on("\n").omitEmptyStrings().trimResults().split(gitIgnores))
-          .filter(line -> !line.startsWith("#"))
-          .map(dir -> nameFileFilter(dir, ignoreCase ? IOCase.INSENSITIVE : IOCase.SENSITIVE));
+        .filter(line -> !line.startsWith("#"))
+        .map(dir -> nameFileFilter(dir, ignoreCase ? IOCase.INSENSITIVE : IOCase.SENSITIVE));
       List<IOFileFilter> all = or.collect(Collectors.toList());
       return new OrFileFilter(all);
     }
@@ -92,7 +92,7 @@ public class FileTraversals {
     @Override
     public Flux<Path> traverse(Path start, String regex, boolean ignoreCase) {
       Iterable<File> a = () -> FileUtils.iterateFilesAndDirs(start.toFile(), TrueFileFilter.INSTANCE,
-          getFilter(ignoreCase));
+        getFilter(ignoreCase));
       // lesAndDirs(start.toFile(), null, null);
       return Flux.fromStream(StreamSupport.stream(a.spliterator(), false).map(File::toPath));
     }
@@ -118,8 +118,8 @@ public class FileTraversals {
    */
   protected static OrFileFilter createGitFilter(String gitIgnores, boolean ignoreCase) {
     Stream<IOFileFilter> or = Streams.stream(Splitter.on("\n").omitEmptyStrings().trimResults().split(gitIgnores))
-        .filter(line -> !line.startsWith("#"))
-        .map(dir -> nameFileFilter(dir, ignoreCase ? IOCase.INSENSITIVE : IOCase.SENSITIVE));
+      .filter(line -> !line.startsWith("#"))
+      .map(dir -> nameFileFilter(dir, ignoreCase ? IOCase.INSENSITIVE : IOCase.SENSITIVE));
     List<IOFileFilter> all = or.collect(Collectors.toList());
     return new OrFileFilter(all);
   }

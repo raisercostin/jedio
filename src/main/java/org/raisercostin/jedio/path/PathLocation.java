@@ -424,8 +424,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   private void reportOperationEvent(CopyOptions copyOptions, boolean operationIgnored, CopyEvent event,
-      ExistingLocation src,
-      ReferenceLocation dst, Object... args) {
+      ExistingLocation src, ReferenceLocation dst, Object... args) {
     copyOptions.reportOperationEvent(event, src, dst, args);
     if (operationIgnored && copyOptions.throwOnError()) {
       throw new Audit.AuditException("CopyOperation result: %s (src=%s, dst=%s) %s", event, src, dst, API.List(args));

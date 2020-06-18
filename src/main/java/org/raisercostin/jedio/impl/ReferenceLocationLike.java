@@ -253,14 +253,14 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
   default SELF withName(Function<String, String> newName) {
     val fullname = absoluteAndNormalized();
     return create(
-        FilenameUtils.concat(FilenameUtils.getFullPath(fullname), newName.apply(FilenameUtils.getName(fullname))));
+      FilenameUtils.concat(FilenameUtils.getFullPath(fullname), newName.apply(FilenameUtils.getName(fullname))));
   }
 
   @Override
   default SELF withBasename(Function<String, String> newBasename) {
     val fullname = absoluteAndNormalized();
     return create(FilenameUtils.concat(FilenameUtils.getFullPath(fullname),
-        newBasename.apply(FilenameUtils.getBaseName(fullname)) + "." + FilenameUtils.getExtension(fullname)));
+      newBasename.apply(FilenameUtils.getBaseName(fullname)) + "." + FilenameUtils.getExtension(fullname)));
   }
 
   @Override
@@ -273,7 +273,7 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
   default SELF withExtension(Function<String, String> newExtension) {
     val fullname = absoluteAndNormalized();
     return create(
-        FilenameUtils.removeExtension(fullname) + "." + newExtension.apply(FilenameUtils.getExtension(fullname)));
+      FilenameUtils.removeExtension(fullname) + "." + newExtension.apply(FilenameUtils.getExtension(fullname)));
   }
 
   @Override
@@ -282,7 +282,7 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
     val basename = FilenameUtils.getBaseName(fullname);
     val extension = FilenameUtils.getExtension(fullname);
     return create(
-        FilenameUtils.concat(FilenameUtils.getFullPath(fullname), newBasenameAndExtension.apply(basename, extension)));
+      FilenameUtils.concat(FilenameUtils.getFullPath(fullname), newBasenameAndExtension.apply(basename, extension)));
   }
 
   @Override

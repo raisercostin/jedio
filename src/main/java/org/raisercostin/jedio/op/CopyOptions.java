@@ -14,8 +14,8 @@ public interface CopyOptions {
   // Boolean, optionalMeta: Boolean, monitor: OperationMonitor =
   // LoggingOperationMonitor)
 
-  /**Default copy:
-   * Report each step in log, do not overwrite but throw exception.
+  /**
+   * Default copy: Report each step in log, do not overwrite but throw exception.
    */
   static SimpleCopyOptions copyDefault() {
     return copyDoNotOverwrite();
@@ -67,7 +67,7 @@ public interface CopyOptions {
   /** Destination can be changed based on the input and metadata. */
   @SuppressWarnings("unchecked")
   default <T extends WritableFileLocation> T amend(T dest, StreamAndMeta streamAndMeta) {
-    //if there is no http response status code might be a simple copy from other sources
+    // if there is no http response status code might be a simple copy from other sources
     int code = streamAndMeta.meta.httpMetaResponseStatusCode().getOrElse(200);
     if (code == 200) {
       return dest;

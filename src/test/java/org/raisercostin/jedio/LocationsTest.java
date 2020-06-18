@@ -13,7 +13,7 @@ class LocationsTest {
   @Test
   void test() {
     assertEquals("PathLocation(path=" + Paths.get(".").toAbsolutePath().normalize() + ")",
-        Locations.current().toString());
+      Locations.current().toString());
   }
 
   @Test

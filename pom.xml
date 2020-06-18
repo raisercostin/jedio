@@ -74,8 +74,8 @@
       <artifactId>spotbugs-annotations</artifactId>
     </dependency>
     <!-- <dependency> <groupId>org.jetbrains.kotlin</groupId> <artifactId>kotlin-stdlib</artifactId> <version>${kotlin.version}</version> </dependency> 
-			<dependency> <groupId>org.jetbrains.kotlin</groupId> <artifactId>kotlin-test-junit</artifactId> <version>${kotlin.version}</version> <scope>test</scope> 
-			</dependency> -->
+      <dependency> <groupId>org.jetbrains.kotlin</groupId> <artifactId>kotlin-test-junit</artifactId> <version>${kotlin.version}</version> <scope>test</scope> 
+      </dependency> -->
     <dependency>
       <groupId>org.raisercostin</groupId>
       <artifactId>jedi-nodes-java</artifactId>
@@ -134,7 +134,7 @@
     </dependency>
  -->
     <!-- <dependency> <groupId>org.junit.platform</groupId> <artifactId>junit-platform-launcher</artifactId> <version>1.1.0</version> <scope>test</scope> 
-			</dependency> -->
+      </dependency> -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
@@ -243,7 +243,7 @@
      -->
     <!-- <dependency> <groupId>org.mapstruct</groupId> <artifactId>mapstruct-jdk8</artifactId> <version>${org.mapstruct.version}</version> </dependency> -->
     <!-- <dependency> <groupId>org.mapstruct</groupId> <artifactId>mapstruct-processor</artifactId> <version>${org.mapstruct.version}</version> 
-			</dependency> -->
+      </dependency> -->
     <!-- pdfbox, poi, tabula -->
     <dependency>
       <groupId>technology.tabula</groupId>
@@ -270,12 +270,12 @@
     <finalName>${project.artifactId}</finalName>
     <plugins>
       <!-- <sourceDirectory>src/main/kotlin</sourceDirectory> <testSourceDirectory>src/test/kotlin</testSourceDirectory> <plugin> <groupId>org.jetbrains.kotlin</groupId> 
-				<artifactId>kotlin-maven-plugin</artifactId> <version>${kotlin.version}</version> <configuration> <nowarn>false</nowarn> <args> <arg>-Xjsr305=strict</arg> 
-				Enable strict mode for JSR-305 annotations </args> </configuration> <executions> <execution> <id>compile</id> <phase>compile</phase> <goals> 
-				<goal>compile</goal> </goals> <configuration> <sourceDirs> <sourceDir>${project.basedir}/src/main/kotlin</sourceDir> <sourceDir>${project.basedir}/src/main/java</sourceDir> 
-				</sourceDirs> </configuration> </execution> <execution> <id>test-compile</id> <phase>test-compile</phase> <goals> <goal>test-compile</goal> </goals> 
-				<configuration> <sourceDirs> <sourceDir>${project.basedir}/src/test/kotlin</sourceDir> <sourceDir>${project.basedir}/src/test/java</sourceDir> 
-				</sourceDirs> </configuration> </execution> </executions> </plugin> -->
+        <artifactId>kotlin-maven-plugin</artifactId> <version>${kotlin.version}</version> <configuration> <nowarn>false</nowarn> <args> <arg>-Xjsr305=strict</arg> 
+        Enable strict mode for JSR-305 annotations </args> </configuration> <executions> <execution> <id>compile</id> <phase>compile</phase> <goals> 
+        <goal>compile</goal> </goals> <configuration> <sourceDirs> <sourceDir>${project.basedir}/src/main/kotlin</sourceDir> <sourceDir>${project.basedir}/src/main/java</sourceDir> 
+        </sourceDirs> </configuration> </execution> <execution> <id>test-compile</id> <phase>test-compile</phase> <goals> <goal>test-compile</goal> </goals> 
+        <configuration> <sourceDirs> <sourceDir>${project.basedir}/src/test/kotlin</sourceDir> <sourceDir>${project.basedir}/src/test/java</sourceDir> 
+        </sourceDirs> </configuration> </execution> </executions> </plugin> -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -327,9 +327,9 @@
           <generatedSourcesDirectory>${project.build.directory}/generated-sources</generatedSourcesDirectory>
         </configuration>
         <!-- <executions> Replacing default-compile as it is treated specially by maven <execution> <id>default-compile</id> <phase>none</phase> 
-					</execution> Replacing default-testCompile as it is treated specially by maven <execution> <id>default-testCompile</id> <phase>none</phase> </execution> 
-					<execution> <id>java-compile</id> <phase>compile</phase> <goals> <goal>compile</goal> </goals> </execution> <execution> <id>java-test-compile</id> 
-					<phase>test-compile</phase> <goals> <goal>testCompile</goal> </goals> </execution> </executions> -->
+          </execution> Replacing default-testCompile as it is treated specially by maven <execution> <id>default-testCompile</id> <phase>none</phase> </execution> 
+          <execution> <id>java-compile</id> <phase>compile</phase> <goals> <goal>compile</goal> </goals> </execution> <execution> <id>java-test-compile</id> 
+          <phase>test-compile</phase> <goals> <goal>testCompile</goal> </goals> </execution> </executions> -->
       </plugin>
       <!-- lombok for ecj compiler
       <plugin>
@@ -376,7 +376,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore />
+                  <ignore/>
                 </action>
               </pluginExecution>
               <pluginExecution>
@@ -389,7 +389,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore />
+                  <ignore/>
                 </action>
               </pluginExecution>
             </pluginExecutions>
@@ -454,22 +454,48 @@
       </plugin>
       <!-- https://github.com/coveo/fmt-maven-plugin -->
       <!-- <plugin> <groupId>com.coveo</groupId> <artifactId>fmt-maven-plugin</artifactId> <version>2.6.0</version> <executions> <execution> <goals> 
-				<goal>format</goal> </goals> </execution> </executions> </plugin> -->
+        <goal>format</goal> </goals> </execution> </executions> </plugin> -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.8</version>
+        <!--$NO-MVN-MAN-VER$-->
+        <!--$NO-MVN-MAN-VER$ -->
+        <configuration>
+          <target>
+            <echo message="ant cleanup started."/>
+            <fixcrlf srcdir="${basedir}" eol="unix" tab="remove" tablength="2" includes="**/*.java **/*.xml" preservelastmodified="true" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*"/>
+            <echo message="ant cleanup finished."/>
+          </target>
+        </configuration>
+        <!-- not always needed -->
+        <!--
+        <executions>
+          <execution>
+            <id>all-format</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+        -->
+      </plugin>
       <!-- https://github.com/revelc/formatter-maven-plugin -->
       <plugin>
         <groupId>net.revelc.code.formatter</groupId>
         <artifactId>formatter-maven-plugin</artifactId>
         <version>2.8.1</version>
         <configuration>
-          <configFile>${project.basedir}/src/build/code-formatter.xml</configFile>
+          <configFile>${project.basedir}/src/build/eclipse-2020-06-18--java-code-style-formatter.xml</configFile>
           <configJsonFile>${project.basedir}/src/build/json-formatter.properties</configJsonFile>
           <sourceDirectory>${basedir}</sourceDirectory>
           <includes>
             <include>**/**</include>
           </includes>
           <excludes>
-            <exclude>.git/**</exclude>
-            <exclude>**/target/**</exclude>
+            <exclude>.git/</exclude>
+            <exclude>target/</exclude>
             <exclude>**/*.xml</exclude>
           </excludes>
           <lineEnding>LF</lineEnding>
@@ -483,6 +509,8 @@
         </configuration>
         <executions>
           <execution>
+            <id>all-format</id>
+            <phase>validate</phase>
             <goals>
               <goal>format</goal>
             </goals>
@@ -522,9 +550,9 @@
               <excludes>
                 <exclude>**/src/main/resources/**</exclude>
                 <exclude>**/src/test/resources/**</exclude>
-                <exclude>**/src/test/resources2/**</exclude>
                 <exclude>.git/**</exclude>
                 <exclude>**/target/**</exclude>
+                <exclude>.m2/**</exclude>
               </excludes>
               <!-- configure your formatting preferences here (see link below) https://acegi.github.io/xml-format-maven-plugin/xml-format-mojo.html -->
               <indentSize>2</indentSize>
@@ -607,7 +635,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore />
+                    <ignore/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>

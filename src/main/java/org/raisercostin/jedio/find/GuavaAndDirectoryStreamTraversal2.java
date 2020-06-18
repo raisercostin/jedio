@@ -32,8 +32,9 @@ public class GuavaAndDirectoryStreamTraversal2 implements FileTraversal2 {
           // fileTraverser(filter2).depthFirstPreOrder(start);
           // .breadthFirst(start);
           Files.newDirectoryStream(start, filter2);
-      return Flux.fromIterable(iterable).filter(path -> filter.matches(path))
-          .sort((x, y) -> Boolean.compare(Files.isDirectory(y, options), Files.isDirectory(x, options)));
+      return Flux.fromIterable(iterable)
+        .filter(path -> filter.matches(path))
+        .sort((x, y) -> Boolean.compare(Files.isDirectory(y, options), Files.isDirectory(x, options)));
       // .map(x->{System.out.println("found "+x);return x;});
     } catch (IOException e) {
       throw new RuntimeException(e);

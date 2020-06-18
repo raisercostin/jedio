@@ -87,9 +87,9 @@ public class SimpleShell implements Shell {
       // File input = File.createTempFile("restfs", ".input");
       // TODO splitting command should work for "aaa bbbb" as argument
       ProcessBuilder builder = new ProcessBuilder(commandAndParams).redirectOutput(Redirect.PIPE)
-          .redirectError(Redirect.PIPE)
-          // .redirectInput(input)
-          .directory(path.asPathLocation().toFile());
+        .redirectError(Redirect.PIPE)
+        // .redirectInput(input)
+        .directory(path.asPathLocation().toFile());
       // .inheritIO();
       Map<String, String> currentEnvironment = builder.environment();
       currentEnvironment.putAll(env);

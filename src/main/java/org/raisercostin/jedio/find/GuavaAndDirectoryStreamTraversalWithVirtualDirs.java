@@ -51,26 +51,28 @@ public class GuavaAndDirectoryStreamTraversalWithVirtualDirs implements FileTrav
   @Override
   public Flux<PathWithAttributes> traverse2(Path start, TraversalFilter filter) {
     try {
-      PathMatcher all = new PathMatcher() {
-        @Override
-        public boolean matches(Path path) {
-          if (filter.shouldPrune(path)) {
-            return false;
+      PathMatcher all = new PathMatcher()
+        {
+          @Override
+          public boolean matches(Path path) {
+            if (filter.shouldPrune(path)) {
+              return false;
+            }
+            if (isDirectory(path)) {
+              return true;
+            }
+            return filter.matches(path);
           }
-          if (isDirectory(path)) {
-            return true;
-          }
-          return filter.matches(path);
-        }
 
-        private boolean isDirectory(Path path) {
-          return PathWithAttributes.readAttrs(path).isDirectory();
-        }
-      };
+          private boolean isDirectory(Path path) {
+            return PathWithAttributes.readAttrs(path).isDirectory();
+          }
+        };
       Iterable<Path> iterable = filter.recursive() ? fileTraverser(createFilter(all)).depthFirstPreOrder(start)
           : newVirtualDirectoryStream(start, createFilter(all));
       final Flux<PathWithAttributes> all2 = Flux.fromStream(StreamSupport.stream(iterable.spliterator(), false))
-          .map(x -> new PathWithAttributes(x)).filter(path -> filter.matches(path.path));
+        .map(x -> new PathWithAttributes(x))
+        .filter(path -> filter.matches(path.path));
       if (filter.dirsFirstInRecursive()) {
         return all2.sort(dirsFirst());
       } else {
@@ -92,25 +94,28 @@ public class GuavaAndDirectoryStreamTraversalWithVirtualDirs implements FileTrav
 
   private DirectoryStream<Path> newActualVirtualDirectoryStream(Path pdfFile, Filter<Path> filter) {
     Preconditions.checkArgument(pdfFile.toString().toLowerCase().endsWith(".pdf"));
-    return new DirectoryStream<Path>() {
-      @Override
-      public void close() {
-        throw new RuntimeException("Not implemented yet!!!");
-      }
+    return new DirectoryStream<Path>()
+      {
+        @Override
+        public void close() {
+          throw new RuntimeException("Not implemented yet!!!");
+        }
 
-      @Override
-      public Iterator<Path> iterator() {
-        return Locations.path(pdfFile).asReadableFile().usingInputStream((InputStream is) -> {
-          PDDocument doc = PDDocument.load(is);
-          return List.ofAll(doc.getPages()).zipWithIndex().map(pageWithIndex -> toPath(pdfFile, pageWithIndex))
+        @Override
+        public Iterator<Path> iterator() {
+          return Locations.path(pdfFile).asReadableFile().usingInputStream((InputStream is) -> {
+            PDDocument doc = PDDocument.load(is);
+            return List.ofAll(doc.getPages())
+              .zipWithIndex()
+              .map(pageWithIndex -> toPath(pdfFile, pageWithIndex))
               .iterator();
-        });
-      }
+          });
+        }
 
-      private Path toPath(Path pdfFile, Tuple2<PDPage, Integer> pageWithIndex) {
-        return pdfFile.resolve("page-" + pageWithIndex._2);
-      }
-    };
+        private Path toPath(Path pdfFile, Tuple2<PDPage, Integer> pageWithIndex) {
+          return pdfFile.resolve("page-" + pageWithIndex._2);
+        }
+      };
   }
 
   @Override

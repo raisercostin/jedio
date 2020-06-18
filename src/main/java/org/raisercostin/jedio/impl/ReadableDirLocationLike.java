@@ -44,7 +44,8 @@ public interface ReadableDirLocationLike<SELF extends ReadableDirLocationLike<SE
         WritableFileLocation copied = item.relative(this, dir)
           .get()
           .asWritableFile()
-          .copyFrom(item.asReadableFile(), copyOptions);
+          .copyFrom(item.asReadableFile(),
+            copyOptions);
         return copied;
       })
       .timeout(copyOptions.timeoutOnItem())

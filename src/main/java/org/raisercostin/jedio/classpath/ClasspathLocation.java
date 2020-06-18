@@ -45,7 +45,7 @@ public class ClasspathLocation
     implements ReadableDirLocation, ReadableFileLocation, ReadableDirLocationLike<ClasspathLocation>,
     ExistingLocationLike<ClasspathLocation>, ReadableFileLocationLike<ClasspathLocation> {
   private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
-      .getOrElse(ClassLoader.class.getClassLoader());
+    .getOrElse(ClassLoader.class.getClassLoader());
 
   private static URL toUrl(String resourcePath) {
     URL res = specialClassLoader.getResource(resourcePath);

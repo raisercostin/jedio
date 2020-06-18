@@ -42,17 +42,17 @@ public class HttpPerformanceTest {
     assertThatTime(Duration.ofSeconds(3), () -> {
       AtomicInteger finished = new AtomicInteger(0);
       Vector<Mono<Integer>> all = Vector.range(0, totalCalls)// .toJavaParallelStream().
-          .map((Integer x) -> {
-            log.info("x=" + x);
-            return Locations.url(testUrl, client).readContentAsync().map(content -> {
-              assertThat(content.length()).isGreaterThan(1);
-              // assertThat(content).startsWith("{\"updated\":\"");
-              assertThat(content).startsWith("<!DOCTYPE html>");
-              int counter = finished.incrementAndGet();
-              log.info("{} finished total={}, stats={}", x, counter, client.getStatus());
-              return x;
-            }).cache();
-          });
+        .map((Integer x) -> {
+          log.info("x=" + x);
+          return Locations.url(testUrl, client).readContentAsync().map(content -> {
+            assertThat(content.length()).isGreaterThan(1);
+            // assertThat(content).startsWith("{\"updated\":\"");
+            assertThat(content).startsWith("<!DOCTYPE html>");
+            int counter = finished.incrementAndGet();
+            log.info("{} finished total={}, stats={}", x, counter, client.getStatus());
+            return x;
+          }).cache();
+        });
       log.info("all started {}", all.size());
 
       // all.forEach(x -> x.block());
