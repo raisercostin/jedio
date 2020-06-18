@@ -17,7 +17,7 @@ public class PathWithAttributes {
 
   public PathWithAttributes(Path path) {
     this.path = path;
-    attrs = Lazy.of(() -> readAttrs(path));
+    this.attrs = Lazy.of(() -> readAttrs(path));
   }
 
   public boolean isDirectory() {
@@ -28,7 +28,7 @@ public class PathWithAttributes {
       // TODO fix
       return false;
     }
-    return attrs.get().isDirectory();
+    return this.attrs.get().isDirectory();
   }
 
   public FileTime lastModifiedTime() {
@@ -36,16 +36,16 @@ public class PathWithAttributes {
       // TODO fix
       return FileTime.fromMillis(0);
     }
-    return attrs.get().lastModifiedTime();
+    return this.attrs.get().lastModifiedTime();
   }
 
   private boolean isInsideVirtualDirectory() {
     // TODO fix this (this allows only one level virtual dir)
-    return path.getParent().toString().toLowerCase().endsWith(".pdf");
+    return this.path.getParent().toString().toLowerCase().endsWith(".pdf");
   }
 
   public boolean isVirtualDirectory() {
-    return path.toString().toLowerCase().endsWith(".pdf");
+    return this.path.toString().toLowerCase().endsWith(".pdf");
     // return GuavaAndDirectoryStreamTraversalWithVirtualDirs.this.isVirtualDir.apply(path);
   }
 

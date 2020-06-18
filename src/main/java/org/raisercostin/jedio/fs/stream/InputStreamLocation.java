@@ -15,7 +15,7 @@ public class InputStreamLocation implements ReadableFileLocation, ReadableFileLo
 
   @Override
   public InputStream unsafeInputStream() {
-    return stream;
+    return this.stream;
   }
 
   @Override

@@ -31,39 +31,39 @@ public class HttpStandardJavaLocation extends BaseHttpLocationLike<HttpStandardJ
 
   @SneakyThrows
   private URLConnection createConnection() {
-    return url.openConnection();
+    return this.url.openConnection();
   }
 
   @Override
   @SneakyThrows
   public InputStream unsafeInputStream() {
-    URLConnection conn = connection.get();
+    URLConnection conn = this.connection.get();
     return conn.getInputStream();
   }
 
   @Override
   @SneakyThrows
   public boolean exists() {
-    HttpURLConnection huc = (HttpURLConnection) connection.get();
+    HttpURLConnection huc = (HttpURLConnection) this.connection.get();
     int responseCode = huc.getResponseCode();
     return responseCode != HttpURLConnection.HTTP_NOT_FOUND;
   }
 
   @Override
   public String readContentSync(Charset charset) {
-    return HttpUtils.getFromURL(url.toExternalForm());
+    return HttpUtils.getFromURL(this.url.toExternalForm());
   }
 
   @Override
   public void close() throws IOException {
-    if (connection.isEvaluated()) {
-      HttpURLConnection huc = (HttpURLConnection) connection.get();
+    if (this.connection.isEvaluated()) {
+      HttpURLConnection huc = (HttpURLConnection) this.connection.get();
       huc.disconnect();
     }
   }
 
   @Override
   protected HttpStandardJavaLocation create(URL resolve, boolean escaped) {
-    return new HttpStandardJavaLocation(url, escaped);
+    return new HttpStandardJavaLocation(this.url, escaped);
   }
 }

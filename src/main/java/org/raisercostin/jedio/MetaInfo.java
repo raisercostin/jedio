@@ -68,8 +68,8 @@ public class MetaInfo {
     @Override
     @SneakyThrows
     public void close() {
-      if (is != null) {
-        is.close();
+      if (this.is != null) {
+        this.is.close();
       }
     }
   }

@@ -182,15 +182,15 @@ public class JedioHttpClient {
     this.connManager = createConnectionManager();
     this.builder = createHttpBuilder();
     this.executorService = createExecutor();
-    this.client = Lazy.of(() -> builder.build());
+    this.client = Lazy.of(() -> this.builder.build());
   }
 
   public CloseableHttpClient client() {
-    return client.get();
+    return this.client.get();
   }
 
   public PoolStats getStatus() {
-    return connManager.getTotalStats();
+    return this.connManager.getTotalStats();
   }
 
   private ExecutorService createExecutor() {
@@ -208,20 +208,20 @@ public class JedioHttpClient {
     // HttpHost host = new HttpHost("hostname", 80);
     // HttpRoute route = new HttpRoute(host);
     // connManager.setSocketConfig(route.getTargetHost(), SocketConfig.custom().setSoTimeout(5000).build());
-    connManager.setMaxTotal(config.maxTotal);
+    connManager.setMaxTotal(this.config.maxTotal);
     connManager.closeExpiredConnections();
-    connManager.closeIdleConnections(config.closeIdleConnections.toMillis(), TimeUnit.MILLISECONDS);
-    connManager.setDefaultMaxPerRoute(config.maxPerRoute);
+    connManager.closeIdleConnections(this.config.closeIdleConnections.toMillis(), TimeUnit.MILLISECONDS);
+    connManager.setDefaultMaxPerRoute(this.config.maxPerRoute);
     ConnectionConfig defaultConnectionConfig = ConnectionConfig.custom().build();
     // Set the total number of concurrent connections to a specific route, which is 2 by default.
     // connManager.setMaxPerRoute(route, 5);
     connManager.setDefaultConnectionConfig(defaultConnectionConfig);
     // see java.net.SocketOptions
     SocketConfig defaultSocketConfig = SocketConfig.custom()
-      .setSoTimeout(Math.toIntExact(config.soTimeout.toMillis()))
+      .setSoTimeout(Math.toIntExact(this.config.soTimeout.toMillis()))
       .build();
     connManager.setDefaultSocketConfig(defaultSocketConfig);
-    connManager.setValidateAfterInactivity(Math.toIntExact(config.validateAfterInactivity.toMillis()));
+    connManager.setValidateAfterInactivity(Math.toIntExact(this.config.validateAfterInactivity.toMillis()));
     return connManager;
   }
 
@@ -276,7 +276,7 @@ public class JedioHttpClient {
     RequestConfig requestConfig = createRequestConfig();
     HttpClientBuilder builder = HttpClients.custom()
       .setKeepAliveStrategy(keepAliveStrategy)
-      .setConnectionManager(connManager)
+      .setConnectionManager(this.connManager)
       .setRetryHandler(retryHandler())
       .setConnectionTimeToLive(60, TimeUnit.SECONDS)
       .setDefaultRequestConfig(requestConfig)
@@ -304,7 +304,7 @@ public class JedioHttpClient {
           return Long.parseLong(value) * MILLIS;
         }
       }
-      return config.defaultKeepAlive.toMillis();
+      return this.config.defaultKeepAlive.toMillis();
     };
   }
 
@@ -333,32 +333,32 @@ public class JedioHttpClient {
 
     @JsonProperty
     public String hostName() {
-      return address.getHostName();
+      return this.address.getHostName();
     }
 
     @JsonProperty
     public String hostString() {
-      return address.getHostString();
+      return this.address.getHostString();
     }
 
     @JsonProperty
     public int hostPort() {
-      return address.getPort();
+      return this.address.getPort();
     }
 
     @JsonProperty
     public boolean isUnresolved() {
-      return address.isUnresolved();
+      return this.address.isUnresolved();
     }
 
     @JsonProperty
     public String hostAddress() {
-      return address.getAddress().getHostAddress();
+      return this.address.getAddress().getHostAddress();
     }
 
     @JsonProperty
     public String hostName2() {
-      return address.getAddress().getHostName();
+      return this.address.getAddress().getHostName();
     }
   }
 
@@ -373,7 +373,7 @@ public class JedioHttpClient {
   }
 
   private boolean checkRetriable(IOException exception, int executionCount, HttpContext context) {
-    if (executionCount >= config.maxRetry) {
+    if (executionCount >= this.config.maxRetry) {
       // Do not retry if over max retry count
       return false;
     }
@@ -414,7 +414,7 @@ public class JedioHttpClient {
     // Fiber<String> fiber = new Fiber<String>(fiberForkJoinScheduler, () -> {throw new
     // RuntimeException("yourCompletableFuture.complete(readContent())");});
     // Thread.activeCount()
-    executorService.execute(
+    this.executorService.execute(
       // Thread fiber = new Thread(//fiberForkJoinScheduler,
       () -> {
         try {

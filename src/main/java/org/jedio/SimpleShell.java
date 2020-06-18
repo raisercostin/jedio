@@ -58,23 +58,23 @@ public class SimpleShell implements Shell {
 
   private SimpleShell(DirLocation path, DeleteOptions deleteOptions) {
     this.deleteOptions = deleteOptions;
-    env = Maps.newHashMap();
-    current = path;
+    this.env = Maps.newHashMap();
+    this.current = path;
   }
 
   @Override
   public void execute(String command) {
-    executeInternal(current, split(command)).valid();
+    executeInternal(this.current, split(command)).valid();
   }
 
   @Override
   public void execute(String command, String... params) {
-    executeInternal(current, Lists.asList(command, params)).valid();
+    executeInternal(this.current, Lists.asList(command, params)).valid();
   }
 
   @Override
   public ProcessResult executeWithResult(String command) {
-    return executeInternal(current, split(command));
+    return executeInternal(this.current, split(command));
   }
 
   // See
@@ -92,9 +92,9 @@ public class SimpleShell implements Shell {
         .directory(path.asPathLocation().toFile());
       // .inheritIO();
       Map<String, String> currentEnvironment = builder.environment();
-      currentEnvironment.putAll(env);
+      currentEnvironment.putAll(this.env);
       Process proc = builder.start();
-      return new ProcessResult(current, commandAndParams, sensibleRegex, proc);
+      return new ProcessResult(this.current, commandAndParams, this.sensibleRegex, proc);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -119,7 +119,7 @@ public class SimpleShell implements Shell {
 
   @Override
   public DirLocation pwd() {
-    return current;
+    return this.current;
   }
 
   @Override
@@ -129,23 +129,23 @@ public class SimpleShell implements Shell {
 
   @Override
   public DirLocation pushd(DirLocation url) {
-    dirs.push(current);
+    this.dirs.push(this.current);
     return internalCd(url);
   }
 
   @Override
   public DirLocation pushd(RelativeLocation path) {
-    dirs.push(current);
+    this.dirs.push(this.current);
     return internalCd(child(path).existingRef().get().asDir());
   }
 
   @Override
   public DirLocation popd() {
-    return internalCd(dirs.pop());
+    return internalCd(this.dirs.pop());
   }
 
   private DirLocation internalCd(DirLocation dir) {
-    current = dir;
+    this.current = dir;
     dir.mkdirIfNeeded();
     return dir;
   }
@@ -191,12 +191,12 @@ public class SimpleShell implements Shell {
 
   @Override
   public void deleteIfExists(String path) {
-    child(path).nonExistingOrElse(x -> x.delete(deleteOptions));
+    child(path).nonExistingOrElse(x -> x.delete(this.deleteOptions));
   }
 
   @Override
   public void addEnv(String name, String value) {
-    env.put(name, value);
+    this.env.put(name, value);
   }
 
   @Override

@@ -18,7 +18,7 @@ public interface DeleteOptions {
 
     @Override
     public boolean deleteByRename() {
-      return deleteByRename;
+      return this.deleteByRename;
     }
   }
 

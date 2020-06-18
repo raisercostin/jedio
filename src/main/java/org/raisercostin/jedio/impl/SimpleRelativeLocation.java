@@ -9,6 +9,6 @@ public class SimpleRelativeLocation implements RelativeLocation, LocationLike<Si
 
   @Override
   public String relativePath() {
-    return location;
+    return this.location;
   }
 }

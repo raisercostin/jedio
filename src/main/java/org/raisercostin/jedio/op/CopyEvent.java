@@ -23,7 +23,7 @@ public enum CopyEvent {
   String description;
 
   CopyEvent() {
-    description = name();
+    this.description = name();
   }
 
   CopyEvent(String description) {

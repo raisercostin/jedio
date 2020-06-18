@@ -77,8 +77,8 @@ public class FileTraversals {
     private final IOFileFilter gitFilterCaseInSensible;
 
     public CommonsIoTraversal(String gitIgnores) {
-      gitFilterCaseSensible = notFileFilter(and(directoryFileFilter(), createFilter(gitIgnores, true)));
-      gitFilterCaseInSensible = notFileFilter(and(directoryFileFilter(), createFilter(gitIgnores, false)));
+      this.gitFilterCaseSensible = notFileFilter(and(directoryFileFilter(), createFilter(gitIgnores, true)));
+      this.gitFilterCaseInSensible = notFileFilter(and(directoryFileFilter(), createFilter(gitIgnores, false)));
     }
 
     private OrFileFilter createFilter(String gitIgnores, boolean ignoreCase) {
@@ -99,9 +99,9 @@ public class FileTraversals {
 
     private IOFileFilter getFilter(boolean ignoreCase) {
       if (ignoreCase) {
-        return gitFilterCaseInSensible;
+        return this.gitFilterCaseInSensible;
       } else {
-        return gitFilterCaseSensible;
+        return this.gitFilterCaseSensible;
       }
     }
   }
@@ -136,7 +136,7 @@ public class FileTraversals {
       if (path.getClass().getName().equals("com.sun.nio.zipfs.ZipPath")) {
         return true;
       }
-      return filter.accept(path.toFile());
+      return this.filter.accept(path.toFile());
     }
   }
 

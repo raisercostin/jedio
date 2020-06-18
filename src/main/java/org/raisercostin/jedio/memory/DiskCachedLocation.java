@@ -38,7 +38,7 @@ public class DiskCachedLocation implements ReadableFileLocation, ReadableFileLoc
     }
 
     public ReadableFileLocation locationFor(ReadableFileLocation location) {
-      return dir.child(slug(location)).asReadableFile();
+      return this.dir.child(slug(location)).asReadableFile();
     }
   }
 
@@ -97,24 +97,24 @@ public class DiskCachedLocation implements ReadableFileLocation, ReadableFileLoc
 
   @Override
   public String readContentSync(Charset charset) {
-    ReadableFileLocation cached = cache.locationFor(location);
+    ReadableFileLocation cached = this.cache.locationFor(this.location);
     if (cached.exists()) {
       return cached.asReadableFile().readContentSync(charset);
     } else {
-      String content = location.readContentSync(charset);
-      cached.asWritableFile().write(cache.transformer.apply(content));
+      String content = this.location.readContentSync(charset);
+      cached.asWritableFile().write(this.cache.transformer.apply(content));
       return content;
     }
   }
 
   @Override
   public Mono<String> readContentAsync(Charset charset) {
-    ReadableFileLocation cached = cache.locationFor(location);
+    ReadableFileLocation cached = this.cache.locationFor(this.location);
     if (cached.exists()) {
       return cached.asReadableFile().readContentAsync(charset);
     } else {
-      return location.readContentAsync(charset).map(content -> {
-        cached.asWritableFile().write(cache.transformer.apply(content));
+      return this.location.readContentAsync(charset).map(content -> {
+        cached.asWritableFile().write(this.cache.transformer.apply(content));
         return content;
       });
     }

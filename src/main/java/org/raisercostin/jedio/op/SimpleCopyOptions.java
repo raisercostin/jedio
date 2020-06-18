@@ -27,7 +27,7 @@ public class SimpleCopyOptions implements CopyOptions {
 
   @Override
   public boolean acceptStreamAndMeta(StreamAndMeta streamAndMeta) {
-    return acceptStreamAndMeta.test(streamAndMeta);
+    return this.acceptStreamAndMeta.test(streamAndMeta);
   }
 
   public SimpleCopyOptions filterHttpContentTypeHtml() {
@@ -36,12 +36,12 @@ public class SimpleCopyOptions implements CopyOptions {
 
   @Override
   public boolean throwOnError() {
-    return throwIfIgnored;
+    return this.throwIfIgnored;
   }
 
   @Override
   public boolean replaceExisting() {
-    return replaceExisting;
+    return this.replaceExisting;
   }
 
   public CopyOptions withDefaultReporting() {
@@ -50,26 +50,26 @@ public class SimpleCopyOptions implements CopyOptions {
 
   @Override
   public boolean reportSteps() {
-    return operationListener != null;
+    return this.operationListener != null;
   }
 
   @Override
   public void reportOperationEvent(CopyEvent event, ExistingLocation src, ReferenceLocation dst, Object... args) {
-    if (operationListener != null) {
-      operationListener.reportOperationEvent(event, null, src, dst, args);
+    if (this.operationListener != null) {
+      this.operationListener.reportOperationEvent(event, null, src, dst, args);
     }
   }
 
   @Override
   public void reportOperationEvent(CopyEvent event, Throwable exception, ExistingLocation src, ReferenceLocation dst,
       Object... args) {
-    if (operationListener != null) {
-      operationListener.reportOperationEvent(event, exception, src, dst, args);
+    if (this.operationListener != null) {
+      this.operationListener.reportOperationEvent(event, exception, src, dst, args);
     }
   }
 
   @Override
   public boolean copyMeta() {
-    return copyMeta;
+    return this.copyMeta;
   }
 }

@@ -55,7 +55,7 @@ public class SimpleUrl {
 
   @SneakyThrows
   public SimpleUrl withoutQuery() {
-    uri.setEscapedQuery(null);
+    this.uri.setEscapedQuery(null);
     return this;
   }
 
@@ -64,7 +64,7 @@ public class SimpleUrl {
   }
 
   public String toExternalForm() {
-    return uri.toString();
+    return this.uri.toString();
   }
 
 }

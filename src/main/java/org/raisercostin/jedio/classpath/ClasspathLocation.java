@@ -57,8 +57,8 @@ public class ClasspathLocation
   private final URL resourceUrl;
 
   public ClasspathLocation(String path) {
-    resourcePath = fixPath(path);
-    resourceUrl = toUrl(resourcePath);
+    this.resourcePath = fixPath(path);
+    this.resourceUrl = toUrl(this.resourcePath);
   }
 
   private String fixPath(String path) {
@@ -73,7 +73,7 @@ public class ClasspathLocation
   @Override
   @SneakyThrows
   public String absoluteAndNormalized() {
-    URL url = resourceUrl;
+    URL url = this.resourceUrl;
     String x = url.toURI().getPath();
     if (x == null) {
       return url.toURI().toString();
@@ -91,7 +91,7 @@ public class ClasspathLocation
 
   private Path toPath() {
     return ExceptionUtils.tryWithSuppressed(() -> {
-      URL resource = ClasspathLocation.class.getClassLoader().getResource(resourcePath);
+      URL resource = ClasspathLocation.class.getClassLoader().getResource(this.resourcePath);
       System.out.println("resource=" + resource);
       Preconditions.checkNotNull(resource);
       URI uri = resource.toURI();
@@ -99,7 +99,7 @@ public class ClasspathLocation
       System.out.println("uri=" + uri);
       Preconditions.checkNotNull(uri);
       return Paths.get(uri);
-    }, "When trying to read resource [%s]", resourcePath);
+    }, "When trying to read resource [%s]", this.resourcePath);
   }
 
   private FileSystem initFileSystem(URI uri) throws IOException {
@@ -123,7 +123,7 @@ public class ClasspathLocation
 
   @Override
   public ClasspathLocation child(RelativeLocation child) {
-    return Locations.classpath(fixPath(resourcePath + "/" + child.relativePath()));
+    return Locations.classpath(fixPath(this.resourcePath + "/" + child.relativePath()));
   }
   //
   // private InputStream toStream() {
@@ -132,7 +132,7 @@ public class ClasspathLocation
 
   @Override
   public InputStream unsafeInputStream() {
-    final InputStream res = specialClassLoader.getResourceAsStream(resourcePath);
+    final InputStream res = specialClassLoader.getResourceAsStream(this.resourcePath);
     Preconditions.checkNotNull(res);
     return res;
   }
@@ -142,7 +142,7 @@ public class ClasspathLocation
     try (BufferedInputStream b = new BufferedInputStream(unsafeInputStream())) {
       return IOUtils.toString(b, charset);
     } catch (IOException e) {
-      throw new RuntimeException("Can't read resource [" + resourcePath + "]", e);
+      throw new RuntimeException("Can't read resource [" + this.resourcePath + "]", e);
     }
   }
 

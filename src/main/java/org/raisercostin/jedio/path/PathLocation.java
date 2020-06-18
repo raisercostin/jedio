@@ -105,7 +105,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   @Override
   public PathLocation child(RelativeLocation child) {
-    return Locations.path(fixPath(path.resolve(child.relativePath())));
+    return Locations.path(fixPath(this.path.resolve(child.relativePath())));
   }
 
   @Override
@@ -114,11 +114,11 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   public File toFile() {
-    return path.toFile();
+    return this.path.toFile();
   }
 
   public Path toPath() {
-    return path;
+    return this.path;
   }
 
   @Override
@@ -134,7 +134,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   @Override
   /** Not all absolute paths are canonical. Some contain `..` and `.` */
   public String absolute() {
-    return path.toAbsolutePath().toString();
+    return this.path.toAbsolutePath().toString();
   }
 
   @Override
@@ -245,7 +245,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   @Override
   public Option<PathLocation> existing() {
-    if (Files.exists(path)) {
+    if (Files.exists(this.path)) {
       return Option.of(this);
     } else {
       return Option.none();
@@ -254,7 +254,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   @Override
   public Option<NonExistingLocationLike<?>> nonExisting() {
-    if (!Files.exists(path)) {
+    if (!Files.exists(this.path)) {
       return Option.of(this);
     } else {
       return Option.none();
@@ -272,7 +272,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   @Override
   public boolean exists() {
-    return Files.exists(path);
+    return Files.exists(this.path);
   }
 
   @Override
@@ -330,7 +330,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   @Override
   public long length() {
     try {
-      return Files.size(path);
+      return Files.size(this.path);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -487,7 +487,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   @Override
   public Option<PathLocation> parent() {
-    return Option.of(path.getParent()).map(x -> create(x));
+    return Option.of(this.path.getParent()).map(x -> create(x));
   }
 
   @Override
@@ -552,11 +552,11 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   @Override
   public boolean isSymlink() {
-    return Files.isSymbolicLink(path) || isJunctionInWindows();
+    return Files.isSymbolicLink(this.path) || isJunctionInWindows();
   }
 
   private boolean isJunctionInWindows() {
-    return !Files.isRegularFile(path);
+    return !Files.isRegularFile(this.path);
   }
 
   @Override
@@ -564,9 +564,9 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     Preconditions.checkState(isSymlink());
     try {
       if (isJunctionInWindows()) {
-        return create(path.toRealPath(LinkOption.NOFOLLOW_LINKS));
+        return create(this.path.toRealPath(LinkOption.NOFOLLOW_LINKS));
       }
-      return create(Files.readSymbolicLink(path));
+      return create(Files.readSymbolicLink(this.path));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -602,7 +602,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     // System.out.println(changeKind.toString() + " " + directory.toString()));
     // val observer = new FileAlterationObserver(toFile());
     // val monitor = new FileAlterationMonitor(pollingIntervalInMillis);
-    return PathObservables.watchNonRecursive(path);
+    return PathObservables.watchNonRecursive(this.path);
     // .map(x->{System.out.println(x.kind().type()+" "+x.kind().name()+"
     // "+x.context()+" "+x.count()+"
     // "+((Path)x.context()).toAbsolutePath());return x;})
@@ -879,6 +879,6 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   @Override
   public URI toUri() {
-    return path.toUri();
+    return this.path.toUri();
   }
 }

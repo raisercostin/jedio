@@ -47,7 +47,7 @@ public class WebLocation implements ReadableDirLocation, ReadableDirLocationLike
   public Iterator<WebLocation> ls() {
     return prefixes1
       .flatMap(
-        prefix1 -> prefixes2.flatMap(prefix2 -> suffixes.map(suffix -> prefix1 + prefix2 + webAddress + suffix)))
+        prefix1 -> prefixes2.flatMap(prefix2 -> suffixes.map(suffix -> prefix1 + prefix2 + this.webAddress + suffix)))
       .iterator()
       .map(x -> child(x));
   }
@@ -55,11 +55,11 @@ public class WebLocation implements ReadableDirLocation, ReadableDirLocationLike
   private static final JedioHttpClient client = JedioHttpClient.createHighPerfHttpClient();
 
   public HttpClientLocation asHttpClientLocation() {
-    return new HttpClientLocation(webAddress, false, client);
+    return new HttpClientLocation(this.webAddress, false, client);
   }
 
   public HttpStandardJavaLocation asHttpStandardJavaLocation() {
-    return new HttpStandardJavaLocation(webAddress, false);
+    return new HttpStandardJavaLocation(this.webAddress, false);
   }
 
   @Override

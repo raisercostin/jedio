@@ -27,9 +27,9 @@ public class GuavaAndDirectoryStreamTraversal3 implements FileTraversal2 {
   public GuavaAndDirectoryStreamTraversal3(boolean followLinks) {
     // this.followLinks = followLinks;
     if (followLinks) {
-      options = new LinkOption[0];
+      this.options = new LinkOption[0];
     } else {
-      options = new LinkOption[] { LinkOption.NOFOLLOW_LINKS };
+      this.options = new LinkOption[] { LinkOption.NOFOLLOW_LINKS };
     }
   }
 
@@ -101,7 +101,7 @@ public class GuavaAndDirectoryStreamTraversal3 implements FileTraversal2 {
   private Iterable<Path> fileTreeChildren(Path file, Filter<Path> filter) {
     // check isDirectory() just because it may be faster than listFiles() on a
     // non-directory
-    if (Files.isDirectory(file, options)) {
+    if (Files.isDirectory(file, this.options)) {
       try {
         DirectoryStream<Path> files = Files.newDirectoryStream(file, filter);
         if (files != null) {

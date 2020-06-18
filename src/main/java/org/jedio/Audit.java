@@ -61,7 +61,7 @@ public class Audit {
     public boolean isWarn;
 
     public Situation increased() {
-      counter++;
+      this.counter++;
       return this;
     }
   }

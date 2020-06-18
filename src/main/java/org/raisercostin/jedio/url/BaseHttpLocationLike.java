@@ -78,23 +78,23 @@ public abstract class BaseHttpLocationLike<SELF extends BaseHttpLocationLike<SEL
 
   @Override
   public String toExternalForm() {
-    return url.toExternalForm();
+    return this.url.toExternalForm();
   }
 
   @Override
   @SneakyThrows
   public java.net.URI toUri() {
-    return url.toURI();
+    return this.url.toURI();
   }
 
   @Override
   public URL toUrl() {
-    return url;
+    return this.url;
   }
 
   @Override
   public SELF child(String path) {
-    return create(resolve(url, path), true);
+    return create(resolve(this.url, path), true);
   }
 
   @Override

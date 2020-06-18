@@ -63,21 +63,21 @@ public final class PathObservables {
     private final boolean recursive;
 
     private FluxFactory(final Path path, final boolean recursive) {
-      directory = path.toAbsolutePath();
+      this.directory = path.toAbsolutePath();
       this.recursive = recursive;
     }
 
     private Flux<FileAltered> create() {
       return Flux.create(subscriber -> {
-        try (WatchService watcher = directory.getFileSystem().newWatchService()) {
-          if (recursive) {
-            registerAll(directory, watcher);
+        try (WatchService watcher = this.directory.getFileSystem().newWatchService()) {
+          if (this.recursive) {
+            registerAll(this.directory, watcher);
           } else {
-            register(directory, watcher);
+            register(this.directory, watcher);
           }
           while (!subscriber.isCancelled()) {
             final WatchKey key = watcher.take();
-            final Path dir = directoriesByKey.get(key);
+            final Path dir = this.directoriesByKey.get(key);
             for (final WatchEvent<?> event : key.pollEvents()) {
               subscriber.next(new FileAltered(dir, event));
               registerNewDirectory(subscriber, dir, watcher, event);
@@ -86,9 +86,9 @@ public final class PathObservables {
             // accessible
             boolean valid = key.reset();
             if (!valid) {
-              directoriesByKey.remove(key);
+              this.directoriesByKey.remove(key);
               // nothing to be watched
-              if (directoriesByKey.isEmpty()) {
+              if (this.directoriesByKey.isEmpty()) {
                 break;
               }
             }
@@ -121,14 +121,14 @@ public final class PathObservables {
 
     private void register(final Path dir, final WatchService watcher) throws IOException {
       final WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-      directoriesByKey.put(key, dir);
+      this.directoriesByKey.put(key, dir);
     }
 
     // register newly created directory to watching in recursive mode
     private void registerNewDirectory(final FluxSink<FileAltered> subscriber, final Path dir,
         final WatchService watcher, final WatchEvent<?> event) {
       final Kind<?> kind = event.kind();
-      if (recursive && kind.equals(ENTRY_CREATE)) {
+      if (this.recursive && kind.equals(ENTRY_CREATE)) {
         // Context for directory entry event is the file name of entry
         @SuppressWarnings("unchecked")
         final WatchEvent<Path> eventWithPath = (WatchEvent<Path>) event;

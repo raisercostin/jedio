@@ -17,11 +17,11 @@ public class InMemoryLocation implements ReadableFileLocation, ReadableFileLocat
 
   @Override
   public InputStream unsafeInputStream() {
-    return IOUtils.toInputStream(data, Charsets.UTF_8);
+    return IOUtils.toInputStream(this.data, Charsets.UTF_8);
   }
 
   @Override
   public String readContentSync(Charset charset) {
-    return data;
+    return this.data;
   }
 }

@@ -69,12 +69,12 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
 
   @Override
   public String toString() {
-    return String.format("HttpClientLocation(%s, client=%s)", url, client.config.name);
+    return String.format("HttpClientLocation(%s, client=%s)", this.url, this.client.config.name);
   }
 
   @Override
   public String absolute() {
-    return url.toExternalForm();
+    return this.url.toExternalForm();
   }
 
   @Override
@@ -85,10 +85,10 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
   @Override
   @SneakyThrows
   public InputStream unsafeInputStream() {
-    HttpGet get1 = new HttpGet(url.toExternalForm());
+    HttpGet get1 = new HttpGet(this.url.toExternalForm());
     // CloseableHttpResponse lastResponse = null;
     // Throwable ignoredExceptionForRetry = null;
-    try (CloseableHttpResponse response = client.client().execute(get1)) {
+    try (CloseableHttpResponse response = this.client.client().execute(get1)) {
       // int code = response.getStatusLine().getStatusCode();
       // String reason = response.getStatusLine().getReasonPhrase();
       // lastResponse = response;
@@ -138,7 +138,7 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
   @SneakyThrows
   public <R> R usingInputStreamAndMeta(boolean returnExceptionsAsMeta,
       JedioFunction<StreamAndMeta, R> inputStreamConsumer) {
-    HttpGet request = new HttpGet(url.toExternalForm());
+    HttpGet request = new HttpGet(this.url.toExternalForm());
     request.addHeader("Connection", "keep-alive");
     request.addHeader("Pragma", "no-cache");
     request.addHeader("Cache-Control", "no-cache");
@@ -172,7 +172,7 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
           return attrs.get(id);
         }
       });
-    try (CloseableHttpResponse response = client.client().execute(request, context)) {
+    try (CloseableHttpResponse response = this.client.client().execute(request, context)) {
       int code = response.getStatusLine().getStatusCode();
       String reason = response.getStatusLine().getReasonPhrase();
       // TODO do not remove this close - we need to close the stream and let the connection be (might be reused by
@@ -207,9 +207,9 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
   }
 
   public Mono<String> readContentAsyncOld(Charset charset) {
-    HttpGet get1 = new HttpGet(url.toExternalForm());
+    HttpGet get1 = new HttpGet(this.url.toExternalForm());
     return Mono.fromCallable(() -> {
-      try (CloseableHttpResponse response = client.client().execute(get1)) {
+      try (CloseableHttpResponse response = this.client.client().execute(get1)) {
         return IOUtils.toString(response.getEntity().getContent(), charset);
       }
     });
@@ -285,22 +285,22 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
 
   @Override
   public Mono<String> readContentAsync(Charset charset) {
-    return client.execute(() -> readContentSync(charset));
+    return this.client.execute(() -> readContentSync(charset));
   }
 
   @Override
   public CompletableFuture<String> readContentAsyncCompletableFuture(Charset charset) {
-    return client.executeCompletableFuture(() -> readContentSync(charset));
+    return this.client.executeCompletableFuture(() -> readContentSync(charset));
   }
 
   @Override
   public HttpClientLocation child(String link) {
-    return create(url, true);
+    return create(this.url, true);
   }
 
   @Override
   protected HttpClientLocation create(URL url, boolean escaped) {
-    return new HttpClientLocation(url, escaped, client);
+    return new HttpClientLocation(url, escaped, this.client);
   }
 
   @SneakyThrows

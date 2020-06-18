@@ -38,7 +38,7 @@ public class StringLocation implements FileLocation, NonExistingLocation, Readab
 
   @Override
   public boolean exists() {
-    return content != null;
+    return this.content != null;
   }
 
   @Override
@@ -74,27 +74,27 @@ public class StringLocation implements FileLocation, NonExistingLocation, Readab
   // length in chars or bytes????
   @Override
   public long length() {
-    return content.length();
+    return this.content.length();
   }
 
   @Override
   public Option<String> readIfExists() {
-    return Option.of(content);
+    return Option.of(this.content);
   }
 
   @Override
   public InputStream unsafeInputStream() {
-    return new ByteArrayInputStream(content.getBytes());
+    return new ByteArrayInputStream(this.content.getBytes());
   }
 
   @Override
   public String readContentSync(Charset charset) {
-    return content;
+    return this.content;
   }
 
   @Override
   public Mono<String> readContentAsync(Charset charset) {
-    return Mono.just(content);
+    return Mono.just(this.content);
   }
 
   @Override
