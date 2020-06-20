@@ -1,6 +1,7 @@
 package org.raisercostin.jedio;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
@@ -16,6 +17,7 @@ import lombok.SneakyThrows;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.jedio.NodeUtils;
 import org.raisercostin.nodes.Nodes;
 
@@ -71,6 +73,16 @@ public class MetaInfo {
       if (this.is != null) {
         this.is.close();
       }
+    }
+
+    @SneakyThrows
+    public String readContent() {
+      return readContent(ReadableFileLocation.charset1_UTF8);
+    }
+
+    @SneakyThrows
+    public String readContent(Charset charset) {
+      return IOUtils.toString(is, charset);
     }
   }
 

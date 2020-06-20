@@ -9,6 +9,7 @@ import java.util.function.Function;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Maps;
 import io.vavr.API;
+import io.vavr.CheckedFunction1;
 import io.vavr.collection.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,11 +19,15 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.RequestLine;
 import org.apache.http.StatusLine;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
@@ -42,6 +47,22 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
     return new HttpClientLocation(url, defaultClient);
   }
 
+  public static HttpClientLocation url(String url, JedioHttpClient client) {
+    return new HttpClientLocation(url, false, client);
+  }
+
+  /**Request with already defined entity if needed.*/
+  public static HttpClientLocation url(String url, HttpUriRequest request, JedioHttpClient client) {
+    return new HttpClientLocation(url, false, request, client);
+  }
+
+  /**Request with specific entity.*/
+  public static HttpClientLocation url(String url, HttpEntityEnclosingRequestBase request, HttpEntity entity,
+      JedioHttpClient client) {
+    request.setEntity(entity);
+    return new HttpClientLocation(url, false, request, client);
+  }
+
   @SneakyThrows
   public static HttpClientLocation url(String sourceHyperlink, String relativeOrAbsoluteHyperlink,
       JedioHttpClient defaultClient) {
@@ -51,19 +72,27 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
   private static final int retries = 5;
   @JsonIgnore
   public final JedioHttpClient client;
+  private final HttpUriRequest request;
 
   public HttpClientLocation(String url, boolean escaped, JedioHttpClient client) {
+    this(url, escaped, new HttpGet(), client);
+  }
+
+  public HttpClientLocation(String url, boolean escaped, HttpUriRequest request, JedioHttpClient client) {
     super(url, escaped);
+    this.request = request;
     this.client = client;
   }
 
   public HttpClientLocation(URL url, boolean escaped, JedioHttpClient client) {
     super(url, escaped);
+    this.request = new HttpGet();
     this.client = client;
   }
 
   public HttpClientLocation(SimpleUrl url, JedioHttpClient client) {
     super(url);
+    this.request = new HttpGet();
     this.client = client;
   }
 
@@ -138,7 +167,9 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
   @SneakyThrows
   public <R> R usingInputStreamAndMeta(boolean returnExceptionsAsMeta,
       JedioFunction<StreamAndMeta, R> inputStreamConsumer) {
-    HttpGet request = new HttpGet(this.url.toExternalForm());
+    if (request instanceof HttpRequestBase) {
+      ((HttpRequestBase) request).setURI(toUri());
+    }
     request.addHeader("Connection", "keep-alive");
     request.addHeader("Pragma", "no-cache");
     request.addHeader("Cache-Control", "no-cache");
@@ -177,9 +208,10 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
       String reason = response.getStatusLine().getReasonPhrase();
       // TODO do not remove this close - we need to close the stream and let the connection be (might be reused by
       // connection pool)
+      RequestConfig requestConfig = request instanceof HttpRequestBase ? ((HttpRequestBase) request).getConfig() : null;
       try (InputStream in = response.getEntity().getContent()) {
         HttpClientLocationMetaRequest req = new HttpClientLocationMetaRequest(request.getRequestLine(),
-          request.getConfig(), request.getParams(), toHeaders(request.getAllHeaders()));
+          requestConfig, request.getParams(), toHeaders(request.getAllHeaders()));
         HttpClientLocationMetaResponse res = new HttpClientLocationMetaResponse(response.getStatusLine(),
           toHeaders(response.getAllHeaders()));
         context.removeAttribute(HttpCoreContext.HTTP_RESPONSE);
@@ -237,14 +269,27 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
     }
   }
 
+  public <R> Mono<R> readContentAsyncWithMeta(CheckedFunction1<StreamAndMeta, R> consumer) {
+    return readContentAsyncWithMeta(this.charset1_UTF8, consumer);
+  }
+
+  public <R> Mono<R> readContentAsyncWithMeta(Charset charset, CheckedFunction1<StreamAndMeta, R> consumer) {
+    return client.execute(() -> executeOnHttp200(consumer));
+  }
+
   @Override
   @SneakyThrows
   public String readContentSync(Charset charset) {
+    return executeOnHttp200(streamAndMeta -> streamAndMeta.readContent(charset));
+  }
+
+  private <R> R executeOnHttp200(CheckedFunction1<StreamAndMeta, R> consumer) {
     return usingInputStreamAndMeta(false, streamAndMeta -> {
       try {
         log.debug("reading from {}", this);
         if (streamAndMeta.meta.httpMetaResponseStatusCodeIs200()) {
-          return IOUtils.toString(streamAndMeta.is, charset);
+          //return IOUtils.toString(streamAndMeta.is, charset);
+          return consumer.apply(streamAndMeta);
         }
         throw new AuditException(new AuditException("Error full meta %s", Nodes.json.toString(streamAndMeta.meta)),
           "Http error [%s] on calling %s. Full meta in root cause.",

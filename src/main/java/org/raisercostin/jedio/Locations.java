@@ -6,7 +6,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import io.vavr.Lazy;
+import lombok.SneakyThrows;
 import org.apache.commons.httpclient.URI;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.jedio.sugar;
 import org.raisercostin.jedio.classpath.ClasspathLocation;
 import org.raisercostin.jedio.fs.stream.InputStreamLocation;
@@ -82,11 +85,16 @@ public class Locations {
     return HttpClientLocation.url(url, defaultClient.get());
   }
 
+  @SneakyThrows
+  public static HttpClientLocation urlPost(String url, String body) {
+    return HttpClientLocation.url(url, new HttpPost(), new StringEntity(body), defaultClient.get());
+  }
+
   public static HttpClientLocation url(String sourceHyperlink, String relativeOrAbsoluteHyperlink) {
     return HttpClientLocation.url(sourceHyperlink, relativeOrAbsoluteHyperlink, defaultClient.get());
   }
 
   public static HttpClientLocation url(String url, JedioHttpClient client) {
-    return new HttpClientLocation(url, false, client);
+    return HttpClientLocation.url(url, client);
   }
 }
