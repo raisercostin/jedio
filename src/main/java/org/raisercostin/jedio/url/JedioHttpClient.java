@@ -67,15 +67,21 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @ToString
 /**
- * Default client configuration that takes care of all http call details: - [x] connection pool:
- * `PoolingHttpClientConnectionManager` - [x] thread pool: `ExecutorService result = Executors.newFixedThreadPool`
+ * Default client configuration that takes care of all http call details:
+ * - [x] connection pool: `PoolingHttpClientConnectionManager`
+ * - [x] thread pool: `ExecutorService result = Executors.newFixedThreadPool`
+ *
+ * Important config classes
+ * - SocketConfig
+ * - RequestConfig
+ * - HttpClientBuilder
+ *
  */
 @Slf4j
 public class JedioHttpClient {
   private static final String SOCKET_REMOTE_ADDRESS = "socket-remote-address";
   private static final String SOCKET_LOCAL_ADDRESS = "socket-local-address";
   private static final int MILLIS = 1000;
-  private static final int timeoutBase = 20;
 
   @Value
   @With
@@ -85,6 +91,10 @@ public class JedioHttpClient {
   @Getter(lombok.AccessLevel.NONE)
   @Setter(lombok.AccessLevel.NONE)
   @FieldDefaults(makeFinal = true, level = AccessLevel.PUBLIC)
+  /**
+   * More about timeouts
+   * {@link https://stackoverflow.com/questions/18184899/what-is-the-difference-between-the-setconnectiontimeout-setsotimeout-and-http}
+   */
   public static class JedioHttpConfig {
     public static JedioHttpConfig create() {
       return new JedioHttpConfig();
@@ -103,15 +113,61 @@ public class JedioHttpClient {
     /** The maximum number of concurrent connections per route, which is 2 by default. */
     @Builder.Default
     int maxPerRoute = 2;
+    /**
+     * Defines the socket timeout ({@code SO_TIMEOUT}) in milliseconds,
+     * which is the timeout for waiting for data or, put differently,
+     * a maximum period inactivity between two consecutive data packets).
+     * <p>
+     * A timeout value of zero is interpreted as an infinite timeout.
+     * A negative value is interpreted as undefined (system default if applicable).
+     * {@link RequestConfig#getSocketTimeout}
+    */
     @Builder.Default
     Duration soTimeout = Duration.ofSeconds(22);
+    /**
+    * Determines the timeout in milliseconds until a connection is established.
+    * <p>
+    * A timeout value of zero is interpreted as an infinite timeout.
+    * A negative value is interpreted as undefined (system default if applicable).
+    * {@link RequestConfig#getConnectTimeout}
+    */
+    @Builder.Default
+    Duration connectTimeout = Duration.ofSeconds(23);
+    /**
+     * Returns the timeout in milliseconds used when requesting a connection
+     * from the connection manager.
+     * <p>
+     * A timeout value of zero is interpreted as an infinite timeout.
+     * A negative value is interpreted as undefined (system default if applicable).
+     * </p>
+     * <p>
+     * Default: {@code -1}
+     * </p>
+     * {@link RequestConfig#getConnectionRequestTimeout}
+     */
+    @Builder.Default
+    Duration connectionRequestTimeout = Duration.ofSeconds(24);
+
+    /**
+     * Sets maximum time to live for persistent connections
+     * <p>
+     * Please note this value can be overridden by the {@link #setConnectionManager(
+     *   org.apache.http.conn.HttpClientConnectionManager)} method.
+     * </p>
+     *
+     * @since 4.4
+     * @link HttpClientBuilder#connTimeToLive
+     */
+    @Builder.Default
+    Duration connTimeToLive = Duration.ofSeconds(241);
+
     /**
      * Defines period of inactivity in milliseconds after which persistent connections mustbe re-validated prior to
      * being leased to the consumer. Non-positive value passedto this method disables connection validation. This check
      * helps detect connectionsthat have become stale (half-closed) while kept inactive in the pool.
      */
     @Builder.Default
-    Duration validateAfterInactivity = Duration.ofSeconds(timeoutBase);
+    Duration validateAfterInactivity = Duration.ofSeconds(61);
 
     /**
      * Determines if a method should be retried after an IOException occurs during execution.
@@ -278,7 +334,7 @@ public class JedioHttpClient {
       .setKeepAliveStrategy(keepAliveStrategy)
       .setConnectionManager(this.connManager)
       .setRetryHandler(retryHandler())
-      .setConnectionTimeToLive(60, TimeUnit.SECONDS)
+      .setConnectionTimeToLive(this.config.connTimeToLive.toMillis(), TimeUnit.MILLISECONDS)
       .setDefaultRequestConfig(requestConfig)
       .disableRedirectHandling()
     // added already in connManager
@@ -311,9 +367,9 @@ public class JedioHttpClient {
   private RequestConfig createRequestConfig() {
     return RequestConfig.custom()
       // .setStaleConnectionCheckEnabled(true) - used setValidateAfterInactivity
-      .setConnectTimeout(timeoutBase * MILLIS)
-      .setConnectionRequestTimeout(timeoutBase * MILLIS)
-      .setSocketTimeout(timeoutBase * MILLIS)
+      .setConnectTimeout(Math.toIntExact(this.config.connectTimeout.toMillis()))
+      .setConnectionRequestTimeout(Math.toIntExact(this.config.connectionRequestTimeout.toMillis()))
+      .setSocketTimeout(Math.toIntExact(this.config.soTimeout.toMillis()))
       .setContentCompressionEnabled(true)
       .build();
   }
