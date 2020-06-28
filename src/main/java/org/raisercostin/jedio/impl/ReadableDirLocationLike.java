@@ -54,4 +54,8 @@ public interface ReadableDirLocationLike<SELF extends ReadableDirLocationLike<SE
   }
 
   Flux<SELF> findFilesAndDirs(boolean recursive);
+
+  default boolean isEmptyDir() {
+    return ls().size() == 0;
+  }
 }

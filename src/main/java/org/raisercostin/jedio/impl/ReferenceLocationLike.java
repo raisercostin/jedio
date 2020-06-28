@@ -309,7 +309,7 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
   }
 
   @Override
-  default boolean isEmpty() {
+  default boolean isEmptyFile() {
     return !exists() || length() == 0;
   }
 

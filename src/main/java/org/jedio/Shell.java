@@ -42,6 +42,7 @@ public interface Shell {
 
   ProcessResult executeWithResult(String command);
 
+  /**Blurs matched texts when displayed by this shell*/
   void blur(String sensibleRegex);
 
   default Path pwdPath() {

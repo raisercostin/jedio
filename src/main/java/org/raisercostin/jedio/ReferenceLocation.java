@@ -123,7 +123,7 @@ public interface ReferenceLocation extends Location {
 
   boolean hasExtension(String extension);
 
-  boolean isEmpty();
+  boolean isEmptyFile();
 
   long length();
 
