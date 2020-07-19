@@ -1,5 +1,6 @@
 package org.raisercostin.jedio;
 
+import io.vavr.collection.Iterator;
 import org.raisercostin.jedio.op.CopyOptions;
 
 public interface ReadableDirLocation extends BasicDirLocation {
@@ -12,4 +13,6 @@ public interface ReadableDirLocation extends BasicDirLocation {
   // Flux<SELF> findFilesAndDirs(boolean recursive);
 
   void copyTo(DirLocation dir, CopyOptions copyOptions);
+
+  <T extends ReadableDirLocation> Iterator<T> ls(boolean recursive);
 }

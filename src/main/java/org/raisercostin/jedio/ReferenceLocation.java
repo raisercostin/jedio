@@ -2,10 +2,14 @@ package org.raisercostin.jedio;
 
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.attribute.FileTime;
 import java.util.function.Function;
 
 import io.vavr.Function2;
 import io.vavr.control.Option;
+import lombok.SneakyThrows;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.impl.LinkLocationLike;
@@ -139,4 +143,8 @@ public interface ReferenceLocation extends Location {
 
   PathLocation asPathLocation();
 
+  @SneakyThrows
+  default FileTime createdDateTime() {
+    return (FileTime) Files.getAttribute(asPathLocation().toPath(), "basic:creationTime", LinkOption.NOFOLLOW_LINKS);
+  }
 }

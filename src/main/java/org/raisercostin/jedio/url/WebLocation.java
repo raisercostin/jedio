@@ -1,5 +1,7 @@
 package org.raisercostin.jedio.url;
 
+import java.nio.file.attribute.FileTime;
+
 import io.vavr.API;
 import io.vavr.collection.Iterator;
 import io.vavr.collection.Seq;
@@ -70,5 +72,20 @@ public class WebLocation implements ReadableDirLocation, ReadableDirLocationLike
   @Override
   public ReadableFileLocation asReadableFile() {
     throw new RuntimeException("Doesn't have content so it cannot be read.");
+  }
+
+  @Override
+  public boolean isDir() {
+    return isRoot;
+  }
+
+  @Override
+  public String absoluteAndNormalized() {
+    return webAddress;
+  }
+
+  @Override
+  public FileTime createdDateTime() {
+    return FileTime.fromMillis(System.currentTimeMillis());
   }
 }
