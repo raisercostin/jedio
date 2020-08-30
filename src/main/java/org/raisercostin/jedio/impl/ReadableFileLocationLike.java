@@ -85,7 +85,7 @@ public interface ReadableFileLocationLike<SELF extends ReadableFileLocationLike<
     try {
       return Nodes.json.toObject(readMetaContent(), MetaInfo.class);
     } catch (Exception e) {
-      throw ExceptionUtils.nowrap(e, "While reading metadata of %s", this);
+      throw ExceptionUtils.wrap(e, "While reading metadata of %s", this);
     }
   }
 

@@ -90,7 +90,7 @@ public interface ReadableFileLocation extends BasicFileLocation {
       try {
         return readContent(charset2_ISO_8859_1);
       } catch (Exception e2) {
-        throw ExceptionUtils.nowrap(e, "While reading %s with charsets %s and %s. Others could exist %s", this,
+        throw ExceptionUtils.wrap(e, "While reading %s with charsets %s and %s. Others could exist %s", this,
           charset1_UTF8, charset2_ISO_8859_1, Charset.availableCharsets().keySet());
       }
     }

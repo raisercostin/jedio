@@ -225,7 +225,7 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
         return result;
       }
     } catch (Exception e) {
-      throw ExceptionUtils.nowrap(e, "When trying to read from %s", this);
+      throw ExceptionUtils.wrap(e, "When trying to read from %s", this);
     }
   }
 

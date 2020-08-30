@@ -56,6 +56,7 @@ public class ExceptionUtils {
   }
 
   @SuppressWarnings("unchecked")
+  //TODO remove this method since suppressed exceptions are not logged properly by lombok
   // DEV-NOTE: we do not plan to expose this as public API
   // claim that the typeErasure invocation throws a RuntimeException
   private static <R, T extends Throwable> R sneakyThrow(final Throwable throwable, String format, Object... args)

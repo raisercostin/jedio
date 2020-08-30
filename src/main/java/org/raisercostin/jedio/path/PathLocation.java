@@ -300,7 +300,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     try (BufferedReader b = reader(toPath(), charset)) {
       return IOUtils.toString(b);
     } catch (IOException e) {
-      throw ExceptionUtils.nowrap(e, "While reading %s with charset %s. Others could exist %s", this, charset,
+      throw ExceptionUtils.wrap(e, "While reading %s with charset %s. Others could exist %s", this, charset,
         Charset.availableCharsets().keySet());
     }
   }
