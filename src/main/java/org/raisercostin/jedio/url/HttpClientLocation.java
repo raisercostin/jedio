@@ -7,7 +7,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.collect.Maps;
 import io.vavr.API;
 import io.vavr.CheckedFunction1;
 import io.vavr.collection.Map;
@@ -30,7 +29,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
 import org.jedio.Audit.AuditException;
 import org.jedio.ExceptionUtils;
@@ -182,28 +180,8 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
     request.addHeader("Accept-Encoding", "gzip, deflate, sdch");
     // not needed anymore - request.addHeader("Accept-Charset", "utf-8, iso-8859-1;q=0.5");
     // request.addHeader("Accept-Language", "en-US,en;q=0.9");
-    java.util.Map<String, Object> attrs = Maps.newConcurrentMap();
-    HttpClientContext context = HttpClientContext.adapt(new HttpContext()
-      {
-        @Override
-        public void setAttribute(String id, Object obj) {
-          if (id == null || obj == null) {
-            // log.warn("cannot add attribute {}:{}", id, obj);
-          } else {
-            attrs.put(id, obj);
-          }
-        }
-
-        @Override
-        public Object removeAttribute(String id) {
-          return attrs.remove(id);
-        }
-
-        @Override
-        public Object getAttribute(String id) {
-          return attrs.get(id);
-        }
-      });
+    JedioHttpClientContext jedioContext = new JedioHttpClientContext();
+    HttpClientContext context = HttpClientContext.adapt(jedioContext);
     try (CloseableHttpResponse response = this.client.client().execute(request, context)) {
       int code = response.getStatusLine().getStatusCode();
       String reason = response.getStatusLine().getReasonPhrase();
@@ -221,7 +199,7 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
         context.removeAttribute("http.cookie-spec");
         context.removeAttribute("http.cookiespec-registry");
         R result = inputStreamConsumer
-          .apply(StreamAndMeta.fromPayload(new HttpClientLocationMeta(req, res, attrs), in));
+          .apply(StreamAndMeta.fromPayload(new HttpClientLocationMeta(req, res, jedioContext.attrs), in));
         return result;
       }
     } catch (Exception e) {

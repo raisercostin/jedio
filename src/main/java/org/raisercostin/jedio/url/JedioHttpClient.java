@@ -421,9 +421,12 @@ public class JedioHttpClient {
   private HttpRequestRetryHandler retryHandler() {
     return (exception, executionCount, context) -> {
       boolean retryable = checkRetriable(exception, executionCount, context);
-      log.info("error. try again request: {}. {} Enable debug to see fullstacktrace.", retryable,
-        exception.getMessage());
-      log.debug("error. try again request: {}. {} Fullstacktrace:", retryable, exception.getMessage(), exception);
+      log.info(
+        "ErrorInRetry. Try again request: {}, messsage={}, url={}, context={} . Enable debug to see fullstacktrace.",
+        retryable,
+        exception.getMessage(), context.getAttribute("http.request"), context);
+      log.debug("ErrorInRetry. Try again request: {}, messsage={}, url={} context={} . Fullstacktrace:", retryable,
+        exception.getMessage(), context.getAttribute("http.request"), context, exception);
       return retryable;
     };
   }
