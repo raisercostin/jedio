@@ -31,7 +31,8 @@ public interface ReadableDirLocationLike<SELF extends ReadableDirLocationLike<SE
     return ls(false);
   }
 
-  @Override
+  @SuppressWarnings("unchecked")
+  //  @Override
   @sugar
   default Iterator<SELF> ls(boolean recursive) {
     return Iterator.ofAll(findFilesAndDirs(recursive).toIterable());
