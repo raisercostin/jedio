@@ -10,6 +10,9 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
 ## Usage
 
 ## ToDo
+- [ ] add deserializers
+  - to specific implementations
+  - to interfaces https://stackoverflow.com/questions/25387978/how-to-add-custom-deserializer-to-interface-using-jackson
 - [ ] async first library 
   - [ ] readContent should always do a readContentAsync.block to force reading async
   - [ ] readContentSync - forces reading in current thread
