@@ -60,9 +60,8 @@ import org.raisercostin.jedio.impl.WritableFileLocationLike;
 import org.raisercostin.jedio.op.CopyEvent;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.DeleteOptions;
-import org.raisercostin.nodes.ExceptionUtils;
 import org.raisercostin.nodes.Nodes;
-import org.raisercostin.nodes.impl.JsonUtils2;
+import org.raisercostin.nodes.impl.JsonNodes;
 import reactor.core.publisher.Flux;
 
 /**
@@ -300,7 +299,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     try (BufferedReader b = reader(toPath(), charset)) {
       return IOUtils.toString(b);
     } catch (IOException e) {
-      throw ExceptionUtils.wrap(e, "While reading %s with charset %s. Others could exist %s", this, charset,
+      throw org.jedio.ExceptionUtils.wrap(e, "While reading %s with charset %s. Others could exist %s", this, charset,
         Charset.availableCharsets().keySet());
     }
   }
@@ -397,7 +396,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
               }
               // write meta
               if (copyOptions.copyMeta()) {
-                JsonUtils2 mapper = Nodes.json;
+                JsonNodes mapper = Nodes.json;
                 // mapper.mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, false);
                 String str = mapper.excluding("parent", "otherParents", "impl").toString(streamAndMeta.meta);
                 metaHttp.write(str);
