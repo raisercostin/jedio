@@ -21,28 +21,31 @@ public class PathWithAttributes {
   }
 
   public boolean isDirectory() {
-    if (isVirtualDirectory())
+    if (isVirtualDirectory()) {
       return true;
-    if (isInsideVirtualDirectory())
+    }
+    if (isInsideVirtualDirectory()) {
       // TODO fix
       return false;
-    return attrs.get().isDirectory();
+    }
+    return this.attrs.get().isDirectory();
   }
 
   public FileTime lastModifiedTime() {
-    if (isInsideVirtualDirectory())
+    if (isInsideVirtualDirectory()) {
       // TODO fix
       return FileTime.fromMillis(0);
-    return attrs.get().lastModifiedTime();
+    }
+    return this.attrs.get().lastModifiedTime();
   }
 
   private boolean isInsideVirtualDirectory() {
     // TODO fix this (this allows only one level virtual dir)
-    return path.getParent().toString().toLowerCase().endsWith(".pdf");
+    return this.path.getParent().toString().toLowerCase().endsWith(".pdf");
   }
 
   public boolean isVirtualDirectory() {
-    return path.toString().toLowerCase().endsWith(".pdf");
+    return this.path.toString().toLowerCase().endsWith(".pdf");
     // return GuavaAndDirectoryStreamTraversalWithVirtualDirs.this.isVirtualDir.apply(path);
   }
 

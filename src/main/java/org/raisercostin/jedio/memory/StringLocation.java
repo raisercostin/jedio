@@ -2,26 +2,22 @@ package org.raisercostin.jedio.memory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.function.Function;
+import java.nio.charset.Charset;
 
 import io.vavr.control.Option;
-import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.FileLocation;
-import org.raisercostin.jedio.LinkLocation;
 import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
-import org.raisercostin.jedio.ReferenceLocation;
-import org.raisercostin.jedio.RelativeLocation;
-import org.raisercostin.jedio.WritableFileLocation;
-import org.raisercostin.jedio.find.FileTraversal2;
-import org.raisercostin.jedio.find.PathWithAttributes;
+import org.raisercostin.jedio.impl.LinkLocationLike;
+import org.raisercostin.jedio.impl.NonExistingLocationLike;
+import org.raisercostin.jedio.impl.ReadableFileLocationLike;
+import org.raisercostin.jedio.impl.WritableFileLocationLike;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.DeleteOptions;
-import org.raisercostin.jedio.path.PathLocation;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public class StringLocation implements ReadableFileLocation, WritableFileLocation, NonExistingLocation {
+public class StringLocation implements FileLocation, NonExistingLocation, ReadableFileLocationLike<StringLocation>,
+    WritableFileLocationLike<StringLocation>, NonExistingLocationLike<StringLocation> {
   public String content;
 
   public StringLocation(String content) {
@@ -29,99 +25,24 @@ public class StringLocation implements ReadableFileLocation, WritableFileLocatio
   }
 
   @Override
-  public NonExistingLocation deleteFile(DeleteOptions options) {
+  public StringLocation deleteFile(DeleteOptions options) {
     this.content = null;
     return this;
   }
 
   @Override
-  public void rename(FileLocation asWritableFile) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public NonExistingLocation delete(DeleteOptions options) {
+  public StringLocation delete(DeleteOptions options) {
     this.content = null;
     return this;
-  }
-
-  @Override
-  public ReferenceLocation child(RelativeLocation path) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public String absolute() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public String normalized() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public String canonical() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public String absoluteAndNormalized() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public String real() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public String getName() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Option<ReferenceLocation> findAncestor(Function<ReferenceLocation, Boolean> fn) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public PathLocation makeDirOnParentIfNeeded() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Option<? extends ReferenceLocation> parent() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Option<DirLocation> existing() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Option<NonExistingLocation> nonExisting() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public NonExistingLocation nonExistingOrElse(Function<DirLocation, NonExistingLocation> fn) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public DirLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn) {
-    throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
   public boolean exists() {
-    return content != null;
+    return this.content != null;
   }
 
   @Override
-  public WritableFileLocation asWritableFile() {
+  public StringLocation asWritableFile() {
     return this;
   }
 
@@ -141,17 +62,7 @@ public class StringLocation implements ReadableFileLocation, WritableFileLocatio
   }
 
   @Override
-  public void symlinkTo(ReferenceLocation parent) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public void junctionTo(ReferenceLocation parent) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Option<LinkLocation> asSymlink() {
+  public Option<LinkLocationLike> asSymlink() {
     return Option.none();
   }
 
@@ -160,65 +71,44 @@ public class StringLocation implements ReadableFileLocation, WritableFileLocatio
     return false;
   }
 
-  @Override
-  public Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore,
-      boolean dirsFirst) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public ReferenceLocation create(String path) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public DirLocation asDir() {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
   // length in chars or bytes????
   @Override
   public long length() {
-    return content.length();
+    return this.content.length();
   }
 
   @Override
   public Option<String> readIfExists() {
-    return Option.of(content);
+    return Option.of(this.content);
   }
 
   @Override
   public InputStream unsafeInputStream() {
-    return new ByteArrayInputStream(content.getBytes());
+    return new ByteArrayInputStream(this.content.getBytes());
   }
 
   @Override
-  public String readContent() {
-    return content;
+  public String readContentSync(Charset charset) {
+    return this.content;
   }
 
   @Override
-  public Mono<String> readContentAsync() {
-    return Mono.just(content);
+  public Mono<String> readContentAsync(Charset charset) {
+    return Mono.just(this.content);
   }
 
   @Override
-  public WritableFileLocation write(String content, String encoding) {
+  public StringLocation write(String content, String encoding) {
     this.content = content;
     return this;
   }
 
   @Override
-  public WritableFileLocation copyFrom(ReadableFileLocation source, CopyOptions options) {
+  public StringLocation copyFrom(ReadableFileLocation source, CopyOptions options) {
     if (this.content != null && !options.replaceExisting()) {
       throw new RuntimeException("Cannot overwrite [" + this + "] with content from " + source);
     }
     this.content = source.readContent();
     return this;
-  }
-
-  @Override
-  public DirLocation mkdir() {
-    throw new RuntimeException("Not implemented yet!!!");
   }
 }

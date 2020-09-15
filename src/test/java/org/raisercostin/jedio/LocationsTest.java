@@ -13,23 +13,22 @@ class LocationsTest {
   @Test
   void test() {
     assertEquals("PathLocation(path=" + Paths.get(".").toAbsolutePath().normalize() + ")",
-        Locations.current().toString());
+      Locations.current().toString());
   }
 
   @Test
   void testCopyTo() {
-    assertEquals(346622,
-        Locations.classpath("a b.jpg").copyTo(Locations.writableFile("target/ab-copied.jpg")).length());
+    assertEquals(346622, Locations.classpath("a b.jpg").copyToFile(Locations.path("target/ab-copied.jpg")).length());
   }
 
   @Test
   void testCopyToDontOverwrite() {
     final ReadableFileLocation src = Locations.classpath("a b.jpg");
-    final WritableFileLocation dest = Locations.writableFile("target/ab-copied.jpg");
+    final WritableFileLocation dest = Locations.path("target/ab-copied.jpg").mkdirOnParentIfNeeded();
     dest.deleteFile();
-    assertEquals(346622, src.copyTo(dest).length());
+    assertEquals(346622, src.copyToFile(dest).length());
     assertThrows(FileAlreadyExistsException.class, () -> {
-      src.copyTo(dest, CopyOptions.copyDoNotOverwrite());
+      src.copyToFile(dest, CopyOptions.copyDoNotOverwrite());
     });
   }
 }

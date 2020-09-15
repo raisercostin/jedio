@@ -11,7 +11,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
 import reactor.core.publisher.Flux;
 import technology.tabula.CommandLineApp;
 
@@ -20,11 +19,13 @@ public class Pdf2TableMain implements ApplicationRunner {
   @Test
   @Disabled("not actual test")
   void test() {
-    Flux<FileAltered> all = Locations.existingDir("d:/work/watched").asChangableLocation().watch();
+    Flux<FileAltered> all = Locations.path("d:/work/watched").asChangableLocation().watch();
     all.log("rec").map(x -> {
-      if (x.event.kind().name() == "ENTRY_MODIFY")
-        if (x.location().getName().endsWith(".pdf"))
+      if (x.event.kind().name() == "ENTRY_MODIFY") {
+        if (x.location().getName().endsWith(".pdf")) {
           extractCsv(x);
+        }
+      }
       return x;
     }).blockLast();// Duration.ofSeconds(200)
   }
@@ -35,9 +36,9 @@ public class Pdf2TableMain implements ApplicationRunner {
       CommandLineParser parser = new DefaultParser();
       CommandLine line = parser.parse(CommandLineApp.buildOptions(), new String[] { "" });
       CommandLineApp app = new technology.tabula.CommandLineApp(null, line);
-      x.location().asWritableFile().rename(x.location().asReadableFile());
+      x.location().asWritableFile().rename(x.location().asWritableFile());
       app.extractFileInto(new File(x.location().absoluteAndNormalized()),
-          new File(x.location().absoluteAndNormalized() + ".csv"));
+        new File(x.location().absoluteAndNormalized() + ".csv"));
       // extractFileInto
       // technology.tabula.CommandLineApp.main(
       // new String[] { , "-o", x.location().absoluteAndNormalized() + ".csv"

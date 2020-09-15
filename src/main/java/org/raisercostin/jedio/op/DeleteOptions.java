@@ -18,7 +18,7 @@ public interface DeleteOptions {
 
     @Override
     public boolean deleteByRename() {
-      return deleteByRename;
+      return this.deleteByRename;
     }
   }
 
@@ -26,19 +26,19 @@ public interface DeleteOptions {
   // Boolean, optionalMeta: Boolean, monitor: OperationMonitor =
   // LoggingOperationMonitor)
 
-  public static DeleteOptions deleteByRenameOption() {
+  static DeleteOptions deleteByRenameOption() {
     return new SimpleDeleteOptions(true);
   }
 
-  public static DeleteOptions deletePermanent() {
+  static DeleteOptions deletePermanent() {
     return new SimpleDeleteOptions(false);
   }
 
-  public static DeleteOptions deleteToBintray() {
+  static DeleteOptions deleteToBintray() {
     return deleteByRenameOption();
   }
 
-  public static DeleteOptions deleteDefault() {
+  static DeleteOptions deleteDefault() {
     return deleteToBintray();
   }
 }

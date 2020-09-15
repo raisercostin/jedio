@@ -1,14 +1,14 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.raisercostin.utils</groupId>
-    <artifactId>maven-defaults</artifactId>
-    <version>6</version>
+    <groupId>org.raisercostin</groupId>
+    <artifactId>maven-defaults-raisercostin</artifactId>
+    <version>1.12</version>
   </parent>
-  <groupId>org.raisercostin</groupId>
   <artifactId>jedio</artifactId>
-  <version>0.24-SNAPSHOT</version>
+  <version>0.43-SNAPSHOT</version>
   <name>jedio</name>
   <description>Uniform, fluent access to files, urls and other resources API for java, kotlin and scala.</description>
   <url>${git.url}</url>
@@ -42,24 +42,9 @@
     <dist.snapshot.url>${dist.url}/snapshots/</dist.snapshot.url>
     <dist.site.url>${dist.url}/sites/${project.groupId}-${project.artifactId}-${project.version}</dist.site.url>
     <createChecksum>false</createChecksum>
-    <!--http://mapstruct.org/documentation/ide-support/ : automatically run annotation processors within the incremental compilation -->
-    <m2e.apt.activation>jdt_apt</m2e.apt.activation>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <myJavaVersion>1.8</myJavaVersion>
-    <target.java.version>${myJavaVersion}</target.java.version>
-    <source.java.version>${myJavaVersion}</source.java.version>
-    <target.jvm.version>${myJavaVersion}</target.jvm.version>
-    <java.version>${myJavaVersion}</java.version>
     <maven.test.skip>false</maven.test.skip>
     <!--<docker.image.prefix>registry.gitlab.com/dcsi/all/docker/custom</docker.image.prefix> -->
     <docker.image.prefix>com.revomatico</docker.image.prefix>
-    <org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
-    <lombok.version>1.18.10</lombok.version>
-    <junit-jupiter.version>5.4.2</junit-jupiter.version>
-    <junit-platform.version>1.4.2</junit-platform.version>
-    <slf4j.version>1.7.25</slf4j.version>
-    <logback.version>1.2.3</logback.version>
     <reactor.version>3.2.5.RELEASE</reactor.version>
     <spring.version>5.1.4.RELEASE</spring.version>
     <spring.boot.version>2.2.1.RELEASE</spring.boot.version>
@@ -86,23 +71,24 @@
   </developers>
   <dependencies>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-devtools</artifactId>
-      <version>${spring.boot.version}</version>
-      <scope>runtime</scope>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
     </dependency>
     <!-- <dependency> <groupId>org.jetbrains.kotlin</groupId> <artifactId>kotlin-stdlib</artifactId> <version>${kotlin.version}</version> </dependency> 
-			<dependency> <groupId>org.jetbrains.kotlin</groupId> <artifactId>kotlin-test-junit</artifactId> <version>${kotlin.version}</version> <scope>test</scope> 
-			</dependency> -->
+      <dependency> <groupId>org.jetbrains.kotlin</groupId> <artifactId>kotlin-test-junit</artifactId> <version>${kotlin.version}</version> <scope>test</scope> 
+      </dependency> -->
+    <dependency>
+      <groupId>org.raisercostin</groupId>
+      <artifactId>jedi-nodes-java</artifactId>
+      <version>0.13</version>
+    </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
-      <version>${spring.version}</version>
     </dependency>
     <dependency>
       <groupId>io.projectreactor</groupId>
       <artifactId>reactor-core</artifactId>
-      <version>${reactor.version}</version>
     </dependency>
     <!-- https://github.com/TooTallNate/Java-WebSocket -->
     <dependency>
@@ -110,83 +96,72 @@
       <artifactId>Java-WebSocket</artifactId>
       <version>1.5.0</version>
     </dependency>
-    <!-- <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-jersey</artifactId> <version>${spring.version}</version> 
-			</dependency> <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-web</artifactId> <version>${spring.version}</version> 
-			</dependency> <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-websocket</artifactId> <version>${spring.version}</version> 
-			</dependency> <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-devtools</artifactId> <version>${spring.version}</version> 
-			</dependency> <dependency> <groupId>io.springfox</groupId> <artifactId>springfox-swagger2</artifactId> <version>2.9.2</version> </dependency> 
-			<dependency> <groupId>io.springfox</groupId> <artifactId>springfox-swagger-ui</artifactId> <version>2.9.2</version> </dependency> <dependency> 
-			<groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-actuator</artifactId> </dependency> <dependency> <groupId>org.springframework.boot</groupId> 
-			<artifactId>spring-boot-starter-amqp</artifactId> <version>${spring.version}</version> </dependency> <dependency> <groupId>org.springframework.boot</groupId> 
-			<artifactId>spring-boot-starter-webflux</artifactId> <version>${spring.version}</version> </dependency> <dependency> <groupId>org.springframework.boot</groupId> 
-			<artifactId>spring-boot-configuration-processor</artifactId> <optional>true</optional> <version>${spring.version}</version> </dependency> -->
-    <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.8.5</version>
     </dependency>
     <!-- testing -->
     <!-- Not test as we might use asserts in test clients main classes. -->
     <!-- <dependency> <groupId>junit</groupId> <artifactId>junit</artifactId> <version>4.12</version> <type>jar</type> </dependency> -->
-    <dependency>
+    <!--     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>${junit-jupiter.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
-      <version>${junit-jupiter.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
-      <version>${junit-jupiter.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-runner</artifactId>
-      <version>${junit-platform.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>2.23.4</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-junit-jupiter</artifactId>
-      <version>2.23.4</version>
       <scope>test</scope>
     </dependency>
+ -->
     <!-- <dependency> <groupId>org.junit.platform</groupId> <artifactId>junit-platform-launcher</artifactId> <version>1.1.0</version> <scope>test</scope> 
-			</dependency> -->
+      </dependency> -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.9.10</version>
     </dependency>
     <!-- utilities -->
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.6</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.8</version>
+    </dependency>
+    <!--
+    <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+    </dependency>
+    -->
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>27.1-jre</version>
     </dependency>
     <dependency>
       <groupId>com.mashape.unirest</groupId>
@@ -202,67 +177,64 @@
     <dependency>
       <groupId>io.vavr</groupId>
       <artifactId>vavr</artifactId>
-      <version>0.10.0</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>${lombok.version}</version>
     </dependency>
     <!-- <dependency> <groupId>io.reactivex.rxjava2</groupId> <artifactId>rxjava</artifactId> <version>2.2.4</version> </dependency> -->
     <dependency>
       <groupId>com.typesafe</groupId>
       <artifactId>config</artifactId>
-      <version>1.3.0</version>
     </dependency>
     <dependency>
       <groupId>org.raisercostin</groupId>
       <artifactId>raisercostin-commons</artifactId>
-      <version>2.26</version>
+      <version>2.27</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.raisercostin</groupId>
+          <artifactId>jedio</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- logs -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
-      <version>${slf4j.version}</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>${logback.version}</version>
       <optional>true</optional>
     </dependency>
     <!-- tests -->
+    <!-- 
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
-      <version>${spring.boot.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-test</artifactId>
-      <version>${spring.boot.version}</version>
       <type>jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
-      <version>5.1.3.RELEASE</version>
       <type>jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.projectreactor</groupId>
       <artifactId>reactor-test</artifactId>
-      <version>${reactor.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -271,9 +243,10 @@
       <version>1.5.0</version>
       <scope>test</scope>
     </dependency>
+     -->
     <!-- <dependency> <groupId>org.mapstruct</groupId> <artifactId>mapstruct-jdk8</artifactId> <version>${org.mapstruct.version}</version> </dependency> -->
     <!-- <dependency> <groupId>org.mapstruct</groupId> <artifactId>mapstruct-processor</artifactId> <version>${org.mapstruct.version}</version> 
-			</dependency> -->
+      </dependency> -->
     <!-- pdfbox, poi, tabula -->
     <dependency>
       <groupId>technology.tabula</groupId>
@@ -290,27 +263,63 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <scope>runtime</scope>
+    </dependency>
   </dependencies>
   <build>
     <finalName>${project.artifactId}</finalName>
     <plugins>
       <!-- <sourceDirectory>src/main/kotlin</sourceDirectory> <testSourceDirectory>src/test/kotlin</testSourceDirectory> <plugin> <groupId>org.jetbrains.kotlin</groupId> 
-				<artifactId>kotlin-maven-plugin</artifactId> <version>${kotlin.version}</version> <configuration> <nowarn>false</nowarn> <args> <arg>-Xjsr305=strict</arg> 
-				Enable strict mode for JSR-305 annotations </args> </configuration> <executions> <execution> <id>compile</id> <phase>compile</phase> <goals> 
-				<goal>compile</goal> </goals> <configuration> <sourceDirs> <sourceDir>${project.basedir}/src/main/kotlin</sourceDir> <sourceDir>${project.basedir}/src/main/java</sourceDir> 
-				</sourceDirs> </configuration> </execution> <execution> <id>test-compile</id> <phase>test-compile</phase> <goals> <goal>test-compile</goal> </goals> 
-				<configuration> <sourceDirs> <sourceDir>${project.basedir}/src/test/kotlin</sourceDir> <sourceDir>${project.basedir}/src/test/java</sourceDir> 
-				</sourceDirs> </configuration> </execution> </executions> </plugin> -->
+        <artifactId>kotlin-maven-plugin</artifactId> <version>${kotlin.version}</version> <configuration> <nowarn>false</nowarn> <args> <arg>-Xjsr305=strict</arg> 
+        Enable strict mode for JSR-305 annotations </args> </configuration> <executions> <execution> <id>compile</id> <phase>compile</phase> <goals> 
+        <goal>compile</goal> </goals> <configuration> <sourceDirs> <sourceDir>${project.basedir}/src/main/kotlin</sourceDir> <sourceDir>${project.basedir}/src/main/java</sourceDir> 
+        </sourceDirs> </configuration> </execution> <execution> <id>test-compile</id> <phase>test-compile</phase> <goals> <goal>test-compile</goal> </goals> 
+        <configuration> <sourceDirs> <sourceDir>${project.basedir}/src/test/kotlin</sourceDir> <sourceDir>${project.basedir}/src/test/java</sourceDir> 
+        </sourceDirs> </configuration> </execution> </executions> </plugin> -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.0</version>
+        <!-- <version>3.8.1</version> -->
+        <!-- to use eclipse compiler like in 
+          - https://stackoverflow.com/questions/33164976/using-eclipse-java-compiler-ecj-in-maven-builds
+          - https://projectlombok.org/setup/ecj
+          - https://projectlombok.org/setup/ecj-in-maven-pom-example.xml
+          -->
         <!--$NO-MVN-MAN-VER$ -->
+        <!-- 
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-compiler-eclipse</artifactId>
+            <version>2.8.6</version>
+          </dependency>
+          <dependency>
+            <groupId>org.eclipse.jdt</groupId>
+            <artifactId>ecj</artifactId>
+            <version>3.21.0</version>
+          </dependency>
+        </dependencies>
+         -->
         <configuration>
           <source>${source.java.version}</source>
           <target>${target.java.version}</target>
           <showWarnings>true</showWarnings>
           <showDeprecation>true</showDeprecation>
+          <!-- eclipse compiler -->
+          <!-- 
+            set MAVEN_OPTS=-javaagent:target/lombok.jar=ECJ-
+            <release>11</release>
+           -->
+          <!-- 
+          <compilerId>eclipse</compilerId>
+          <fork>true</fork>
+          <compilerArgs>
+            <arg>-javaagent:target/lombok.jar=ECJ</arg>
+          </compilerArgs>
+           -->
           <annotationProcessorPaths>
             <path>
               <groupId>org.projectlombok</groupId>
@@ -321,10 +330,38 @@
           <generatedSourcesDirectory>${project.build.directory}/generated-sources</generatedSourcesDirectory>
         </configuration>
         <!-- <executions> Replacing default-compile as it is treated specially by maven <execution> <id>default-compile</id> <phase>none</phase> 
-					</execution> Replacing default-testCompile as it is treated specially by maven <execution> <id>default-testCompile</id> <phase>none</phase> </execution> 
-					<execution> <id>java-compile</id> <phase>compile</phase> <goals> <goal>compile</goal> </goals> </execution> <execution> <id>java-test-compile</id> 
-					<phase>test-compile</phase> <goals> <goal>testCompile</goal> </goals> </execution> </executions> -->
+          </execution> Replacing default-testCompile as it is treated specially by maven <execution> <id>default-testCompile</id> <phase>none</phase> </execution> 
+          <execution> <id>java-compile</id> <phase>compile</phase> <goals> <goal>compile</goal> </goals> </execution> <execution> <id>java-test-compile</id> 
+          <phase>test-compile</phase> <goals> <goal>testCompile</goal> </goals> </execution> </executions> -->
       </plugin>
+      <!-- lombok for ecj compiler
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <id>get-lombok</id>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <phase>validate</phase>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.projectlombok</groupId>
+                  <artifactId>lombok</artifactId>
+                  <version>${lombok.version}</version>
+                  <type>jar</type>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                  <destFileName>lombok.jar</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      -->
       <plugin>
         <groupId>org.eclipse.m2e</groupId>
         <artifactId>lifecycle-mapping</artifactId>
@@ -342,7 +379,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore/>
+                  <ignore />
                 </action>
               </pluginExecution>
               <pluginExecution>
@@ -355,7 +392,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore/>
+                  <ignore />
                 </action>
               </pluginExecution>
             </pluginExecutions>
@@ -365,7 +402,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <!-- <version>2.6</version> -->
         <configuration>
           <archive>
             <manifest>
@@ -378,7 +414,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.6</version>
         <!--$NO-MVN-MAN-VER$ -->
         <executions>
           <execution>
@@ -422,22 +457,48 @@
       </plugin>
       <!-- https://github.com/coveo/fmt-maven-plugin -->
       <!-- <plugin> <groupId>com.coveo</groupId> <artifactId>fmt-maven-plugin</artifactId> <version>2.6.0</version> <executions> <execution> <goals> 
-				<goal>format</goal> </goals> </execution> </executions> </plugin> -->
+        <goal>format</goal> </goals> </execution> </executions> </plugin> -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.8</version>
+        <!--$NO-MVN-MAN-VER$-->
+        <!--$NO-MVN-MAN-VER$ -->
+        <configuration>
+          <target>
+            <echo message="ant cleanup started." />
+            <fixcrlf srcdir="${basedir}" eol="unix" tab="remove" tablength="2" includes="**/*.java **/*.xml" preservelastmodified="true" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" />
+            <echo message="ant cleanup finished." />
+          </target>
+        </configuration>
+        <!-- not always needed -->
+        <!--
+        <executions>
+          <execution>
+            <id>all-format</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+        -->
+      </plugin>
       <!-- https://github.com/revelc/formatter-maven-plugin -->
       <plugin>
         <groupId>net.revelc.code.formatter</groupId>
         <artifactId>formatter-maven-plugin</artifactId>
         <version>2.8.1</version>
         <configuration>
-          <configFile>${project.basedir}/src/build/code-formatter.xml</configFile>
+          <configFile>${project.basedir}/src/build/eclipse-2020-06-18--java-code-style-formatter.xml</configFile>
           <configJsonFile>${project.basedir}/src/build/json-formatter.properties</configJsonFile>
           <sourceDirectory>${basedir}</sourceDirectory>
           <includes>
             <include>**/**</include>
           </includes>
           <excludes>
-            <exclude>.git/**</exclude>
-            <exclude>**/target/**</exclude>
+            <exclude>.git/</exclude>
+            <exclude>target/</exclude>
             <exclude>**/*.xml</exclude>
           </excludes>
           <lineEnding>LF</lineEnding>
@@ -451,11 +512,31 @@
         </configuration>
         <executions>
           <execution>
+            <id>all-format</id>
+            <phase>validate</phase>
             <goals>
               <goal>format</goal>
             </goals>
           </execution>
         </executions>
+        <dependencies>
+          <!-- to use eclipse compiler like in 
+          - https://stackoverflow.com/questions/33164976/using-eclipse-java-compiler-ecj-in-maven-builds
+          - https://projectlombok.org/setup/ecj
+          - https://projectlombok.org/setup/ecj-in-maven-pom-example.xml
+
+          <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-compiler-eclipse</artifactId>
+            <version>2.8.6</version>
+          </dependency>
+          <dependency>
+            <groupId>org.eclipse.jdt</groupId>
+            <artifactId>ecj</artifactId>
+            <version>3.21.0</version>
+          </dependency>
+          -->
+        </dependencies>
       </plugin>
       <plugin>
         <groupId>au.com.acegi</groupId>
@@ -472,9 +553,9 @@
               <excludes>
                 <exclude>**/src/main/resources/**</exclude>
                 <exclude>**/src/test/resources/**</exclude>
-                <exclude>**/src/test/resources2/**</exclude>
                 <exclude>.git/**</exclude>
                 <exclude>**/target/**</exclude>
+                <exclude>.m2/**</exclude>
               </excludes>
               <!-- configure your formatting preferences here (see link below) https://acegi.github.io/xml-format-maven-plugin/xml-format-mojo.html -->
               <indentSize>2</indentSize>
@@ -557,7 +638,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore/>
+                    <ignore />
                   </action>
                 </pluginExecution>
               </pluginExecutions>

@@ -1,4 +1,4 @@
-package org.raisercostin.util;
+package org.jedio;
 
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
@@ -25,7 +25,7 @@ import org.raisercostin.jedio.op.DeleteOptions;
 @NotThreadSafe
 public class SimpleShell implements Shell {
   private static final Pattern SPLIT_PARAMS_PATTERN = Pattern.compile("\"([^\"]*)\"|(\\S+)");
-  private Stack<DirLocation> dirs = new Stack<DirLocation>();
+  private Stack<DirLocation> dirs = new Stack<>();
   private DirLocation current;
   private final Map<String, String> env;
   private Pattern sensibleRegex;
@@ -33,22 +33,22 @@ public class SimpleShell implements Shell {
 
   @sugar
   public SimpleShell(String path) {
-    this(Locations.existingDir(path), DeleteOptions.deleteByRenameOption());
+    this(Locations.path(path).mkdirIfNeeded(), DeleteOptions.deleteByRenameOption());
   }
 
   @sugar
   public SimpleShell(Path path) {
-    this(Locations.existingDir(path), DeleteOptions.deleteByRenameOption());
+    this(Locations.path(path).mkdirIfNeeded(), DeleteOptions.deleteByRenameOption());
   }
 
   @sugar
   public SimpleShell() {
-    this(Locations.existingDir("."), DeleteOptions.deleteByRenameOption());
+    this(Locations.current(), DeleteOptions.deleteByRenameOption());
   }
 
   @sugar
   public SimpleShell(DeleteOptions deleteOptions) {
-    this(Locations.existingDir("."), deleteOptions);
+    this(Locations.current(), deleteOptions);
   }
 
   @sugar
@@ -58,22 +58,23 @@ public class SimpleShell implements Shell {
 
   private SimpleShell(DirLocation path, DeleteOptions deleteOptions) {
     this.deleteOptions = deleteOptions;
-    env = Maps.newHashMap();
-    current = path;
+    this.env = Maps.newHashMap();
+    this.current = path;
   }
 
+  @Override
   public void execute(String command) {
-    executeInternal(current, split(command)).valid();
+    executeInternal(this.current, split(command)).valid();
   }
 
   @Override
   public void execute(String command, String... params) {
-    executeInternal(current, Lists.asList(command, params)).valid();
+    executeInternal(this.current, Lists.asList(command, params)).valid();
   }
 
   @Override
   public ProcessResult executeWithResult(String command) {
-    return executeInternal(current, split(command));
+    return executeInternal(this.current, split(command));
   }
 
   // See
@@ -86,14 +87,14 @@ public class SimpleShell implements Shell {
       // File input = File.createTempFile("restfs", ".input");
       // TODO splitting command should work for "aaa bbbb" as argument
       ProcessBuilder builder = new ProcessBuilder(commandAndParams).redirectOutput(Redirect.PIPE)
-          .redirectError(Redirect.PIPE)
-          // .redirectInput(input)
-          .directory(path.asPathLocation().toFile());
+        .redirectError(Redirect.PIPE)
+        // .redirectInput(input)
+        .directory(path.asPathLocation().toFile());
       // .inheritIO();
       Map<String, String> currentEnvironment = builder.environment();
-      currentEnvironment.putAll(env);
+      currentEnvironment.putAll(this.env);
       Process proc = builder.start();
-      return new ProcessResult(current, commandAndParams, sensibleRegex, proc);
+      return new ProcessResult(this.current, commandAndParams, this.sensibleRegex, proc);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -116,73 +117,86 @@ public class SimpleShell implements Shell {
     return result;
   }
 
+  @Override
   public DirLocation pwd() {
-    return current;
+    return this.current;
   }
 
+  @Override
   public DirLocation cd(RelativeLocation path) {
-    return internalCd(child(path).existing().get());
+    return internalCd(child(path).existingRef().get().asDir());
   }
 
+  @Override
   public DirLocation pushd(DirLocation url) {
-    dirs.push(current);
+    this.dirs.push(this.current);
     return internalCd(url);
   }
 
+  @Override
   public DirLocation pushd(RelativeLocation path) {
-    dirs.push(current);
-    return internalCd(child(path).existing().get());
+    this.dirs.push(this.current);
+    return internalCd(child(path).existingRef().get().asDir());
   }
 
+  @Override
   public DirLocation popd() {
-    return internalCd(dirs.pop());
+    return internalCd(this.dirs.pop());
   }
 
   private DirLocation internalCd(DirLocation dir) {
-    current = dir;
-    dir.mkdirIfNecessary();
+    this.current = dir;
+    dir.mkdirIfNeeded();
     return dir;
   }
 
+  @Override
   public void mkdir(RelativeLocation path) {
     child(path).existingOrElse(NonExistingLocation::mkdir);
   }
 
+  @Override
   public ReferenceLocation child(RelativeLocation path) {
     return pwd().child(path);
   }
 
+  @Override
   @sugar
   public ReferenceLocation child(String path) {
     return child(Locations.relative(path));
   }
 
+  @Override
   @sugar
   public DirLocation pushd(String path) {
     return pushd(Locations.relative(path));
   }
 
+  @Override
   public void mkdir(String path) {
     mkdir(Locations.relative(path));
   }
 
+  @Override
   public String absolute(String path) {
     return child(path).absoluteAndNormalized();
   }
 
+  @Override
   @sugar
   public DirLocation mkdirAndPushd(String path) {
     mkdir(path);
     return pushd(path);
   }
 
+  @Override
   public void deleteIfExists(String path) {
-    child(path).nonExistingOrElse(x -> x.delete(deleteOptions));
+    child(path).nonExistingOrElse(x -> x.delete(this.deleteOptions));
   }
 
   @Override
   public void addEnv(String name, String value) {
-    env.put(name, value);
+    this.env.put(name, value);
   }
 
   @Override

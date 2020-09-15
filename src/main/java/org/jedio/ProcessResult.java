@@ -1,4 +1,4 @@
-package org.raisercostin.util;
+package org.jedio;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -57,16 +57,18 @@ public class ProcessResult {
 
   public Try<ProcessResult> get() {
     return Try.ofCallable(() -> {
-      if (finished) {
-        int exitValue = proc.exitValue();
+      if (this.finished) {
+        int exitValue = this.proc.exitValue();
         if (exitValue != 0) {
-          if (!error.isEmpty())
-            throw new RuntimeException("Couldn't execute [" + command + "] errorCode=" + exitValue + "\nOutput:["
-                + output + "]\n Error:[" + error + "]");
+          if (!this.error.isEmpty()) {
+            throw new RuntimeException("Couldn't execute [" + this.command + "] errorCode=" + exitValue + "\nOutput:["
+                + this.output + "]\n Error:[" + this.error + "]");
+          }
         }
       } else {
-        throw new RuntimeException("Timeout. Couldn't execute [" + command + "] errorCode=none\nOutput:[" + output
-            + "]\n Error:[" + error + "]");
+        throw new RuntimeException(
+          "Timeout. Couldn't execute [" + this.command + "] errorCode=none\nOutput:[" + this.output
+              + "]\n Error:[" + this.error + "]");
       }
       return this;
     });
@@ -77,26 +79,30 @@ public class ProcessResult {
   }
 
   private void message(DirLocation current, int exitValue, String command, String output, String error) {
-    if (exitValue == 0 && output.isEmpty() && error.isEmpty())
+    if (exitValue == 0 && output.isEmpty() && error.isEmpty()) {
       logger.info(current.toString() + " > [" + command + "]");
-    else
+    } else {
       logger.info(current.toString() + " > " + command + "\nExitValue: " + exitValue + "\nOutput:[" + print(output)
           + "]\nError:[" + print(error) + "]\n");
+    }
   }
 
   private String print(String message) {
-    if (message.isEmpty())
+    if (message.isEmpty()) {
       return "";
-    if (message.contains("\n"))
+    }
+    if (message.contains("\n")) {
       return "\n" + message;
+    }
     return message;
   }
 
   private String blurMessage(Pattern sensibleRegex, String message) {
-    if (sensibleRegex != null)
+    if (sensibleRegex != null) {
       return sensibleRegex.matcher(message).replaceAll("***");
-    else
+    } else {
       return message;
+    }
   }
 
   private static String toString(final InputStream input, final String encoding) {

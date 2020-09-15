@@ -50,9 +50,11 @@ public class FileTraversals {
     return new CommonsIoTraversal(gitIgnores);
   }
 
-  public static interface SimpleFileTraversal extends FileTraversal {
-    abstract Flux<Path> traverse(Path start, boolean ignoreCase);
+  public interface SimpleFileTraversal extends FileTraversal {
+    @Override
+    Flux<Path> traverse(Path start, boolean ignoreCase);
 
+    @Override
     default Flux<Path> traverse(Path start, String regex, boolean ignoreCase) {
       PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + regex);
       return traverse(start, ignoreCase).filter(path -> matcher.matches(path));
@@ -60,6 +62,7 @@ public class FileTraversals {
   }
 
   public static class WalkTraversal implements SimpleFileTraversal {
+    @Override
     public Flux<Path> traverse(Path start, boolean ignoreCase) {
       try {
         return Flux.fromStream(Files.walk(start));
@@ -74,36 +77,38 @@ public class FileTraversals {
     private final IOFileFilter gitFilterCaseInSensible;
 
     public CommonsIoTraversal(String gitIgnores) {
-      gitFilterCaseSensible = notFileFilter(and(directoryFileFilter(), createFilter(gitIgnores, true)));
-      gitFilterCaseInSensible = notFileFilter(and(directoryFileFilter(), createFilter(gitIgnores, false)));
+      this.gitFilterCaseSensible = notFileFilter(and(directoryFileFilter(), createFilter(gitIgnores, true)));
+      this.gitFilterCaseInSensible = notFileFilter(and(directoryFileFilter(), createFilter(gitIgnores, false)));
     }
 
     private OrFileFilter createFilter(String gitIgnores, boolean ignoreCase) {
       Stream<IOFileFilter> or = Streams.stream(Splitter.on("\n").omitEmptyStrings().trimResults().split(gitIgnores))
-          .filter(line -> !line.startsWith("#"))
-          .map(dir -> nameFileFilter(dir, ignoreCase ? IOCase.INSENSITIVE : IOCase.SENSITIVE));
+        .filter(line -> !line.startsWith("#"))
+        .map(dir -> nameFileFilter(dir, ignoreCase ? IOCase.INSENSITIVE : IOCase.SENSITIVE));
       List<IOFileFilter> all = or.collect(Collectors.toList());
       return new OrFileFilter(all);
     }
 
+    @Override
     public Flux<Path> traverse(Path start, String regex, boolean ignoreCase) {
       Iterable<File> a = () -> FileUtils.iterateFilesAndDirs(start.toFile(), TrueFileFilter.INSTANCE,
-          getFilter(ignoreCase));
+        getFilter(ignoreCase));
       // lesAndDirs(start.toFile(), null, null);
       return Flux.fromStream(StreamSupport.stream(a.spliterator(), false).map(File::toPath));
     }
 
     private IOFileFilter getFilter(boolean ignoreCase) {
-      if (ignoreCase)
-        return gitFilterCaseInSensible;
-      else
-        return gitFilterCaseSensible;
+      if (ignoreCase) {
+        return this.gitFilterCaseInSensible;
+      } else {
+        return this.gitFilterCaseSensible;
+      }
     }
   }
 
   /**
    * Sample gitIgnores:
-   * 
+   *
    * <pre>
    *     # for now only dirs
    *     target
@@ -113,8 +118,8 @@ public class FileTraversals {
    */
   protected static OrFileFilter createGitFilter(String gitIgnores, boolean ignoreCase) {
     Stream<IOFileFilter> or = Streams.stream(Splitter.on("\n").omitEmptyStrings().trimResults().split(gitIgnores))
-        .filter(line -> !line.startsWith("#"))
-        .map(dir -> nameFileFilter(dir, ignoreCase ? IOCase.INSENSITIVE : IOCase.SENSITIVE));
+      .filter(line -> !line.startsWith("#"))
+      .map(dir -> nameFileFilter(dir, ignoreCase ? IOCase.INSENSITIVE : IOCase.SENSITIVE));
     List<IOFileFilter> all = or.collect(Collectors.toList());
     return new OrFileFilter(all);
   }
@@ -131,7 +136,7 @@ public class FileTraversals {
       if (path.getClass().getName().equals("com.sun.nio.zipfs.ZipPath")) {
         return true;
       }
-      return filter.accept(path.toFile());
+      return this.filter.accept(path.toFile());
     }
   }
 
@@ -148,6 +153,7 @@ public class FileTraversals {
   // }
   //
   public static class GuavaTraversal implements SimpleFileTraversal {
+    @Override
     public Flux<Path> traverse(Path start, boolean ignoreCase) {
       Iterable<File> iterable = com.google.common.io.Files.fileTraverser().depthFirstPreOrder(start.toFile());
       Stream<File> stream = StreamSupport.stream(iterable.spliterator(), false);
@@ -156,6 +162,7 @@ public class FileTraversals {
   }
 
   public static class GuavaAndDirectoryStreamTraversal implements FileTraversal {
+    @Override
     public Flux<Path> traverse(Path start, String regex, boolean ignoreCase) {
       try {
         Iterable<Path> iterable = fileTraverser(createFilter(start, regex)).depthFirstPreOrder(start);
@@ -177,10 +184,11 @@ public class FileTraversals {
       if (Files.isDirectory(file, options)) {
         try {
           DirectoryStream<Path> files = null;
-          if (filter.isPresent())
+          if (filter.isPresent()) {
             files = Files.newDirectoryStream(file, filter.get());
-          else
+          } else {
             files = Files.newDirectoryStream(file);
+          }
           if (files != null) {
             return files;
             // return Collections.unmodifiableList(Arrays.asList(files));
@@ -196,17 +204,13 @@ public class FileTraversals {
   // copied from newDirectoryStream(file,regex)
   public static Optional<Filter<Path>> createFilter(Path dir, String glob) throws IOException {
     // avoid creating a matcher if all entries are required.
-    if (glob.equals("*"))
+    if (glob.equals("*")) {
       return Optional.empty();
+    }
     // create a matcher and return a filter that uses it.
     FileSystem fs = dir.getFileSystem();
     final PathMatcher matcher = fs.getPathMatcher("glob:" + glob);
-    DirectoryStream.Filter<Path> filter = new DirectoryStream.Filter<Path>() {
-      @Override
-      public boolean accept(Path path) {
-        return matcher.matches(path);
-      }
-    };
+    DirectoryStream.Filter<Path> filter = path -> matcher.matches(path);
     return Optional.of(filter);
   }
 }

@@ -1,13 +1,14 @@
 package org.raisercostin.jedio.fs.mem;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.raisercostin.jedio.ReadableFileLocation;
-import org.raisercostin.jedio.fs.stream.AbstractLocation;
+import org.raisercostin.jedio.impl.ReadableFileLocationLike;
 
-public class InMemoryLocation extends AbstractLocation implements ReadableFileLocation {
+public class InMemoryLocation implements ReadableFileLocation, ReadableFileLocationLike<InMemoryLocation> {
   private String data;
 
   public InMemoryLocation(String data) {
@@ -16,11 +17,11 @@ public class InMemoryLocation extends AbstractLocation implements ReadableFileLo
 
   @Override
   public InputStream unsafeInputStream() {
-    return IOUtils.toInputStream(data, Charsets.UTF_8);
+    return IOUtils.toInputStream(this.data, Charsets.UTF_8);
   }
 
   @Override
-  public String readContent() {
-    return data;
+  public String readContentSync(Charset charset) {
+    return this.data;
   }
 }

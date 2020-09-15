@@ -9,6 +9,21 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
 
 ## Usage
 
+## ToDo
+- [ ] add deserializers
+  - to specific implementations
+  - to interfaces https://stackoverflow.com/questions/25387978/how-to-add-custom-deserializer-to-interface-using-jackson
+- [ ] async first library 
+  - [ ] readContent should always do a readContentAsync.block to force reading async
+  - [ ] readContentSync - forces reading in current thread
+- [x] ignore ssl validation
+- [ ] copy meta info
+  - [ ] for UrlLocations entire header and other details with suffix: `.meta.json`, `-1.meta.json`, etc.
+  - [ ] other copy operation could describe the source of file?
+- [ ] detect if a specific error is thrown multiple times and stop
+  - [ ] https - "javax.net.ssl.SSLHandshakeException: java.security.cert.CertificateException: No subject alternative DNS name matching revomatico.com found." 
+- [ ] stop redirects in crawler - we will search for them in meta.json
+
 ### Maven
 
 #### Dependency

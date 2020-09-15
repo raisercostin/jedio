@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
@@ -22,16 +23,14 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jedio.ExceptionUtils;
-import org.raisercostin.jedio.ChangeableLocation;
-import org.raisercostin.jedio.ExistingLocation;
 import org.raisercostin.jedio.Locations;
 import org.raisercostin.jedio.ReadableDirLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
-import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
-import org.raisercostin.jedio.fs.stream.AbstractLocation;
+import org.raisercostin.jedio.impl.ExistingLocationLike;
+import org.raisercostin.jedio.impl.ReadableDirLocationLike;
+import org.raisercostin.jedio.impl.ReadableFileLocationLike;
 import org.raisercostin.jedio.path.PathLocation;
-import org.raisercostin.utils.ClassPathInputLocation;
 import reactor.core.publisher.Flux;
 
 /**
@@ -42,10 +41,11 @@ import reactor.core.publisher.Flux;
  * @author raiser
  */
 @Data
-public class ClasspathLocation extends AbstractLocation
-    implements ReadableDirLocation, ExistingLocation, ReadableFileLocation {
+public class ClasspathLocation
+    implements ReadableDirLocation, ReadableFileLocation, ReadableDirLocationLike<ClasspathLocation>,
+    ExistingLocationLike<ClasspathLocation>, ReadableFileLocationLike<ClasspathLocation> {
   private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
-      .getOrElse(ClassLoader.class.getClassLoader());
+    .getOrElse(ClassLoader.class.getClassLoader());
 
   private static URL toUrl(String resourcePath) {
     URL res = specialClassLoader.getResource(resourcePath);
@@ -58,7 +58,7 @@ public class ClasspathLocation extends AbstractLocation
 
   public ClasspathLocation(String path) {
     this.resourcePath = fixPath(path);
-    this.resourceUrl = toUrl(resourcePath);
+    this.resourceUrl = toUrl(this.resourcePath);
   }
 
   private String fixPath(String path) {
@@ -73,15 +73,16 @@ public class ClasspathLocation extends AbstractLocation
   @Override
   @SneakyThrows
   public String absoluteAndNormalized() {
-    URL url = resourceUrl;
+    URL url = this.resourceUrl;
     String x = url.toURI().getPath();
-    if (x == null)
+    if (x == null) {
       return url.toURI().toString();
-    else if (SystemUtils.IS_OS_WINDOWS)
+    } else if (SystemUtils.IS_OS_WINDOWS) {
       return StringUtils.removeStart(x, "/");
-    else
+    } else {
       return x;
-    // return Locations.existingFile(toUrl()).absoluteAndNormalized();
+      // return Locations.existingFile(toUrl()).absoluteAndNormalized();
+    }
   }
 
   private PathLocation toPathLocation() {
@@ -121,8 +122,8 @@ public class ClasspathLocation extends AbstractLocation
   }
 
   @Override
-  public ReferenceLocation child(RelativeLocation child) {
-    return Locations.classpath(fixPath(resourcePath + "/" + child.getLocation()));
+  public ClasspathLocation child(RelativeLocation child) {
+    return Locations.classpath(fixPath(this.resourcePath + "/" + child.relativePath()));
   }
   //
   // private InputStream toStream() {
@@ -131,16 +132,17 @@ public class ClasspathLocation extends AbstractLocation
 
   @Override
   public InputStream unsafeInputStream() {
-    final InputStream res = specialClassLoader.getResourceAsStream(resourcePath);
+    final InputStream res = specialClassLoader.getResourceAsStream(this.resourcePath);
     Preconditions.checkNotNull(res);
     return res;
   }
 
-  public String readContent() {
+  @Override
+  public String readContentSync(Charset charset) {
     try (BufferedInputStream b = new BufferedInputStream(unsafeInputStream())) {
-      return IOUtils.toString(b, "UTF-8");
+      return IOUtils.toString(b, charset);
     } catch (IOException e) {
-      throw new RuntimeException("Can't read resource [" + resourcePath + "]", e);
+      throw new RuntimeException("Can't read resource [" + this.resourcePath + "]", e);
     }
   }
 
@@ -155,12 +157,7 @@ public class ClasspathLocation extends AbstractLocation
   }
 
   @Override
-  public ChangeableLocation asChangableLocation() {
+  public Flux<ClasspathLocation> findFilesAndDirs(boolean recursive) {
     throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  @Override
-  public Flux<ExistingLocation> findFilesAndDirs(boolean recursive) {
-    return toPathLocation().findFilesAndDirs(recursive);
   }
 }

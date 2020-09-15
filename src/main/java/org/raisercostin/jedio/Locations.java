@@ -5,13 +5,22 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import io.vavr.Lazy;
+import lombok.SneakyThrows;
+import org.apache.commons.httpclient.URI;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.jedio.sugar;
 import org.raisercostin.jedio.classpath.ClasspathLocation;
 import org.raisercostin.jedio.fs.stream.InputStreamLocation;
 import org.raisercostin.jedio.path.PathLocation;
-import org.raisercostin.jedio.url.UrlLocation;
-import org.raisercostin.util.sugar;
+import org.raisercostin.jedio.url.HttpClientLocation;
+import org.raisercostin.jedio.url.JedioHttpClient;
+import org.raisercostin.jedio.url.SimpleUrl;
+import org.raisercostin.jedio.url.WebLocation;
 
 public class Locations {
+  private static Lazy<JedioHttpClient> defaultClient = Lazy.of(() -> JedioHttpClient.createHighPerfHttpClient());
 
   @sugar
   public static RelativeLocation relative(Path path) {
@@ -22,82 +31,70 @@ public class Locations {
     return RelativeLocation.create(path);
   }
 
-  @sugar
-  public static ReferenceLocation dir(String path) {
-    return dir(Paths.get(path));
-  }
-
-  @sugar
-  public static ReferenceLocation dir(File path) {
-    return dir(path.toPath());
-  }
-
-  public static ReferenceLocation dir(Path path) {
-    // check if absolute?
-    return new PathLocation(path);
-  }
-
-  @sugar
-  public static DirLocation existingDir(Path path) {
-    return dir(path).mkdirIfNecessary();
-  }
-
-  @sugar
-  public static DirLocation existingDir(String path) {
-    return existingDir(Paths.get(path));
-  }
-
-  public static ReadableFileLocation classpath(String path) {
+  public static ClasspathLocation classpath(String path) {
     return new ClasspathLocation(path);
   }
 
-  public static ReadableDirLocation classpathDir(String path) {
-    return new ClasspathLocation(path);
+  public static PathLocation pathFromRelative(String relativePath) {
+    return pathFromRelative(relative(relativePath));
   }
 
-  public static DirLocation dirFromRelative(String relativePath) {
-    return dirFromRelative(relative(relativePath));
+  public static PathLocation pathFromRelative(RelativeLocation relative) {
+    return current().child(relative).mkdirIfNeeded();
   }
 
-  public static DirLocation dirFromRelative(RelativeLocation relative) {
-    return current().child(relative).mkdirIfNecessary();
-  }
-
-  public static DirLocation current() {
+  public static PathLocation current() {
     return new PathLocation(Paths.get("."));
   }
 
-  public static ExistingLocation existingDirOrFile(Path x) {
-    throw new RuntimeException("Not implemented yet!!!");
-  }
-
-  public static FileLocation existingFile(Path path) {
+  public static PathLocation path(Path path) {
     return new PathLocation(path);
   }
 
   @sugar
-  public static FileLocation existingFile(File path) {
-    return existingFile(path.toPath());
+  public static PathLocation path(File path) {
+    return path(path.toPath());
   }
 
   @sugar
-  public static FileLocation existingFile(String path) {
-    return existingFile(Paths.get(path));
-  }
-
-  public static ReadableFileLocation readableFile(String path) {
-    return existingFile(path).asReadableFile();
-  }
-
-  public static WritableFileLocation writableFile(String path) {
-    return existingFile(path).asWritableFile();
-  }
-
-  public static UrlLocation url(String url) {
-    return new UrlLocation(url);
+  public static PathLocation path(String path) {
+    return path(Paths.get(path));
   }
 
   public static InputStreamLocation stream(InputStream inputStream) {
     return new InputStreamLocation(inputStream);
+  }
+
+  public static WebLocation web(String webAddress) {
+    return new WebLocation(true, webAddress);
+  }
+
+  public static HttpClientLocation url(String url) {
+    return new HttpClientLocation(url, false, defaultClient.get());
+  }
+
+  public static HttpClientLocation url(URI uri) {
+    return url(new SimpleUrl(uri));
+  }
+
+  // public static HttpClientLocation url(URL url) {
+  // return url(new SimpleUrl(url));
+  // }
+
+  public static HttpClientLocation url(SimpleUrl url) {
+    return HttpClientLocation.url(url, defaultClient.get());
+  }
+
+  @SneakyThrows
+  public static HttpClientLocation urlPost(String url, String body) {
+    return HttpClientLocation.url(url, new HttpPost(), new StringEntity(body), defaultClient.get());
+  }
+
+  public static HttpClientLocation url(String sourceHyperlink, String relativeOrAbsoluteHyperlink) {
+    return HttpClientLocation.url(sourceHyperlink, relativeOrAbsoluteHyperlink, defaultClient.get());
+  }
+
+  public static HttpClientLocation url(String url, JedioHttpClient client) {
+    return HttpClientLocation.url(url, client);
   }
 }

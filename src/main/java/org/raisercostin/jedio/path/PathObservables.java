@@ -19,13 +19,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.raisercostin.jedio.FileAltered;
-import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 
 /**
  * Adapted from https://github.com/helmbold/rxfilewatcher (based on RxJava2)
- * 
+ *
  * @author raisercostin
  */
 public final class PathObservables {
@@ -36,7 +35,7 @@ public final class PathObservables {
   /**
    * Creates an observable that watches the given directory and all its subdirectories. Directories that are created
    * after subscription are watched, too.
-   * 
+   *
    * @param path
    *          Root directory to be watched
    * @return Observable that emits an event for each filesystem event.
@@ -48,7 +47,7 @@ public final class PathObservables {
 
   /**
    * Creates an observable that watches the given path but not its subdirectories.
-   * 
+   *
    * @param path
    *          Path to be watched
    * @return Observable that emits an event for each filesystem event.
@@ -64,21 +63,21 @@ public final class PathObservables {
     private final boolean recursive;
 
     private FluxFactory(final Path path, final boolean recursive) {
-      directory = path.toAbsolutePath();
+      this.directory = path.toAbsolutePath();
       this.recursive = recursive;
     }
 
     private Flux<FileAltered> create() {
-      return EmitterProcessor.create(subscriber -> {
-        try (WatchService watcher = directory.getFileSystem().newWatchService()) {
-          if (recursive) {
-            registerAll(directory, watcher);
+      return Flux.create(subscriber -> {
+        try (WatchService watcher = this.directory.getFileSystem().newWatchService()) {
+          if (this.recursive) {
+            registerAll(this.directory, watcher);
           } else {
-            register(directory, watcher);
+            register(this.directory, watcher);
           }
           while (!subscriber.isCancelled()) {
             final WatchKey key = watcher.take();
-            final Path dir = directoriesByKey.get(key);
+            final Path dir = this.directoriesByKey.get(key);
             for (final WatchEvent<?> event : key.pollEvents()) {
               subscriber.next(new FileAltered(dir, event));
               registerNewDirectory(subscriber, dir, watcher, event);
@@ -87,9 +86,9 @@ public final class PathObservables {
             // accessible
             boolean valid = key.reset();
             if (!valid) {
-              directoriesByKey.remove(key);
+              this.directoriesByKey.remove(key);
               // nothing to be watched
-              if (directoriesByKey.isEmpty()) {
+              if (this.directoriesByKey.isEmpty()) {
                 break;
               }
             }
@@ -110,25 +109,26 @@ public final class PathObservables {
      */
     // TODO use traversal from PathLocation
     private void registerAll(final Path rootDirectory, final WatchService watcher) throws IOException {
-      Files.walkFileTree(rootDirectory, new SimpleFileVisitor<Path>() {
-        @Override
-        public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
-          register(dir, watcher);
-          return FileVisitResult.CONTINUE;
-        }
-      });
+      Files.walkFileTree(rootDirectory, new SimpleFileVisitor<Path>()
+        {
+          @Override
+          public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
+            register(dir, watcher);
+            return FileVisitResult.CONTINUE;
+          }
+        });
     }
 
     private void register(final Path dir, final WatchService watcher) throws IOException {
       final WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-      directoriesByKey.put(key, dir);
+      this.directoriesByKey.put(key, dir);
     }
 
     // register newly created directory to watching in recursive mode
     private void registerNewDirectory(final FluxSink<FileAltered> subscriber, final Path dir,
         final WatchService watcher, final WatchEvent<?> event) {
       final Kind<?> kind = event.kind();
-      if (recursive && kind.equals(ENTRY_CREATE)) {
+      if (this.recursive && kind.equals(ENTRY_CREATE)) {
         // Context for directory entry event is the file name of entry
         @SuppressWarnings("unchecked")
         final WatchEvent<Path> eventWithPath = (WatchEvent<Path>) event;

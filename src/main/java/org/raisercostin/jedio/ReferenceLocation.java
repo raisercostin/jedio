@@ -1,32 +1,32 @@
 package org.raisercostin.jedio;
 
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.attribute.FileTime;
 import java.util.function.Function;
 
+import io.vavr.Function2;
 import io.vavr.control.Option;
-import lombok.val;
-import org.apache.commons.io.FilenameUtils;
+import lombok.SneakyThrows;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
+import org.raisercostin.jedio.impl.LinkLocationLike;
+import org.raisercostin.jedio.impl.NonExistingLocationLike;
 import org.raisercostin.jedio.path.PathLocation;
-import org.raisercostin.util.sugar;
 import reactor.core.publisher.Flux;
 
-// TODO maybe should contain type <T> of the actual internal instance
 public interface ReferenceLocation extends Location {
+
   ReferenceLocation child(RelativeLocation path);
 
-  @sugar
-  default ReferenceLocation child(String path) {
-    return child(RelativeLocation.create(path));
-  }
+  ReferenceLocation child(String path);
 
-  @Deprecated
   String absolute();
 
-  @Deprecated
   String normalized();
 
-  @Deprecated
   String canonical();
 
   String absoluteAndNormalized();
@@ -35,32 +35,42 @@ public interface ReferenceLocation extends Location {
 
   String getName();
 
-  default Option<RelativeLocation> stripAncestor(BasicDirLocation x) {
-    throw new RuntimeException("Not implemented yet!!!");
+  /** A form that is parsable back to the same type. Usually contains the schema/protocol. */
+  String toExternalForm();
+
+  URL toUrl();
+
+  URI toUri();
+
+  org.apache.commons.httpclient.URI toApacheUri();
+
+  Option<RelativeLocation> stripAncestor(BasicDirLocation x);
+
+  default Option<RelativeLocation> relativize(BasicDirLocation ancestor) {
+    return stripAncestor(ancestor);
   }
 
   /**
    * Returns a new location inside `to` with the same relative path as the current item is inside `from`. For example
    * file `Location.file("c:\a\b\c.txt").relative("c:\","c:\x") equals Location.file("c:\x\a\b\c.txt")`
    */
-  default Option<ReferenceLocation> relative(BasicDirLocation from, BasicDirLocation to) {
-    Option<RelativeLocation> relative = stripAncestor(from);
-    return relative.map(x -> to.child(x));
-  }
+  // TODO override properly in ReferenceLocationLike
+  // default Option<ReferenceLocation> relativeRef(BasicDirLocation<?> from, BasicDirLocation<?> to);
+  // <T extends ReferenceLocation> Option<T> findAncestor(Function<ReferenceLocation, Boolean> fn);
 
-  Option<ReferenceLocation> findAncestor(Function<ReferenceLocation, Boolean> fn);
+  ReferenceLocation mkdirOnParentIfNeeded();
 
-  PathLocation makeDirOnParentIfNeeded();
+  // <T extends ReferenceLocation> Option<T> parent();
+  Option<ReferenceLocation> parentRef();
 
-  Option<? extends ReferenceLocation> parent();
+  // <T extends ReferenceLocation> Option<T> existing();
+  Option<ReferenceLocation> existingRef();
 
-  Option<DirLocation> existing();
-
-  Option<NonExistingLocation> nonExisting();
+  Option<NonExistingLocationLike<?>> nonExisting();
 
   NonExistingLocation nonExistingOrElse(Function<DirLocation, NonExistingLocation> fn);
 
-  DirLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn);
+  ReferenceLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn);
 
   boolean exists();
 
@@ -72,71 +82,69 @@ public interface ReferenceLocation extends Location {
 
   void junctionTo(ReferenceLocation parent);
 
-  Option<LinkLocation> asSymlink();
+  Option<LinkLocationLike> asSymlink();
 
   boolean isSymlink();
 
-  @sugar
-  default DirLocation mkdirIfNecessary() {
-    return existingOrElse(NonExistingLocation::mkdir);
-  }
+  ReferenceLocation mkdirIfNeeded();
 
-  default Flux<PathWithAttributes> find2(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore) {
-    return find(traversal, filter, recursive, gitIgnore, true);
-  }
+  Flux<PathWithAttributes> find2(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore);
 
   Flux<PathWithAttributes> find(FileTraversal2 traversal, String filter, boolean recursive, String gitIgnore,
       boolean dirsFirst);
 
   ReferenceLocation create(String path);
 
-  default ReferenceLocation withExtension(String extension) {
-    return create(FilenameUtils.removeExtension(absoluteAndNormalized()) + "." + extension);
-  }
+  /** dirname(/some/path/a.test)=/some/path */
+  String dirname();
 
-  default ReferenceLocation withName(String name) {
-    return create(FilenameUtils.concat(FilenameUtils.getFullPath(absoluteAndNormalized()), name));
-  }
+  /** basename(/some/path/a.test)=a */
+  String basename();
 
-  default ReferenceLocation withName(Function<String, String> newName) {
-    val fullName = absoluteAndNormalized();
-    return create(
-        FilenameUtils.concat(FilenameUtils.getFullPath(fullName), newName.apply(FilenameUtils.getName(fullName))));
-  }
+  /** extension(/some/path/a.test)=.test */
+  String extension();
 
-  default boolean hasExtension(String extension) {
-    return getName().endsWith("." + extension);
-  }
+  /** filename(/some/path/a.test)=a.text */
+  String filename();
 
-  default boolean isEmpty() {
-    return !exists() || length() == 0;
-  }
+  ReferenceLocation withName(String name);
+
+  ReferenceLocation withName(Function<String, String> newName);
+
+  ReferenceLocation withBasename(Function<String, String> newBasename);
+
+  ReferenceLocation withExtension(String newExtension);
+
+  ReferenceLocation withExtension(Function<String, String> newExtension);
+
+  ReferenceLocation withBasenameAndExtension(Function2<String, String, String> newBasenameAndExtension);
+
+  ReferenceLocation meta();
+
+  ReferenceLocation meta(String meta, String extension);
+
+  ReferenceLocation withNameAndExtension(Function<String, String> newBasename);
+
+  boolean hasExtension(String extension);
+
+  boolean isEmptyFile();
 
   long length();
 
-  // various forced conversions
+  WritableFileLocation asWritableFile();
 
-  default WritableFileLocation asWritableFile() {
-    return (WritableFileLocation) this;
-  }
+  ReadableFileLocation asReadableFile();
 
-  default ReadableFileLocation asReadableFile() {
-    return (ReadableFileLocation) this;
-  }
+  DirLocation asDir();
 
-  default DirLocation asDir() {
-    return (DirLocation) this;
-  }
+  ReadableDirLocation asReadableDir();
 
-  default ReadableDirLocation asReadableDir() {
-    return (ReadableDirLocation) this;
-  }
+  WritableDirLocation asWritableDir();
 
-  default WritableDirLocation asWritableDir() {
-    return (WritableDirLocation) this;
-  }
+  PathLocation asPathLocation();
 
-  default PathLocation asPathLocation() {
-    return (PathLocation) this;
+  @SneakyThrows
+  default FileTime createdDateTime() {
+    return (FileTime) Files.getAttribute(asPathLocation().toPath(), "basic:creationTime", LinkOption.NOFOLLOW_LINKS);
   }
 }

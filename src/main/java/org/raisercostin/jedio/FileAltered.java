@@ -16,11 +16,12 @@ public class FileAltered {
   public final WatchEvent<?> event;
 
   public ReferenceLocation location() {
-    return Locations.dir(dir.resolve((Path) event.context()));
+    return Locations.path(this.dir.resolve((Path) this.event.context()));
   }
 
+  @Override
   public String toString() {
-    return location() + " " + event.kind().name() + "#" + event.count();
+    return location() + " " + this.event.kind().name() + "#" + this.event.count();
   }
 }
 // FileCreated, FileChanged, FileDeleted, DirectoryCreated,
