@@ -6,8 +6,10 @@ import java.nio.charset.Charset;
 import io.vavr.control.Option;
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.impl.ReadableFileLocationLike;
 import reactor.core.publisher.Mono;
@@ -17,6 +19,8 @@ import reactor.core.publisher.Mono;
 @Setter(value = AccessLevel.NONE)
 public class MemoizedLocation implements ReadableFileLocation, ReadableFileLocationLike<MemoizedLocation> {
   private final ReadableFileLocation location;
+  @ToString.Exclude
+  @EqualsAndHashCode.Exclude
   private String content;
 
   public MemoizedLocation(ReadableFileLocation location) {
