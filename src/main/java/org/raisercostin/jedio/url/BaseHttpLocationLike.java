@@ -7,8 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.ToString;
-import org.apache.commons.httpclient.URI;
 import org.raisercostin.jedio.impl.ReadableFileLocationLike;
+import org.raisercostin.jedio.url.impl.URI;
 
 @Data
 @Getter(lombok.AccessLevel.NONE)

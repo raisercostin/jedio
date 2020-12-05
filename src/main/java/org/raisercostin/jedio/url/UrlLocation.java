@@ -5,7 +5,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import lombok.SneakyThrows;
-import org.apache.commons.httpclient.URI;
+import org.raisercostin.jedio.url.impl.URI;
 
 public class UrlLocation extends BaseHttpLocationLike<UrlLocation> {
   @SneakyThrows

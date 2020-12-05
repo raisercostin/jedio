@@ -46,6 +46,7 @@ public class GuavaAndDirectoryStreamTraversal3 implements FileTraversal2 {
         // throw ioe;
         return Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
       } catch (IOException e) {
+        e.addSuppressed(ioe);
         throw new RuntimeException(e);
       }
     }

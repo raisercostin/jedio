@@ -28,7 +28,7 @@
  *
  */
 
-package org.apache.commons.httpclient;
+package org.raisercostin.jedio.url.impl;
 
 /**
  * Signals that an error has occurred.
@@ -38,20 +38,23 @@ package org.apache.commons.httpclient;
  * @since 3.0
  */
 public class HttpClientError extends Error {
-
-  /**
-   * Creates a new HttpClientError with a <tt>null</tt> detail message.
-   */
   public HttpClientError() {
     super();
   }
 
-  /**
-   * Creates a new HttpClientError with the specified detail message.
-   * @param message The error message
-   */
+  public HttpClientError(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    super(message, cause, enableSuppression, writableStackTrace);
+  }
+
+  public HttpClientError(String message, Throwable cause) {
+    super(message, cause);
+  }
+
   public HttpClientError(String message) {
     super(message);
   }
 
+  public HttpClientError(Throwable cause) {
+    super(cause);
+  }
 }

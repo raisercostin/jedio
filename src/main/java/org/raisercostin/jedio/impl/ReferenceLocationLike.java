@@ -92,8 +92,8 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
 
   @Override
   @SneakyThrows
-  default org.apache.commons.httpclient.URI toApacheUri() {
-    return new org.apache.commons.httpclient.URI(toUrl().toExternalForm(), true);
+  default org.raisercostin.jedio.url.impl.URI toApacheUri() {
+    return new org.raisercostin.jedio.url.impl.URI(toUrl().toExternalForm(), true);
   }
 
   @Override

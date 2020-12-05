@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 
 import io.vavr.Lazy;
 import lombok.SneakyThrows;
-import org.apache.commons.httpclient.URI;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.jedio.sugar;
@@ -18,6 +17,7 @@ import org.raisercostin.jedio.url.HttpClientLocation;
 import org.raisercostin.jedio.url.JedioHttpClient;
 import org.raisercostin.jedio.url.SimpleUrl;
 import org.raisercostin.jedio.url.WebLocation;
+import org.raisercostin.jedio.url.impl.URI;
 
 public class Locations {
   private static Lazy<JedioHttpClient> defaultClient = Lazy.of(() -> JedioHttpClient.createHighPerfHttpClient());

@@ -10,8 +10,8 @@ import java.nio.charset.Charset;
 
 import io.vavr.Lazy;
 import lombok.SneakyThrows;
-import org.apache.commons.httpclient.URI;
 import org.raisercostin.jedio.ReadableFileLocation;
+import org.raisercostin.jedio.url.impl.URI;
 
 public class HttpStandardJavaLocation extends BaseHttpLocationLike<HttpStandardJavaLocation>
     implements ReadableFileLocation, Closeable {

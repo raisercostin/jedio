@@ -45,7 +45,6 @@ public class MetaInfo {
   @AllArgsConstructor
   @Getter(lombok.AccessLevel.NONE)
   @Setter(lombok.AccessLevel.NONE)
-  @Slf4j
   public static class StreamAndMeta implements AutoCloseable {
     public static StreamAndMeta fromThrowable(Throwable e) {
       return new StreamAndMeta(MetaInfo.error(e), null);

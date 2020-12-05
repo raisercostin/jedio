@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
-import org.apache.commons.httpclient.URI;
 import org.apache.commons.lang3.StringUtils;
+import org.raisercostin.jedio.url.impl.URI;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE, force = true)
 @AllArgsConstructor

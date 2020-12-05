@@ -28,7 +28,7 @@
  *
  */
 
-package org.apache.commons.httpclient;
+package org.raisercostin.jedio.url.impl;
 
 import org.apache.http.HttpException;
 
@@ -66,6 +66,18 @@ public class URIException extends HttpException {
    */
   public URIException(int reasonCode, String reason) {
     super(reason); // for backward compatibility of Throwable
+    this.reason = reason;
+    this.reasonCode = reasonCode;
+  }
+
+  /**
+   * The constructor with a reason string and its code arguments.
+   *
+   * @param reasonCode the reason code
+   * @param reason the reason
+   */
+  public URIException(int reasonCode, String reason, Throwable e) {
+    super(reason, e);
     this.reason = reason;
     this.reasonCode = reasonCode;
   }

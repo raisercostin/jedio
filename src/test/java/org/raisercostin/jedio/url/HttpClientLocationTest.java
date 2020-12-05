@@ -2,6 +2,7 @@ package org.raisercostin.jedio.url;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.net.URL;
 
@@ -75,7 +76,8 @@ class HttpClientLocationTest {
   @SneakyThrows
   void test6() {
     String address = "http://www.revomatico.com/camel/portfolio/products/bean:cxfEndpoint|//someAddress";
-    new URL(address);
+    URL url = new URL(address);
+    assertNotNull(url);
     assertThatThrownBy(() -> new URI(address)).hasMessageContaining("Path contains invalid character: |");
     assertThat(UrlLocation.of(address, false).toUri().toString())
       .isEqualTo("http://www.revomatico.com/camel/portfolio/products/bean:cxfEndpoint%7C//someAddress");

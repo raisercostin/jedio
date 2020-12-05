@@ -42,7 +42,7 @@ public interface ReferenceLocation extends Location {
 
   URI toUri();
 
-  org.apache.commons.httpclient.URI toApacheUri();
+  org.raisercostin.jedio.url.impl.URI toApacheUri();
 
   Option<RelativeLocation> stripAncestor(BasicDirLocation x);
 

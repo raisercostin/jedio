@@ -27,7 +27,7 @@
  * <http://www.apache.org/>.
  *
  */
-package org.apache.commons.httpclient;
+package org.raisercostin.jedio.url.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -38,9 +38,9 @@ import java.util.BitSet;
 import java.util.Hashtable;
 import java.util.Locale;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
-import org.apache.commons.httpclient.util.EncodingUtil;
 
 /**
  * The interface for the URI(Uniform Resource Identifiers) version of RFC 2396.
@@ -115,6 +115,7 @@ import org.apache.commons.httpclient.util.EncodingUtil;
  * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
  * @version $Revision: 564973 $ $Date: 2002/03/14 15:14:01
  */
+@Slf4j
 public class URI implements Cloneable, Comparable, Serializable {
 
   // ----------------------------------------------------------- Constructors
@@ -645,6 +646,7 @@ public class URI implements Cloneable, Comparable, Serializable {
     try {
       defaultDocumentCharsetByPlatform = System.getProperty("file.encoding");
     } catch (SecurityException ignore) {
+      log.trace("ignored security exception", ignore);
     }
     if (defaultDocumentCharset == null) {
       // set the default document charset
@@ -2165,8 +2167,7 @@ public class URI implements Cloneable, Comparable, Serializable {
         try {
           _port = Integer.parseInt(original.substring(from));
         } catch (NumberFormatException error) {
-          throw new URIException(URIException.PARSING,
-            "invalid port number");
+          throw new URIException(URIException.PARSING, "invalid port number", error);
         }
       }
       // set a server-based naming authority

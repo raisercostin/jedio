@@ -27,12 +27,11 @@
  * <http://www.apache.org/>.
  *
  */
-package org.apache.commons.httpclient.util;
+package org.raisercostin.jedio.url.impl;
 
 import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.codec.net.URLCodec;
-import org.apache.commons.httpclient.HttpClientError;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.NameValuePair;
@@ -85,8 +84,8 @@ public class EncodingUtil {
         return doFormUrlEncode(pairs, DEFAULT_CHARSET);
       } catch (UnsupportedEncodingException fatal) {
         // Should never happen. ISO-8859-1 must be supported on all JVMs
-        throw new HttpClientError("Encoding not supported: " +
-            DEFAULT_CHARSET);
+        fatal.addSuppressed(e);
+        throw new HttpClientError("Encoding not supported: " + DEFAULT_CHARSET, fatal);
       }
     }
   }
@@ -161,9 +160,8 @@ public class EncodingUtil {
     try {
       return new String(data, offset, length, charset);
     } catch (UnsupportedEncodingException e) {
-
       if (LOG.isWarnEnabled()) {
-        LOG.warn("Unsupported encoding: " + charset + ". System encoding used");
+        LOG.warn("Unsupported encoding: " + charset + ". System encoding used", e);
       }
       return new String(data, offset, length);
     }
@@ -207,11 +205,9 @@ public class EncodingUtil {
     try {
       return data.getBytes(charset);
     } catch (UnsupportedEncodingException e) {
-
       if (LOG.isWarnEnabled()) {
-        LOG.warn("Unsupported encoding: " + charset + ". System encoding used.");
+        LOG.warn("Unsupported encoding: " + charset + ". System encoding used.", e);
       }
-
       return data.getBytes();
     }
   }
@@ -233,7 +229,7 @@ public class EncodingUtil {
     try {
       return data.getBytes("US-ASCII");
     } catch (UnsupportedEncodingException e) {
-      throw new HttpClientError("HttpClient requires ASCII support");
+      throw new HttpClientError("HttpClient requires ASCII support", e);
     }
   }
 
@@ -258,7 +254,7 @@ public class EncodingUtil {
     try {
       return new String(data, offset, length, "US-ASCII");
     } catch (UnsupportedEncodingException e) {
-      throw new HttpClientError("HttpClient requires ASCII support");
+      throw new HttpClientError("HttpClient requires ASCII support", e);
     }
   }
 

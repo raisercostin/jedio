@@ -133,7 +133,6 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
   @AllArgsConstructor
   @Getter(lombok.AccessLevel.NONE)
   @Setter(lombok.AccessLevel.NONE)
-  @Slf4j
   public static class HttpClientLocationMeta {
     public HttpClientLocationMetaRequest request;
     public HttpClientLocationMetaResponse response;
@@ -144,7 +143,6 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
   @AllArgsConstructor
   @Getter(lombok.AccessLevel.NONE)
   @Setter(lombok.AccessLevel.NONE)
-  @Slf4j
   public static class HttpClientLocationMetaRequest {
     public RequestLine requestLine;
     public RequestConfig requestConfig;
@@ -156,7 +154,6 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
   @AllArgsConstructor
   @Getter(lombok.AccessLevel.NONE)
   @Setter(lombok.AccessLevel.NONE)
-  @Slf4j
   public static class HttpClientLocationMetaResponse {
     public StatusLine statusLine;
     public Map<String, Object> header;
@@ -331,7 +328,7 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
 
   @SneakyThrows
   public HttpClientLocation withEscapedQuery(Function<String, String> escapedQuery) {
-    org.apache.commons.httpclient.URI uri = toApacheUri();
+    org.raisercostin.jedio.url.impl.URI uri = toApacheUri();
     String newEscapedQuery = escapedQuery.apply(uri.getEscapedQuery());
     uri.setEscapedQuery(newEscapedQuery);
     return create(new URL(uri.getEscapedURI()), true);

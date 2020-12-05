@@ -19,6 +19,7 @@ import io.vavr.control.Option;
 import io.vavr.control.Try;
 import lombok.Data;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -41,6 +42,7 @@ import reactor.core.publisher.Flux;
  * @author raiser
  */
 @Data
+@Slf4j
 public class ClasspathLocation
     implements ReadableDirLocation, ReadableFileLocation, ReadableDirLocationLike<ClasspathLocation>,
     ExistingLocationLike<ClasspathLocation>, ReadableFileLocationLike<ClasspathLocation> {
@@ -106,6 +108,7 @@ public class ClasspathLocation
     try {
       return FileSystems.getFileSystem(uri);
     } catch (FileSystemNotFoundException e) {
+      log.debug("ignored exception", e);
       Map<String, String> env = new HashMap<>();
       env.put("create", "true");
       return FileSystems.newFileSystem(uri, env);
