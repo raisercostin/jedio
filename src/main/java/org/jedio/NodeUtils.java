@@ -11,6 +11,7 @@ import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Seq;
 import io.vavr.control.Option;
+import io.vavr.control.Try;
 import lombok.SneakyThrows;
 import org.springframework.util.ReflectionUtils;
 
@@ -19,14 +20,24 @@ public class NodeUtils {
     return nullableInternal(object, Iterator.of(firstKey).concat(Iterator.of(restKeys)), false, true);
   }
 
-  public static String notNullString(Object object, Object firstKey, Object... restKeys) {
-    return Objects.toString(nullableInternal(object, Iterator.of(firstKey).concat(Iterator.of(restKeys)), false, true),
-      "returnedNullString");
+  public static String notNullString(Object object, Object... keys) {
+    return Objects.toString(nullableInternal(object, Iterator.of(keys), false, true), "returnedNullString");
+  }
+
+  public static String notNullString(Object object, String... keys) {
+    return Objects.toString(nullableInternal(object, Iterator.of(keys), false, true), "returnedNullString");
   }
 
   public static String nullableString(Object object, String firstKey, Object... restKeys) {
     return Objects.toString(
       nullableInternal(object, Iterator.<Object>of(firstKey).concat(Iterator.of(restKeys)), true, true), null);
+  }
+
+  public static String nullableOrInexistentString(Object object, String firstKey, Object... restKeys) {
+    return Try
+      .of(() -> (String) nullableInternal(object, Iterator.<Object>of(firstKey).concat(Iterator.of(restKeys)), true,
+        true))
+      .getOrNull();
   }
 
   public static String nullableString(Object object, Object... keys) {

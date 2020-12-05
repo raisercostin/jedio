@@ -4,7 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
+import com.google.common.base.Charsets;
 import io.vavr.control.Option;
+import org.apache.commons.io.IOUtils;
 import org.raisercostin.jedio.FileLocation;
 import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
@@ -16,22 +18,22 @@ import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.DeleteOptions;
 import reactor.core.publisher.Mono;
 
-public class StringLocation implements FileLocation, NonExistingLocation, ReadableFileLocationLike<StringLocation>,
-    WritableFileLocationLike<StringLocation>, NonExistingLocationLike<StringLocation> {
+public class InMemoryLocation implements FileLocation, NonExistingLocation, ReadableFileLocationLike<InMemoryLocation>,
+    WritableFileLocationLike<InMemoryLocation>, NonExistingLocationLike<InMemoryLocation> {
   public String content;
 
-  public StringLocation(String content) {
+  public InMemoryLocation(String content) {
     this.content = content;
   }
 
   @Override
-  public StringLocation deleteFile(DeleteOptions options) {
+  public InMemoryLocation deleteFile(DeleteOptions options) {
     this.content = null;
     return this;
   }
 
   @Override
-  public StringLocation delete(DeleteOptions options) {
+  public InMemoryLocation delete(DeleteOptions options) {
     this.content = null;
     return this;
   }
@@ -42,7 +44,7 @@ public class StringLocation implements FileLocation, NonExistingLocation, Readab
   }
 
   @Override
-  public StringLocation asWritableFile() {
+  public InMemoryLocation asWritableFile() {
     return this;
   }
 
@@ -84,7 +86,8 @@ public class StringLocation implements FileLocation, NonExistingLocation, Readab
 
   @Override
   public InputStream unsafeInputStream() {
-    return new ByteArrayInputStream(this.content.getBytes());
+    //return new ByteArrayInputStream(this.content.getBytes());
+    return IOUtils.toInputStream(this.content, Charsets.UTF_8);
   }
 
   @Override
@@ -98,13 +101,13 @@ public class StringLocation implements FileLocation, NonExistingLocation, Readab
   }
 
   @Override
-  public StringLocation write(String content, String encoding) {
+  public InMemoryLocation write(String content, String encoding) {
     this.content = content;
     return this;
   }
 
   @Override
-  public StringLocation copyFrom(ReadableFileLocation source, CopyOptions options) {
+  public InMemoryLocation copyFrom(ReadableFileLocation source, CopyOptions options) {
     if (this.content != null && !options.replaceExisting()) {
       throw new RuntimeException("Cannot overwrite [" + this + "] with content from " + source);
     }

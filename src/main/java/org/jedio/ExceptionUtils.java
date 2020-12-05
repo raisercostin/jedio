@@ -23,7 +23,7 @@ public class ExceptionUtils {
   }
 
   @FunctionalInterface
-  public interface MyCheckedException<R> {
+  public static interface MyCheckedException<R> {
     R apply() throws Throwable;
   }
 

@@ -5,13 +5,17 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import com.google.common.base.Preconditions;
 import io.vavr.Lazy;
+import io.vavr.Tuple3;
 import lombok.SneakyThrows;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.jedio.sugar;
+import org.jedio.regex.RegexExtension;
 import org.raisercostin.jedio.classpath.ClasspathLocation;
 import org.raisercostin.jedio.fs.stream.InputStreamLocation;
+import org.raisercostin.jedio.memory.InMemoryLocation;
 import org.raisercostin.jedio.path.PathLocation;
 import org.raisercostin.jedio.url.HttpClientLocation;
 import org.raisercostin.jedio.url.JedioHttpClient;
@@ -96,5 +100,40 @@ public class Locations {
 
   public static HttpClientLocation url(String url, JedioHttpClient client) {
     return HttpClientLocation.url(url, client);
+  }
+
+  /**Create a location. Shold have a schema.*/
+  public static ReadableFileLocation readable(String externalUrl) {
+    return (ReadableFileLocation) location(externalUrl);
+  }
+
+  /**Create a location. Shold have a schema.*/
+  public static Location location(String externalUrl) {
+    Tuple3<String, String, String> schemaAndUrl = RegexExtension.regexp2("^([a-z]+)\\:(.*)$", externalUrl);
+    switch (schemaAndUrl._2) {
+      case "http":
+      case "https":
+        return url(schemaAndUrl._3);
+      case "classpath":
+        return classpath(schemaAndUrl._3);
+      case "file":
+        return path(schemaAndUrl._3);
+      case "relative":
+        return pathFromRelative(relative(schemaAndUrl._3));
+      case "current":
+        Preconditions.checkArgument(schemaAndUrl._3.length() == 0, "Current schema should have no relative part.");
+        return current();
+      case "web":
+        return web(schemaAndUrl._3);
+      case "mem":
+        return mem(schemaAndUrl._3);
+      default:
+        throw new IllegalArgumentException(
+          "Don't know protocol [" + schemaAndUrl._2 + "] for externalUrl [" + externalUrl + "]");
+    }
+  }
+
+  private static InMemoryLocation mem(String content) {
+    return new InMemoryLocation(content);
   }
 }
