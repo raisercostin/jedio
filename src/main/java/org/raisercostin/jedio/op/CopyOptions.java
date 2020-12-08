@@ -94,7 +94,6 @@ public interface CopyOptions {
     return referenceLocation.parent()
       .get()
       .child("." + meta)
-      .mkdirIfNeeded()
       .child(referenceLocation
         .withExtension(originalExtension -> originalExtension + "#meta-" + meta + "-" + extension)
         .filename());

@@ -113,7 +113,7 @@ public class Locations {
     switch (schemaAndUrl._2) {
       case "http":
       case "https":
-        return url(schemaAndUrl._3);
+        return url(externalUrl);
       case "classpath":
         return classpath(schemaAndUrl._3);
       case "file":
