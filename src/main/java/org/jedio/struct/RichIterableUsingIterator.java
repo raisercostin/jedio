@@ -2,12 +2,11 @@ package org.jedio.struct;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.Spliterator;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -22,29 +21,49 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
+import com.google.common.base.Preconditions;
 import io.vavr.CheckedFunction0;
 import io.vavr.PartialFunction;
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
+import io.vavr.Value;
 import io.vavr.collection.Array;
 import io.vavr.collection.CharSeq;
 import io.vavr.collection.Iterator;
+import io.vavr.collection.LinkedHashMap;
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
 import io.vavr.collection.PriorityQueue;
 import io.vavr.collection.Queue;
 import io.vavr.collection.Seq;
+import io.vavr.collection.Set;
 import io.vavr.collection.SortedMap;
 import io.vavr.collection.SortedSet;
 import io.vavr.collection.Traversable;
 import io.vavr.collection.Tree;
-import io.vavr.collection.Tree.Node;
 import io.vavr.collection.Vector;
+import io.vavr.collection.Tree.Node;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
 
-public class RichIterableUsingIterator<T> implements RichIterable2<T> {
+//TODO Couldn't make it work for CrudRepositories
+//  @SuppressWarnings("rawtypes")
+//  @Component
+//  public class ToRichIterableConverter implements Converter<Iterable, RichIterable> {
+//    @SuppressWarnings("unchecked")
+//    @Override
+//    public RichIterable convert(Iterable source) {
+//      return RichIterable.fromJava(source);
+//    }
+//  }
 
+/**
+ * Intentionally doesn't implement Iterable to force you to pass RichIterable around.
+ * You can get that with iterable().
+ */
+public class RichIterableUsingIterator<T> implements RichIterable2<T> {
   private Iterable<T> iterable;
 
   public RichIterableUsingIterator(Iterable<T> iterable) {
@@ -61,6 +80,109 @@ public class RichIterableUsingIterator<T> implements RichIterable2<T> {
     return Iterator.ofAll(iterable.iterator());
   }
 
+  public <C> Map<C, Iterator<T>> groupBy2(Function<? super T, ? extends C> classifier) {
+    //public <C> Map<? extends C, Iterator<T>> groupBy(Function<? super T, ? extends C> classifier) {
+    return groupBy(this, classifier, Iterator::ofAll);
+  }
+
+  //Copied from vavr Collections.groupBy
+  private static <T, C, R extends Iterable<T>> Map<C, R> groupBy(RichIterable2<T> source,
+      Function<? super T, ? extends C> classifier, Function<? super Iterable<T>, R> mapper) {
+    Objects.requireNonNull(classifier, "classifier is null");
+    Objects.requireNonNull(mapper, "mapper is null");
+    Map<C, R> results = LinkedHashMap.empty();
+    for (java.util.Map.Entry<? extends C, Collection<T>> entry : groupBy(source, classifier)) {
+      results = results.put(entry.getKey(), mapper.apply(entry.getValue()));
+    }
+    return results;
+  }
+
+  private static <T, C> java.util.Set<java.util.Map.Entry<C, Collection<T>>> groupBy(RichIterable2<T> source,
+      Function<? super T, ? extends C> classifier) {
+    final java.util.Map<C, Collection<T>> results = new java.util.LinkedHashMap<>(
+      source.isTraversableAgain() ? source.size() : 16);
+    for (T value : source.iterator()) {
+      final C key = classifier.apply(value);
+      results.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
+    }
+    return results.entrySet();
+  }
+
+  @SuppressWarnings("unchecked")
+  public <U extends T> RichIterable2<U> narrow(Class<U> clazz) {
+    return (RichIterable2<U>) (Object) new RichIterableUsingIterator<>(
+      () -> iterator().filter(y -> y.getClass() == clazz));
+  }
+
+  /**Computes and stores the result of iterable. Creates a new RichIterator based on this.*/
+  public RichIterable2<T> memoizeVavr() {
+    return RichIterable2.fromVavr(toList());
+  }
+
+  public RichIterable2<T> memoizeJava() {
+    return RichIterable2.fromJava(toJavaList());
+  }
+
+  public RichIterable2<T> concat(Iterable<T> next) {
+    return RichIterable2.concat(this, new RichIterableUsingIterator<>(next));
+  }
+
+  public RichIterable2<T> concat(RichIterable2<T> next) {
+    return RichIterable2.concat(this, next);
+  }
+
+  @Deprecated //Try not to use this, call toStream() before for example. The iterable is a little to heavy to be used like this.
+  public T get(int index) {
+    return drop(index).head();
+  }
+
+  public <U extends Comparable<? super U>> T findMaxBy(Function<? super T, ? extends U> mapper) {
+    return sortBy(mapper).last();
+  }
+
+  public RichIterableUsingIterator<T> sorted(Comparator<? super T> comparator) {
+    //Do not use lazy as this will cache the value. The user should decide if he wants that via using memoize
+    //Lazy<java.util.List<T>> sorted =Lazy.of(
+    Supplier<java.util.List<T>> sorted = () -> {
+      java.util.List<T> list = iterator().toJavaList();
+      list.sort(comparator);
+      return list;
+    };
+    return new RichIterableUsingIterator<>(() -> sorted.get().iterator());
+  }
+
+  public <U extends Comparable<? super U>> RichIterable2<T> sortBy(Function<? super T, ? extends U> mapper) {
+    return sorted(comparator(mapper));
+  }
+
+  public <U extends Comparable<? super U>> RichIterable2<T> sortByReversed(Function<? super T, ? extends U> mapper) {
+    return sorted(reversedComparator(mapper));
+  }
+
+  private <U extends Comparable<? super U>> Comparator<? super T> reversedComparator(
+      Function<? super T, ? extends U> mapper) {
+    return (o1, o2) -> {
+      U v1 = mapper.apply(o1);
+      U v2 = mapper.apply(o2);
+      return -v1.compareTo(v2);
+    };
+  }
+
+  private <U extends Comparable<? super U>> Comparator<? super T> comparator(Function<? super T, ? extends U> mapper) {
+    return (o1, o2) -> {
+      U v1 = mapper.apply(o1);
+      U v2 = mapper.apply(o2);
+      return v1.compareTo(v2);
+    };
+  }
+
+  public RichIterable2<T> reverse() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  /**********************************************************************/
+  /** Next operations just delegate to `vavr.Iterator` */
+  /**********************************************************************/
   @Override
   public T fold(T zero, BiFunction<? super T, ? super T, ? extends T> combine) {
     return iterator().fold(zero, combine);
@@ -197,28 +319,29 @@ public class RichIterableUsingIterator<T> implements RichIterable2<T> {
   }
 
   @Override
-  public List<T> toJavaList() {
+  public java.util.List<T> toJavaList() {
     return iterator().toJavaList();
   }
 
   @Override
-  public <LIST extends List<T>> LIST toJavaList(Function<Integer, LIST> factory) {
+  public <LIST extends java.util.List<T>> LIST toJavaList(Function<Integer, LIST> factory) {
     return iterator().toJavaList(factory);
   }
 
   @Override
-  public <K, V> Map<K, V> toJavaMap(Function<? super T, ? extends Tuple2<? extends K, ? extends V>> f) {
+  public <K, V> java.util.Map<K, V> toJavaMap(Function<? super T, ? extends Tuple2<? extends K, ? extends V>> f) {
     return iterator().toJavaMap(f);
   }
 
   @Override
-  public <K, V, MAP extends Map<K, V>> MAP toJavaMap(Supplier<MAP> factory, Function<? super T, ? extends K> keyMapper,
+  public <K, V, MAP extends java.util.Map<K, V>> MAP toJavaMap(Supplier<MAP> factory,
+      Function<? super T, ? extends K> keyMapper,
       Function<? super T, ? extends V> valueMapper) {
     return iterator().toJavaMap(factory, keyMapper, valueMapper);
   }
 
   @Override
-  public <K, V, MAP extends Map<K, V>> MAP toJavaMap(Supplier<MAP> factory,
+  public <K, V, MAP extends java.util.Map<K, V>> MAP toJavaMap(Supplier<MAP> factory,
       Function<? super T, ? extends Tuple2<? extends K, ? extends V>> f) {
     return iterator().toJavaMap(factory, f);
   }
@@ -229,12 +352,12 @@ public class RichIterableUsingIterator<T> implements RichIterable2<T> {
   }
 
   @Override
-  public Set<T> toJavaSet() {
+  public java.util.Set<T> toJavaSet() {
     return iterator().toJavaSet();
   }
 
   @Override
-  public <SET extends Set<T>> SET toJavaSet(Function<Integer, SET> factory) {
+  public <SET extends java.util.Set<T>> SET toJavaSet(Function<Integer, SET> factory) {
     return iterator().toJavaSet(factory);
   }
 
