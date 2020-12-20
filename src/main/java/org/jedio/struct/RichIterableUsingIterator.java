@@ -3,6 +3,7 @@ package org.jedio.struct;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
@@ -76,6 +77,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
     return Iterator.ofAll(iterable.iterator());
   }
 
+  @Override
   public <C> Map<C, Iterator<T>> groupBy2(Function<? super T, ? extends C> classifier) {
     //public <C> Map<? extends C, Iterator<T>> groupBy(Function<? super T, ? extends C> classifier) {
     return groupBy(this, classifier, Iterator::ofAll);
@@ -104,6 +106,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
     return results.entrySet();
   }
 
+  @Override
   @SuppressWarnings("unchecked")
   public <U extends T> RichIterable<U> narrow(Class<U> clazz) {
     return (RichIterable<U>) (Object) new RichIterableUsingIterator<>(
@@ -111,46 +114,64 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   }
 
   /**Computes and stores the result of iterable. Creates a new RichIterator based on this.*/
+  @Override
   public RichIterable<T> memoizeVavr() {
     return RichIterable.fromVavr(toList());
   }
 
+  @Override
   public RichIterable<T> memoizeJava() {
     return RichIterable.fromJava(toJavaList());
   }
 
-  public RichIterable<T> concat(Iterable<T> next) {
+  @Override
+  public RichIterable<T> andThen(Iterable<T> next) {
     return RichIterable.concat(this, new RichIterableUsingIterator<>(next));
   }
 
-  public RichIterable<T> concat(RichIterable<T> next) {
+  @Override
+  public RichIterable<T> andThen(RichIterable<T> next) {
     return RichIterable.concat(this, next);
   }
 
+  @Override
   @Deprecated //Try not to use this, call toStream() before for example. The iterable is a little to heavy to be used like this.
   public T get(int index) {
     return drop(index).head();
   }
 
-  public <U extends Comparable<? super U>> T findMaxBy(Function<? super T, ? extends U> mapper) {
-    return sortBy(mapper).last();
+  @Override
+  public RichIterableUsingIterator<T> sorted() {
+    Supplier<Iterator<T>> sorted = () -> {
+      @SuppressWarnings("unchecked")
+      T[] arrayToSort = (T[]) iterator().toJavaArray();
+      Arrays.sort(arrayToSort);
+      return Iterator.of(arrayToSort);
+    };
+    return new RichIterableUsingIterator<>(() -> sorted.get());
   }
 
+  @Override
   public RichIterableUsingIterator<T> sorted(Comparator<? super T> comparator) {
     //Do not use lazy as this will cache the value. The user should decide if he wants that via using memoize
     //Lazy<java.util.List<T>> sorted =Lazy.of(
-    Supplier<java.util.List<T>> sorted = () -> {
-      java.util.List<T> list = iterator().toJavaList();
-      list.sort(comparator);
-      return list;
+    Supplier<Iterator<T>> sorted = () -> {
+      @SuppressWarnings("unchecked")
+      T[] arrayToSort = (T[]) iterator().toJavaArray();
+      Arrays.sort(arrayToSort, comparator);
+      //      java.util.List<T> list = iterator().toJavaList();
+      //      list.sort(comparator);
+      return Iterator.of(arrayToSort);
     };
-    return new RichIterableUsingIterator<>(() -> sorted.get().iterator());
+    return new RichIterableUsingIterator<>(() -> sorted.get());
   }
 
+  @Override
   public <U extends Comparable<? super U>> RichIterable<T> sortBy(Function<? super T, ? extends U> mapper) {
     return sorted(comparator(mapper));
   }
 
+  @Override
   public <U extends Comparable<? super U>> RichIterable<T> sortByReversed(Function<? super T, ? extends U> mapper) {
     return sorted(reversedComparator(mapper));
   }
@@ -172,6 +193,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
     };
   }
 
+  @Override
   public RichIterable<T> reverse() {
     throw new RuntimeException("Not implemented yet!!!");
   }

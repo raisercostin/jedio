@@ -74,6 +74,7 @@ public interface RichIterable<T> {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
+  @SafeVarargs
   static <T> RichIterable<T> of(T... elements) {
     return fromVavr(elements == null ? io.vavr.collection.List.empty() : io.vavr.collection.List.of(elements));
   }
@@ -88,6 +89,12 @@ public interface RichIterable<T> {
       () -> Iterator.concat(io.vavr.collection.List.of(iterables).map(x -> x.iterator())));
   }
 
+  @SafeVarargs
+  static <T> RichIterable<T> concat(Iterable<T>... iterables) {
+    return new RichIterableUsingIterator<>(
+      () -> Iterator.concat(io.vavr.collection.List.of(iterables).map((Iterable x) -> x.iterator())));
+  }
+
   <C> io.vavr.collection.Map<C, Iterator<T>> groupBy2(Function<? super T, ? extends C> classifier);
 
   <U extends T> RichIterable<U> narrow(Class<U> clazz);
@@ -97,14 +104,14 @@ public interface RichIterable<T> {
 
   RichIterable<T> memoizeJava();
 
-  RichIterable<T> concat(Iterable<T> next);
+  RichIterable<T> andThen(Iterable<T> next);
 
-  RichIterable<T> concat(RichIterable<T> next);
+  RichIterable<T> andThen(RichIterable<T> next);
 
   @Deprecated //Try not to use this, call toStream() before for example. The iterable is a little to heavy to be used like this.
   T get(int index);
 
-  <U extends Comparable<? super U>> T findMaxBy(Function<? super T, ? extends U> mapper);
+  RichIterableUsingIterator<T> sorted();
 
   RichIterableUsingIterator<T> sorted(Comparator<? super T> comparator);
 
@@ -113,6 +120,12 @@ public interface RichIterable<T> {
   <U extends Comparable<? super U>> RichIterable<T> sortByReversed(Function<? super T, ? extends U> mapper);
 
   RichIterable<T> reverse();
+
+  default RichIterable<T> append(T element) {
+    return concat(this, RichIterable.of(element));
+  }
+
+  /* **************************************/
 
   Iterable<T> iterable();
 
@@ -282,14 +295,18 @@ public interface RichIterable<T> {
 
   Option<T> lastOption();
 
+  /**Find max using natural ordering (Comparable)*/
   Option<T> max();
 
+  /**Find max using the Comparable extracted from each element.*/
   Option<T> maxBy(Comparator<? super T> comparator);
 
   <U extends Comparable<? super U>> Option<T> maxBy(Function<? super T, ? extends U> f);
 
+  /**Find min using natural ordering (Comparable)*/
   Option<T> min();
 
+  /**Find min using the Comparable extracted from each element.*/
   Option<T> minBy(Comparator<? super T> comparator);
 
   <U extends Comparable<? super U>> Option<T> minBy(Function<? super T, ? extends U> f);
@@ -370,6 +387,10 @@ public interface RichIterable<T> {
   Option<T> findLast(Predicate<? super T> predicate);
 
   <U> RichIterable<U> flatMap(Function<? super T, ? extends Iterable<? extends U>> mapper);
+
+  default <U> RichIterable<U> flatMapRichIterable(Function<? super T, ? extends RichIterable<? extends U>> mapper) {
+    return flatMap(x -> mapper.apply(x).iterable());
+  }
 
   <U> U foldRight(U zero, BiFunction<? super T, ? super U, ? extends U> f);
 
