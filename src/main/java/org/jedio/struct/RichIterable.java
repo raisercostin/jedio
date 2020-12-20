@@ -88,6 +88,32 @@ public interface RichIterable<T> {
       () -> Iterator.concat(io.vavr.collection.List.of(iterables).map(x -> x.iterator())));
   }
 
+  <C> io.vavr.collection.Map<C, Iterator<T>> groupBy2(Function<? super T, ? extends C> classifier);
+
+  <U extends T> RichIterable<U> narrow(Class<U> clazz);
+
+  /**Computes and stores the result of iterable. Creates a new RichIterator based on this.*/
+  RichIterable<T> memoizeVavr();
+
+  RichIterable<T> memoizeJava();
+
+  RichIterable<T> concat(Iterable<T> next);
+
+  RichIterable<T> concat(RichIterable<T> next);
+
+  @Deprecated //Try not to use this, call toStream() before for example. The iterable is a little to heavy to be used like this.
+  T get(int index);
+
+  <U extends Comparable<? super U>> T findMaxBy(Function<? super T, ? extends U> mapper);
+
+  RichIterableUsingIterator<T> sorted(Comparator<? super T> comparator);
+
+  <U extends Comparable<? super U>> RichIterable<T> sortBy(Function<? super T, ? extends U> mapper);
+
+  <U extends Comparable<? super U>> RichIterable<T> sortByReversed(Function<? super T, ? extends U> mapper);
+
+  RichIterable<T> reverse();
+
   Iterable<T> iterable();
 
   Iterator<T> iterator();
