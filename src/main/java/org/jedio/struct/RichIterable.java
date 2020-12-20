@@ -23,6 +23,7 @@ import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import com.google.common.base.Preconditions;
+import io.vavr.CheckedConsumer;
 import io.vavr.CheckedFunction0;
 import io.vavr.PartialFunction;
 import io.vavr.Tuple2;
@@ -48,6 +49,13 @@ import io.vavr.control.Validation;
 /**
  * Intentionally doesn't implement Iterable to force you to pass RichIterable around.
  * You can get that with iterable().
+ *
+ *
+ * TODO
+ * - IndexedIterable should be created? For underlying collections that could offer efficient get(index)
+ *   - filter/flatMap destroyes indexed addressing
+ *   - map keeps indexed addressing
+ *   - Map structures allow get(key) but not index
  */
 public interface RichIterable<T> {
   static <T> RichIterable<T> fromJava(Collection<T> collection) {
@@ -111,8 +119,11 @@ public interface RichIterable<T> {
 
   RichIterable<T> concat(RichIterable<T> next);
 
-  @Deprecated //Try not to use this, call toStream() before for example. The iterable is a little to heavy to be used like this.
+  @Deprecated //Try not to use this, call toStream() before for example. Iterable doesn't have efficient indexed access.
   T get(int index);
+
+  @Deprecated //Try not to use this, call toStream() before for example. Iterable doesn't have efficient indexed access.
+  Option<T> getOption(int index);
 
   RichIterableUsingIterator<T> sorted();
 
@@ -127,6 +138,8 @@ public interface RichIterable<T> {
   default RichIterable<T> append(T element) {
     return concatAll(this, RichIterable.of(element));
   }
+
+  RichIterable<T> doOnNext(CheckedConsumer<T> callable);
 
   /* **************************************/
 
@@ -389,10 +402,10 @@ public interface RichIterable<T> {
 
   Option<T> findLast(Predicate<? super T> predicate);
 
-  <U> RichIterable<U> flatMap(Function<? super T, ? extends Iterable<? extends U>> mapper);
+  <U> RichIterable<U> flatMapFromIterable(Function<? super T, ? extends Iterable<? extends U>> mapper);
 
-  default <U> RichIterable<U> flatMapRichIterable(Function<? super T, ? extends RichIterable<? extends U>> mapper) {
-    return flatMap(x -> mapper.apply(x).iterable());
+  default <U> RichIterable<U> flatMap(Function<? super T, ? extends RichIterable<? extends U>> mapper) {
+    return flatMapFromIterable(x -> mapper.apply(x).iterable());
   }
 
   <U> U foldRight(U zero, BiFunction<? super T, ? super U, ? extends U> f);

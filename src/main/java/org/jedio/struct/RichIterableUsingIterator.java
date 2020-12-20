@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
+import io.vavr.CheckedConsumer;
 import io.vavr.CheckedFunction0;
 import io.vavr.PartialFunction;
 import io.vavr.Tuple2;
@@ -131,9 +132,15 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   }
 
   @Override
-  @Deprecated //Try not to use this, call toStream() before for example. The iterable is a little to heavy to be used like this.
+  @Deprecated
   public T get(int index) {
     return drop(index).head();
+  }
+
+  @Override
+  @Deprecated
+  public Option<T> getOption(int index) {
+    return drop(index).headOption();
   }
 
   @Override
@@ -193,6 +200,64 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   public RichIterable<T> reverse() {
     throw new RuntimeException("Not implemented yet!!!");
   }
+
+  @Override
+  public RichIterable<T> doOnNext(CheckedConsumer<T> consumer) {
+    return new RichIterableUsingIterator<>(() -> iterator().map(x -> {
+      consumer.unchecked().accept(x);
+      return x;
+    }));
+  }
+
+  @Override
+  public boolean isAsync() {
+    return iterator().isAsync();
+  }
+
+  @Override
+  public boolean isEmpty() {
+    return iterator().isEmpty();
+  }
+
+  @Override
+  public boolean isLazy() {
+    return iterator().isLazy();
+  }
+
+  //  @Override
+  //  public boolean isTraversableAgain() {
+  //    return iterator().isTraversableAgain();
+  //  }
+
+  @Override
+  public boolean isTraversableAgain() {
+    return iterator().isTraversableAgain();
+  }
+
+  @Override
+  public boolean isSequential() {
+    return iterator().isSequential();
+  }
+
+  @Override
+  public T last() {
+    return iterator().last();
+  }
+
+  @Override
+  public int length() {
+    return iterator().length();
+  }
+
+  @Override
+  public int size() {
+    return iterator().size();
+  }
+  //
+  //  @Override
+  //  public int size() {
+  //    return iterator().size();
+  //  }
 
   /**********************************************************************/
   /** Next operations just delegate to `vavr.Iterator` */
@@ -684,11 +749,6 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   }
 
   @Override
-  public int size() {
-    return iterator().size();
-  }
-
-  @Override
   public Spliterator<T> spliterator() {
     return iterator().spliterator();
   }
@@ -811,7 +871,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   }
 
   @Override
-  public <U> RichIterable<U> flatMap(Function<? super T, ? extends Iterable<? extends U>> mapper) {
+  public <U> RichIterable<U> flatMapFromIterable(Function<? super T, ? extends Iterable<? extends U>> mapper) {
     return new RichIterableUsingIterator<>(() -> iterator().flatMap(mapper));
   }
 
@@ -855,41 +915,6 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   public Option<RichIterable<T>> initOption() {
     throw new RuntimeException("Not implemented yet!!!");
     //return new RichIterable3<>(() -> iterator().initOption());
-  }
-
-  @Override
-  public boolean isAsync() {
-    return iterator().isAsync();
-  }
-
-  @Override
-  public boolean isEmpty() {
-    return iterator().isEmpty();
-  }
-
-  @Override
-  public boolean isLazy() {
-    return iterator().isLazy();
-  }
-
-  @Override
-  public boolean isTraversableAgain() {
-    return iterator().isTraversableAgain();
-  }
-
-  @Override
-  public boolean isSequential() {
-    return iterator().isSequential();
-  }
-
-  @Override
-  public T last() {
-    return iterator().last();
-  }
-
-  @Override
-  public int length() {
-    return iterator().length();
   }
 
   @Override

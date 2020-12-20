@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.jedio.struct.RichIterable;
 import org.raisercostin.jedio.ReadableDirLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.impl.ReadableDirLocationLike;
@@ -28,29 +29,34 @@ import reactor.core.publisher.Flux;
 public class WebLocation implements ReadableDirLocation, ReadableDirLocationLike<WebLocation> {
   public final boolean isRoot;
   public final String webAddress;
-  private static final Seq<String> prefixes1 = API.Seq(
+  private static final RichIterable<String> prefixes1 = RichIterable.of(
     // "http://",
     "https://"
   //
   );
-  private static final Seq<String> prefixes2 = API.Seq(
+  private static final RichIterable<String> prefixes2 = RichIterable.of(
     // "",
     "www.");
-  private static final Seq<String> suffixes = API.Seq("", "/", "/favicon.ico", "/robots.txt", "/sitemap.xml",
-    "/sitemap.xml.gz", "/sitemap.gz");
+  private static final RichIterable<String> suffixes = RichIterable.of(
+    "",
+    "/",
+    "/favicon.ico",
+    "/robots.txt",
+    "/sitemap.xml",
+    "/sitemap.xml.gz",
+    "/sitemap.gz");
 
   // (http|https)://(wwww)?\.raisercostin\.org(/(favicon.ico|robots.txt|sitemap.xml|sitemap.xml.gz|sitemap.gz))?
   @Override
   public Flux<WebLocation> findFilesAndDirs(boolean recursive) {
-    return Flux.fromIterable(ls());
+    return Flux.fromIterable(ls().iterable());
   }
 
   @Override
-  public Iterator<WebLocation> ls() {
+  public RichIterable<WebLocation> ls() {
     return prefixes1
       .flatMap(
         prefix1 -> prefixes2.flatMap(prefix2 -> suffixes.map(suffix -> prefix1 + prefix2 + this.webAddress + suffix)))
-      .iterator()
       .map(x -> child(x));
   }
 

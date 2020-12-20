@@ -31,6 +31,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jedio.Audit;
 import org.jedio.SimpleShell;
 import org.jedio.sugar;
+import org.jedio.struct.RichIterable;
 import org.raisercostin.jedio.BasicDirLocation;
 import org.raisercostin.jedio.ChangeableLocation;
 import org.raisercostin.jedio.DirLocation;
@@ -872,8 +873,8 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   @Override
   @sugar
-  public Iterator<PathLocation> ls(boolean recursive) {
-    return Iterator.ofAll(findFilesAndDirs(recursive).toIterable());
+  public RichIterable<PathLocation> ls(boolean recursive) {
+    return RichIterable.fromJava(findFilesAndDirs(recursive).toIterable());
   }
 
   @Override
