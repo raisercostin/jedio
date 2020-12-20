@@ -22,28 +22,24 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-import com.google.common.base.Preconditions;
 import io.vavr.CheckedFunction0;
 import io.vavr.PartialFunction;
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
-import io.vavr.Value;
 import io.vavr.collection.Array;
 import io.vavr.collection.CharSeq;
 import io.vavr.collection.Iterator;
 import io.vavr.collection.LinkedHashMap;
-import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.PriorityQueue;
 import io.vavr.collection.Queue;
 import io.vavr.collection.Seq;
-import io.vavr.collection.Set;
 import io.vavr.collection.SortedMap;
 import io.vavr.collection.SortedSet;
 import io.vavr.collection.Traversable;
 import io.vavr.collection.Tree;
-import io.vavr.collection.Vector;
 import io.vavr.collection.Tree.Node;
+import io.vavr.collection.Vector;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
@@ -125,13 +121,13 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   }
 
   @Override
-  public RichIterable<T> andThen(Iterable<T> next) {
-    return RichIterable.concat(this, new RichIterableUsingIterator<>(next));
+  public RichIterable<T> concat(Iterable<T> next) {
+    return RichIterable.concatAll(this, new RichIterableUsingIterator<>(next));
   }
 
   @Override
-  public RichIterable<T> andThen(RichIterable<T> next) {
-    return RichIterable.concat(this, next);
+  public RichIterable<T> concat(RichIterable<T> next) {
+    return RichIterable.concatAll(this, next);
   }
 
   @Override

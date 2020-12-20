@@ -84,15 +84,18 @@ public interface RichIterable<T> {
   }
 
   @SafeVarargs
-  static <T> RichIterable<T> concat(RichIterable<T>... iterables) {
+  static <T> RichIterable<T> concatAll(RichIterable<T>... iterables) {
     return new RichIterableUsingIterator<>(
       () -> Iterator.concat(io.vavr.collection.List.of(iterables).map(x -> x.iterator())));
   }
 
   @SafeVarargs
-  static <T> RichIterable<T> concat(Iterable<T>... iterables) {
+  static <T> RichIterable<T> concatAll(Iterable<T>... iterables) {
     return new RichIterableUsingIterator<>(
-      () -> Iterator.concat(io.vavr.collection.List.of(iterables).map((Iterable x) -> x.iterator())));
+      () -> {
+        io.vavr.collection.List<Iterable<T>> all = io.vavr.collection.List.of(iterables);
+        return Iterator.concat(all);
+      });
   }
 
   <C> io.vavr.collection.Map<C, Iterator<T>> groupBy2(Function<? super T, ? extends C> classifier);
@@ -104,9 +107,9 @@ public interface RichIterable<T> {
 
   RichIterable<T> memoizeJava();
 
-  RichIterable<T> andThen(Iterable<T> next);
+  RichIterable<T> concat(Iterable<T> next);
 
-  RichIterable<T> andThen(RichIterable<T> next);
+  RichIterable<T> concat(RichIterable<T> next);
 
   @Deprecated //Try not to use this, call toStream() before for example. The iterable is a little to heavy to be used like this.
   T get(int index);
@@ -122,7 +125,7 @@ public interface RichIterable<T> {
   RichIterable<T> reverse();
 
   default RichIterable<T> append(T element) {
-    return concat(this, RichIterable.of(element));
+    return concatAll(this, RichIterable.of(element));
   }
 
   /* **************************************/
