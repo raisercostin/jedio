@@ -7,7 +7,7 @@
     <version>1.12</version>
   </parent>
   <artifactId>jedio</artifactId>
-  <version>0.47-SNAPSHOT</version>
+  <version>0.47</version>
   <name>jedio</name>
   <description>Uniform, fluent access to files, urls and other resources API for java, kotlin and scala.</description>
   <url>${git.url}</url>
@@ -15,7 +15,7 @@
     <connection>scm:git:${git.url}.git</connection>
     <developerConnection>scm:git:${git.url}.git</developerConnection>
     <url>${git.url}</url>
-    <tag>${project.artifactId}-${project.version}</tag>
+    <tag>jedio-0.47</tag>
   </scm>
   <distributionManagement>
     <repository>
