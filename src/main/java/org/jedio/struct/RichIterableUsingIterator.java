@@ -15,6 +15,7 @@ import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntBinaryOperator;
 import java.util.function.IntFunction;
 import java.util.function.ObjIntConsumer;
 import java.util.function.Predicate;
@@ -253,11 +254,59 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   public int size() {
     return iterator().size();
   }
-  //
-  //  @Override
-  //  public int size() {
-  //    return iterator().size();
-  //  }
+
+  @Override
+  public boolean equals(Object o) {
+    return equalsHere(this, o);
+  }
+
+  @Override
+  public int hashCode() {
+    return hashOrdered(this.iterable());
+  }
+
+  private static <V> boolean equalsHere(RichIterable<V> source, Object object) {
+    if (object == source) {
+      return true;
+    } else if (source != null && object instanceof RichIterable) {
+      final RichIterable<V> seq = (RichIterable<V>) object;
+      return seq.size() == source.size() && areEqual(source.iterable(), seq.iterable());
+    } else {
+      return false;
+    }
+  }
+
+  static boolean areEqual(Iterable<?> iterable1, Iterable<?> iterable2) {
+    final java.util.Iterator<?> iter1 = iterable1.iterator();
+    final java.util.Iterator<?> iter2 = iterable2.iterator();
+    while (iter1.hasNext() && iter2.hasNext()) {
+      if (!Objects.equals(iter1.next(), iter2.next())) {
+        return false;
+      }
+    }
+    return iter1.hasNext() == iter2.hasNext();
+  }
+
+  private static int hashOrdered(Iterable<?> iterable) {
+    return hash(iterable, (acc, hash) -> acc * 31 + hash);
+  }
+
+  // hashes the elements regardless of their order
+  private static int hashUnordered(Iterable<?> iterable) {
+    return hash(iterable, (acc, hash) -> acc + hash);
+  }
+
+  private static int hash(Iterable<?> iterable, IntBinaryOperator accumulator) {
+    if (iterable == null) {
+      return 0;
+    } else {
+      int hashCode = 1;
+      for (Object o : iterable) {
+        hashCode = accumulator.applyAsInt(hashCode, Objects.hashCode(o));
+      }
+      return hashCode;
+    }
+  }
 
   /**********************************************************************/
   /** Next operations just delegate to `vavr.Iterator` */

@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import io.vavr.collection.Iterator;
 import io.vavr.collection.List;
@@ -50,12 +51,60 @@ public class NodeUtils {
       fallbackValue);
   }
 
-  public static <T> T notNull(Object object, Object firstKey, Object... restKeys) {
-    return nullableInternal(object, Iterator.of(firstKey).concat(Iterator.of(restKeys)), false, true);
+  /**FirstKey must exist (otherwise compilation error) and must not be an array by mistake.
+   * The legitimate keys are String or Number.
+   */
+  public static <T> T notNull(Object object, String firstKey) {
+    return nullableInternal(object, Iterator.<Object>of(firstKey), false, true);
   }
 
-  public static <T> T nullable(Object object, Object firstKey, Object... restKeys) {
-    return nullableInternal(object, Iterator.of(firstKey).concat(Iterator.of(restKeys)), true, true);
+  /**FirstKey must exist (otherwise compilation error) and must not be an array by mistake.
+   * The legitimate keys are String or Number.
+   */
+  public static <T> T notNull(Object object, Number firstKey, Object... restKeys) {
+    return nullableInternal(object, Iterator.<Object>of(firstKey).concat(Iterator.of(restKeys)), false, true);
+  }
+
+  /**FirstKey must exist (otherwise compilation error) and must not be an array by mistake.
+   * The legitimate keys are String or Number.
+   */
+  public static <T> T notNull(Object object, Object... keys) {
+    return nullableInternal(object, Iterator.of(keys), false, true);
+  }
+
+  /**FirstKey must exist (otherwise compilation error) and must not be an array by mistake.
+   * The legitimate keys are String or Number.
+   */
+  public static <T> T notNull(Object object, String... keys) {
+    return nullableInternal(object, Iterator.of((Object[]) keys), false, true);
+  }
+
+  /**FirstKey must exist (otherwise compilation error) and must not be an array by mistake.
+   * The legitimate keys are String or Number.
+   */
+  public static <T> T nullable(Object object, String firstKey) {
+    return nullableInternal(object, Iterator.<Object>of(firstKey), true, true);
+  }
+
+  /**FirstKey must exist (otherwise compilation error) and must not be an array by mistake.
+   * The legitimate keys are String or Number.
+   */
+  public static <T> T nullable(Object object, Number firstKey, Object... restKeys) {
+    return nullableInternal(object, Iterator.<Object>of(firstKey).concat(Iterator.of(restKeys)), true, true);
+  }
+
+  /**FirstKey must exist (otherwise compilation error) and must not be an array by mistake.
+   * The legitimate keys are String or Number.
+   */
+  public static <T> T nullable(Object object, Object... keys) {
+    return nullableInternal(object, Iterator.of(keys), true, true);
+  }
+
+  /**FirstKey must exist (otherwise compilation error) and must not be an array by mistake.
+   * The legitimate keys are String or Number.
+   */
+  public static <T> T nullable(Object object, String... keys) {
+    return nullableInternal(object, Iterator.of((Object[]) keys), true, true);
   }
 
   public static <T> T nullableWithFallback(T fallbackValue, Object object, Object firstKey, Object... restKeys) {
