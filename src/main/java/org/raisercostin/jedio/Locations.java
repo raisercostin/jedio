@@ -4,15 +4,17 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Matcher;
 
 import com.google.common.base.Preconditions;
 import io.vavr.Lazy;
 import io.vavr.Tuple3;
+import io.vavr.control.Either;
 import lombok.SneakyThrows;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.jedio.sugar;
-import org.jedio.regex.RegexExtension;
+import org.jedio.regex.RichRegex;
 import org.raisercostin.jedio.classpath.ClasspathLocation;
 import org.raisercostin.jedio.fs.stream.InputStreamLocation;
 import org.raisercostin.jedio.memory.InMemoryLocation;
@@ -109,7 +111,12 @@ public class Locations {
 
   /**Create a location. Shold have a schema.*/
   public static Location location(String externalUrl) {
-    Tuple3<String, String, String> schemaAndUrl = RegexExtension.regexp2("^([a-z]+)\\:(.*)$", externalUrl);
+    Either<String, Tuple3<Matcher, String, String>> schemaAndUrl2 = RichRegex.regexp2("^([a-z]+)\\:(.*)$",
+      externalUrl);
+    if (schemaAndUrl2.isLeft()) {
+      throw new IllegalArgumentException(schemaAndUrl2.getLeft());
+    }
+    Tuple3<Matcher, String, String> schemaAndUrl = schemaAndUrl2.get();
     switch (schemaAndUrl._2) {
       case "http":
       case "https":
