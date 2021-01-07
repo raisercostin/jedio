@@ -7,7 +7,7 @@
     <version>1.12</version>
   </parent>
   <artifactId>jedio</artifactId>
-  <version>0.50-SNAPSHOT</version>
+  <version>0.50</version>
   <name>jedio</name>
   <description>Uniform, fluent access to files, urls and other resources API for java, kotlin and scala.</description>
   <url>${git.url}</url>
@@ -15,7 +15,7 @@
     <connection>scm:git:${git.url}.git</connection>
     <developerConnection>scm:git:${git.url}.git</developerConnection>
     <url>${git.url}</url>
-    <tag>${project.artifactId}-${project.version}</tag>
+    <tag>jedio-0.50</tag>
   </scm>
   <distributionManagement>
     <repository>
@@ -378,7 +378,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore />
+                  <ignore/>
                 </action>
               </pluginExecution>
               <pluginExecution>
@@ -391,7 +391,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore />
+                  <ignore/>
                 </action>
               </pluginExecution>
             </pluginExecutions>
@@ -465,9 +465,9 @@
         <!--$NO-MVN-MAN-VER$ -->
         <configuration>
           <target>
-            <echo message="ant cleanup started." />
-            <fixcrlf srcdir="${basedir}" eol="unix" tab="remove" tablength="2" includes="**/*.java **/*.xml" preservelastmodified="true" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" />
-            <echo message="ant cleanup finished." />
+            <echo message="ant cleanup started."/>
+            <fixcrlf srcdir="${basedir}" eol="unix" tab="remove" tablength="2" includes="**/*.java **/*.xml" preservelastmodified="true" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*"/>
+            <echo message="ant cleanup finished."/>
           </target>
         </configuration>
         <!-- not always needed -->
@@ -637,7 +637,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore />
+                    <ignore/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>
