@@ -18,11 +18,15 @@ public interface CopyOptions {
    * Default copy: Report each step in log, do not overwrite but throw exception.
    */
   static SimpleCopyOptions copyDefault() {
-    return copyDoNotOverwrite();
+    return copyDoNotOverwriteAndThrow();
   }
 
-  static SimpleCopyOptions copyDoNotOverwrite() {
+  static SimpleCopyOptions copyDoNotOverwriteAndThrow() {
     return new SimpleCopyOptions(false, false, true, Predicates.alwaysTrue(), OperationListener.defaultListener);
+  }
+
+  static SimpleCopyOptions copyDoNotOverwriteButIgnore() {
+    return new SimpleCopyOptions(false, false, false, Predicates.alwaysTrue(), OperationListener.defaultListener);
   }
 
   static SimpleCopyOptions copyOverwrite() {

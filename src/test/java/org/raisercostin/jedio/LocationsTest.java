@@ -28,7 +28,7 @@ class LocationsTest {
     dest.deleteFile();
     assertEquals(346622, src.copyToFile(dest).length());
     assertThrows(FileAlreadyExistsException.class, () -> {
-      src.copyToFile(dest, CopyOptions.copyDoNotOverwrite());
+      src.copyToFile(dest, CopyOptions.copyDoNotOverwriteAndThrow());
     });
   }
 }
