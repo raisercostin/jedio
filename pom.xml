@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+>
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.raisercostin</groupId>
@@ -45,8 +49,8 @@
     <!--<docker.image.prefix>registry.gitlab.com/dcsi/all/docker/custom</docker.image.prefix> -->
     <docker.image.prefix>com.revomatico</docker.image.prefix>
     <reactor.version>3.2.5.RELEASE</reactor.version>
-    <spring.version>5.1.4.RELEASE</spring.version>
-    <spring.boot.version>2.2.1.RELEASE</spring.boot.version>
+    <spring.version>5.2.10.RELEASE</spring.version>
+    <springboot.version>2.3.5.RELEASE</springboot.version>
     <kotlin.version>1.2.71</kotlin.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <experimentalCoroutines>enable</experimentalCoroutines>
@@ -68,6 +72,19 @@
       <organizationUrl>http://raisercostin.org</organizationUrl>
     </developer>
   </developers>
+  <dependencyManagement>
+    <dependencies>
+      <!-- https://stackoverflow.com/questions/16894032/how-to-use-poms-as-a-dependency-in-maven -->
+      <!-- Spring Boot BOM -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${springboot.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>com.github.spotbugs</groupId>
@@ -466,7 +483,14 @@
         <configuration>
           <target>
             <echo message="ant cleanup started." />
-            <fixcrlf srcdir="${basedir}" eol="unix" tab="remove" tablength="2" includes="**/*.java **/*.xml" preservelastmodified="true" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" />
+            <fixcrlf
+              srcdir="${basedir}"
+              eol="unix"
+              tab="remove"
+              tablength="2"
+              includes="**/*.java **/*.xml"
+              preservelastmodified="true"
+              excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" />
             <echo message="ant cleanup finished." />
           </target>
         </configuration>

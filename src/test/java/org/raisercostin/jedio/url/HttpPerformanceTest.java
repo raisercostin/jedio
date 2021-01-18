@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import io.vavr.collection.Vector;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.raisercostin.jedio.Locations;
 import reactor.core.publisher.Flux;
@@ -16,6 +17,8 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class HttpPerformanceTest {
   @Test
+  @Tag("slow")
+  @Tag("integration")
   void testMaxNumberOfConnections() {
     int totalCalls = 20000;
     // If sync number of threads influences the perf

@@ -1,5 +1,8 @@
 package org.jedio;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 //Copied from apache-commons ExceptionUtils
 public class ExceptionUtils {
   public static <R> R rethrowNowrap(final Throwable throwable) {
@@ -73,5 +76,12 @@ public class ExceptionUtils {
     } catch (Throwable e) {
       throw nowrap(e, format, args);
     }
+  }
+
+  public static String toString(Exception e) {
+    final StringWriter sw = new StringWriter();
+    final PrintWriter pw = new PrintWriter(sw, true);
+    e.printStackTrace(pw);
+    return sw.getBuffer().toString();
   }
 }

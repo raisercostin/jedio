@@ -388,9 +388,10 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
               if (copyOptions.acceptStreamAndMeta(streamAndMeta)) {
                 if (copyOptions.replaceExisting()) {
                   reportOperationEvent(copyOptions, false, CopyEvent.CopyReplacing, source, this);
-                  Files.copy(streamAndMeta.is, actualDest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                  Files.copy(streamAndMeta.is, actualDest.mkdirOnParentIfNeeded().toPath(),
+                    StandardCopyOption.REPLACE_EXISTING);
                 } else {
-                  Files.copy(streamAndMeta.is, actualDest.toPath());
+                  Files.copy(streamAndMeta.is, actualDest.mkdirOnParentIfNeeded().toPath());
                 }
               } else {
                 reportOperationEvent(copyOptions, true, CopyEvent.CopyIgnoreContentType, source, this, metaHttp);

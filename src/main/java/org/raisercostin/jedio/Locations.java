@@ -143,4 +143,8 @@ public class Locations {
   private static InMemoryLocation mem(String content) {
     return new InMemoryLocation(content);
   }
+
+  public static PathLocation temp() {
+    return path(System.getProperty("java.io.tmpdir"));
+  }
 }
