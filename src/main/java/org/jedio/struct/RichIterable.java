@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Spliterator;
@@ -23,6 +24,7 @@ import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import io.vavr.CheckedConsumer;
 import io.vavr.CheckedFunction0;
 import io.vavr.PartialFunction;
@@ -61,21 +63,21 @@ public interface RichIterable<T> {
   static <T> RichIterable<T> fromJava(Collection<T> collection) {
     Preconditions.checkArgument(collection instanceof Collection,
       "The collection should be a java collection not iterable.");
-    return ofAll(collection);
+    return new RichIterableUsingIterator<>("fromJavaCollection", null, collection, collection);
   }
 
   static <T> RichIterable<T> fromJava(Iterable<T> iterable) {
     Preconditions.checkArgument(!(iterable instanceof Traversable), "The iterable should not be a vavr traversable.");
-    return ofAll(iterable);
+    return new RichIterableUsingIterator<>("fromJava", null, iterable, iterable);
   }
 
   static <T> RichIterable<T> fromVavr(Value<T> iterable) {
     Preconditions.checkArgument(iterable instanceof Traversable, "The iterable should be a vavr traversable.");
-    return ofAll(iterable);
+    return new RichIterableUsingIterator<>("fromVavr", null, iterable, iterable);
   }
 
   static <T> RichIterable<T> ofAll(Iterable<T> iterable) {
-    return new RichIterableUsingIterator<>(iterable);
+    return new RichIterableUsingIterator<>("ofAll", null, iterable, iterable);
   }
 
   static <T> RichIterable<T> ofAll(Iterator<T> all) {
@@ -84,7 +86,7 @@ public interface RichIterable<T> {
 
   @SafeVarargs
   static <T> RichIterable<T> of(T... elements) {
-    return fromVavr(elements == null ? io.vavr.collection.List.empty() : io.vavr.collection.List.of(elements));
+    return fromJava(elements == null ? Lists.newArrayList() : Lists.newArrayList(elements));
   }
 
   static <T> RichIterable<T> empty() {
@@ -93,20 +95,18 @@ public interface RichIterable<T> {
 
   @SafeVarargs
   static <T> RichIterable<T> concatAll(RichIterable<T>... iterables) {
-    return new RichIterableUsingIterator<>(
-      () -> Iterator.concat(io.vavr.collection.List.of(iterables).map(x -> x.iterator())));
+    return new RichIterableUsingIterator<>("concatAll", null,
+      () -> Iterator.concat(io.vavr.collection.List.of(iterables).map(x -> x.iterator())), (Object[]) iterables);
   }
 
   @SafeVarargs
   static <T> RichIterable<T> concatAll(Iterable<T>... iterables) {
-    return new RichIterableUsingIterator<>(
+    return new RichIterableUsingIterator<>("concatAll", null,
       () -> {
         io.vavr.collection.List<Iterable<T>> all = io.vavr.collection.List.of(iterables);
         return Iterator.concat(all);
-      });
+      }, (Object[]) iterables);
   }
-
-  <C> io.vavr.collection.Map<C, Iterator<T>> groupBy2(Function<? super T, ? extends C> classifier);
 
   <U extends T> RichIterable<U> narrow(Class<U> clazz);
 
@@ -412,7 +412,11 @@ public interface RichIterable<T> {
 
   T get();
 
-  <C> io.vavr.collection.Map<C, Iterator<T>> groupBy(Function<? super T, ? extends C> classifier);
+  <C> RichIterable<Tuple2<? extends C, RichIterable<T>>> groupBy(Function<? super T, ? extends C> classifier);
+
+  <C> io.vavr.collection.Map<C, RichIterable<T>> groupByAsRichIterable(Function<? super T, ? extends C> classifier);
+
+  <C> io.vavr.collection.Map<C, Iterator<T>> groupByAsVavrIterator(Function<? super T, ? extends C> classifier);
 
   RichIterable<Seq<T>> grouped(int size);
 
@@ -485,4 +489,6 @@ public interface RichIterable<T> {
   RichIterable<T> takeUntil(Predicate<? super T> predicate);
 
   RichIterable<T> takeWhile(Predicate<? super T> predicate);
+
+  boolean isCollection();
 }
