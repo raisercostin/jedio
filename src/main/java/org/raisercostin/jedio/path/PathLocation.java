@@ -875,7 +875,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   @Override
   @sugar
   public RichIterable<PathLocation> ls(boolean recursive) {
-    return RichIterable.fromJava(findFilesAndDirs(recursive).toIterable());
+    return RichIterable.ofIterable(findFilesAndDirs(recursive).toIterable());
   }
 
   @Override

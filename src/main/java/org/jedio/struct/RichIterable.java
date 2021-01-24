@@ -24,6 +24,7 @@ import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import io.vavr.CheckedConsumer;
 import io.vavr.CheckedFunction0;
@@ -60,33 +61,38 @@ import io.vavr.control.Validation;
  *   - Map structures allow get(key) but not index
  */
 public interface RichIterable<T> {
-  static <T> RichIterable<T> fromJava(Collection<T> collection) {
-    Preconditions.checkArgument(collection instanceof Collection,
-      "The collection should be a java collection not iterable.");
-    return new RichIterableUsingIterator<>("fromJavaCollection", null, collection, collection);
-  }
-
-  static <T> RichIterable<T> fromJava(Iterable<T> iterable) {
-    Preconditions.checkArgument(!(iterable instanceof Traversable), "The iterable should not be a vavr traversable.");
-    return new RichIterableUsingIterator<>("fromJava", null, iterable, iterable);
-  }
-
-  static <T> RichIterable<T> fromVavr(Value<T> iterable) {
-    Preconditions.checkArgument(iterable instanceof Traversable, "The iterable should be a vavr traversable.");
-    return new RichIterableUsingIterator<>("fromVavr", null, iterable, iterable);
-  }
 
   static <T> RichIterable<T> ofAll(Iterable<T> iterable) {
-    return new RichIterableUsingIterator<>("ofAll", null, iterable, iterable);
+    return ofIterable(iterable);
   }
 
-  static <T> RichIterable<T> ofAll(Iterator<T> all) {
-    throw new RuntimeException("Not implemented yet!!!");
+  //  static <T> RichIterable<T> ofAll(Iterator<T> all) {
+  //    throw new RuntimeException("Not implemented yet!!!");
+  //  }
+  /**
+   * Use fromJava, fromVavr, fromGuava if possible. Otherwise this is fine.
+   */
+  static <T> RichIterable<T> ofIterable(Iterable<T> iterable) {
+    if (iterable instanceof Collection) {
+      return ofJava((Collection<T>) iterable);
+    }
+    if (iterable instanceof Value) {
+      return ofVavr((Value<T>) iterable);
+    }
+    return new RichIterableUsingIterator<>("ofIterable", null, iterable, iterable);
+  }
+
+  static <T> RichIterable<T> ofJava(Collection<T> collection) {
+    return new RichIterableUsingIterator<>("ofJava", null, collection, collection);
+  }
+
+  static <T> RichIterable<T> ofVavr(Value<T> iterable) {
+    return new RichIterableUsingIterator<>("ofVavr", null, iterable, iterable);
   }
 
   @SafeVarargs
   static <T> RichIterable<T> of(T... elements) {
-    return fromJava(elements == null ? Lists.newArrayList() : Lists.newArrayList(elements));
+    return ofJava(elements == null ? Lists.newArrayList() : Lists.newArrayList(elements));
   }
 
   static <T> RichIterable<T> empty() {

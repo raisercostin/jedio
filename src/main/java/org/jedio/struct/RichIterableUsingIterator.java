@@ -126,8 +126,8 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public <C> RichIterable<Tuple2<? extends C, RichIterable<T>>> groupBy(Function<? super T, ? extends C> classifier) {
-    return RichIterable.fromJava(groupByInternal(this, classifier))
-      .map(x -> Tuple.of(x.getKey(), RichIterable.fromJava(x.getValue())));
+    return RichIterable.ofJava(groupByInternal(this, classifier))
+      .map(x -> Tuple.of(x.getKey(), RichIterable.ofJava(x.getValue())));
   }
 
   @Override
@@ -137,7 +137,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public <C> Map<C, RichIterable<T>> groupByAsRichIterable(Function<? super T, ? extends C> classifier) {
-    return groupByWithGenericMapper(this, classifier, RichIterable::fromJava);
+    return groupByWithGenericMapper(this, classifier, RichIterable::ofIterable);
   }
 
   private static <T, C, R extends Iterable<T>> Map<C, R> groupBy(RichIterable<T> source,
@@ -178,12 +178,12 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   /**Computes and stores the result of iterable. Creates a new RichIterator based on this.*/
   @Override
   public RichIterable<T> memoizeVavr() {
-    return RichIterable.fromVavr(toList());
+    return RichIterable.ofVavr(toList());
   }
 
   @Override
   public RichIterable<T> memoizeJava() {
-    return RichIterable.fromJava(toJavaList());
+    return RichIterable.ofJava(toJavaList());
   }
 
   @Override
@@ -1034,7 +1034,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   @Override
   public Tuple2<RichIterable<T>, RichIterable<T>> partition(Predicate<? super T> predicate) {
     Tuple2<Iterator<T>, Iterator<T>> partition = iterator().partition(predicate);
-    return Tuple.of(RichIterable.fromVavr(partition._1), RichIterable.fromVavr(partition._2));
+    return Tuple.of(RichIterable.ofVavr(partition._1), RichIterable.ofVavr(partition._2));
   }
 
   @Override

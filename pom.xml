@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.raisercostin</groupId>
     <artifactId>maven-defaults-raisercostin</artifactId>
-    <version>1.12</version>
+    <version>1.15</version>
   </parent>
   <artifactId>jedio</artifactId>
   <version>0.54-SNAPSHOT</version>
@@ -92,7 +92,7 @@
     <dependency>
       <groupId>org.raisercostin</groupId>
       <artifactId>jedi-nodes-java</artifactId>
-      <version>0.15</version>
+      <version>0.18</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>

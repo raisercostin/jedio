@@ -37,7 +37,7 @@ public interface ReadableDirLocationLike<SELF extends ReadableDirLocationLike<SE
   //  @Override
   @sugar
   default RichIterable<SELF> ls(boolean recursive) {
-    return RichIterable.fromJava(findFilesAndDirs(recursive).toIterable());
+    return RichIterable.ofIterable(findFilesAndDirs(recursive).toIterable());
   }
 
   @Override
