@@ -102,7 +102,8 @@ public interface RichIterable<T> {
   @SafeVarargs
   static <T> RichIterable<T> concatAll(RichIterable<T>... iterables) {
     return new RichIterableUsingIterator<>("concatAll", null,
-      () -> Iterator.concat(io.vavr.collection.List.of(iterables).map(x -> x.iterator())), (Object[]) iterables);
+      () -> Iterator.concat(io.vavr.collection.List.of(iterables).map(x -> x.iterator("concat"))),
+      (Object[]) iterables);
   }
 
   @SafeVarargs
@@ -125,10 +126,10 @@ public interface RichIterable<T> {
 
   RichIterable<T> concat(RichIterable<T> next);
 
-  @Deprecated //Try not to use this, call toStream() before for example. Iterable doesn't have efficient indexed access.
+  /**This will try not to iterate on collection if possible.*/
   T get(int index);
 
-  @Deprecated //Try not to use this, call toStream() before for example. Iterable doesn't have efficient indexed access.
+  /**This will try not to iterate on collection if possible.*/
   Option<T> getOption(int index);
 
   RichIterableUsingIterator<T> sorted();
@@ -152,6 +153,8 @@ public interface RichIterable<T> {
   Iterable<T> iterable();
 
   Iterator<T> iterator();
+
+  Iterator<T> iterator(String operation);
 
   T fold(T zero, BiFunction<? super T, ? super T, ? extends T> combine);
 
