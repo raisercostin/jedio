@@ -105,8 +105,12 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
     if (iterable instanceof Collection) {
       return true;
     }
-    if (iterable instanceof Value && !(iterable instanceof Iterator)) {
-      return true;
+    if (iterable instanceof Value) {
+      if (iterable instanceof Iterator) {
+        return false;
+      } else {
+        return true;
+      }
     }
     Preconditions.checkArgument(origin != null || this.operation.equals("concatAll"),
       "Origin should not be null when iterable is " + iterable.getClass().getName()
@@ -153,7 +157,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public Iterator<T> iterator(String operation) {
-    return iteratorInternal(operation, false);
+    return iteratorInternal(operation, true);
   }
 
   //@Override
@@ -161,7 +165,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
     return iteratorInternal(operation, true);
   }
 
-  public Iterator<T> iteratorInternal(String operation, boolean allowIteratorIfCollection) {
+  private Iterator<T> iteratorInternal(String operation, boolean allowIteratorIfCollection) {
     if (allowIteratorIfCollection && isCollection()) {
       //its safe to iterate
       return Iterator.ofAll(iterable.iterator());
