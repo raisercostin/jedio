@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Spliterator;
@@ -26,6 +27,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.introspect.TypeResolutionContext.Empty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import io.vavr.CheckedConsumer;
@@ -73,7 +75,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   private final String operation;
   private final RichIterableUsingIterator<?> origin;
   private transient final Object[] params;
-  private final Iterable<T> iterable;
+  private final Lazy<? extends Iterable<T>> iterableLazy;
   private transient final AtomicInteger iterated;
   private transient int maxIterations = 1;
   private transient String lastOperation;
@@ -85,23 +87,23 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
     this.operation = operation;
     this.origin = origin;
     this.params = params;
-    this.iterable = iterable;
+    this.iterableLazy = Lazy.of(() -> iterable);
     this.iterated = new AtomicInteger(0);
   }
 
-  public RichIterableUsingIterator(String operation, RichIterableUsingIterator<?> origin, Lazy<List<T>> iterable,
+  public RichIterableUsingIterator(String operation, RichIterableUsingIterator<?> origin, Lazy<List<T>> iterableLazy,
       Object... params)
   {
     this.operation = operation;
     this.origin = origin;
     this.params = params;
-    //TODO improve this
-    this.iterable = () -> iterable.get().iterator();
+    this.iterableLazy = iterableLazy;
     this.iterated = new AtomicInteger(0);
   }
 
   @Override
   public boolean isCollection() {
+    Iterable<T> iterable = iterableLazy.get();
     if (iterable instanceof Collection) {
       return true;
     }
@@ -143,6 +145,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public Iterable<T> iterable() {
+    Iterable<T> iterable = iterableLazy.get();
     return iterable;
   }
 
@@ -166,6 +169,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   }
 
   private Iterator<T> iteratorInternal(String operation, boolean allowIteratorIfCollection) {
+    Iterable<T> iterable = iterableLazy.get();
     if (allowIteratorIfCollection && isCollection()) {
       //its safe to iterate
       return Iterator.ofAll(iterable.iterator());
@@ -188,7 +192,8 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   }
 
   private String internalToString() {
-    return String.format("%s(op=%s on %s and params %s)", getClass(), this.operation, this.iterable.getClass(),
+    Iterable<T> iterable = iterableLazy.get();
+    return String.format("%s(op=%s on %s and params %s)", getClass(), this.operation, iterable.getClass(),
       Arrays.toString(this.params));
   }
 
@@ -285,7 +290,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   }
 
   @Override
-  public RichIterableUsingIterator<T> sorted() {
+  public RichIterable<T> sorted() {
     Lazy<List<T>> sorted = Lazy.of(() -> {
       @SuppressWarnings("unchecked")
       T[] arrayToSort = (T[]) iteratorOverCollection("sorted").toJavaArray();
@@ -296,7 +301,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   }
 
   @Override
-  public RichIterableUsingIterator<T> sorted(Comparator<? super T> comparator) {
+  public RichIterable<T> sorted(Comparator<? super T> comparator) {
     //Do not use lazy as this will cache the value. The user should decide if he wants that via using memoize
     //Lazy<java.util.List<T>> sorted =Lazy.of(
     Lazy<List<T>> sorted = Lazy.of(() -> {
@@ -401,6 +406,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
       Function1<Value<T>, R> opForValue,
       Function0<R> opForRest) {
     R res = null;
+    Iterable<T> iterable = iterableLazy.get();
     if (iterable instanceof List) {
       //TODO should check RandomAccess interface?
       res = opForList.apply((List<T>) iterable);
@@ -616,7 +622,8 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public java.util.List<T> toJavaList() {
-    return iteratorInternal().toJavaList();
+    return op(l -> l, c -> null, s -> s.toJavaList(), t -> null, v -> null,
+      () -> iteratorInternal().toJavaList());
   }
 
   @Override
@@ -1256,5 +1263,27 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   @Override
   public RichIterable<T> takeWhile(Predicate<? super T> predicate) {
     return new RichIterableUsingIterator<>("takeWhile", this, () -> iterator("takeWhile").takeWhile(predicate));
+  }
+
+  public Tuple3<RichIterable<T>, RichIterable<T>, RichIterable<T>> split(int offset, int pageSize) {
+    //TODO could be improved by iterating
+    Iterator<T> iterator = iterator("page");
+    if (iterator.isEmpty()) {
+      return Tuple.of(RichIterable.empty(), RichIterable.empty(), RichIterable.empty());
+    }
+    final io.vavr.collection.Stream<T> that = iterator.toStream();
+    return Tuple.of(rich("split_1", that.iterator().take(offset), offset, pageSize),
+      rich("split_2", that.iterator().drop(offset).take(pageSize), offset, pageSize),
+      rich("split_3", that.iterator().drop(offset + pageSize), offset, pageSize));
+  }
+
+  private RichIterable<T> rich(String operation, Iterator<T> iterator, int offset, int pageSize) {
+    return new RichIterableUsingIterator<>(operation, this, iterator, offset, pageSize);
+  }
+
+  @Override
+  public Tuple2<RichIterable<T>, Integer> page(int offset, int pageSize) {
+    Tuple3<RichIterable<T>, RichIterable<T>, RichIterable<T>> x = split(offset, pageSize);
+    return Tuple.of(x._2, x._1.size() + x._2.size() + x._3.size());
   }
 }

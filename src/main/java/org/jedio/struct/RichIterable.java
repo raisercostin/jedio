@@ -132,9 +132,9 @@ public interface RichIterable<T> {
   /**This will try not to iterate on collection if possible.*/
   Option<T> getOption(int index);
 
-  RichIterableUsingIterator<T> sorted();
+  RichIterable<T> sorted();
 
-  RichIterableUsingIterator<T> sorted(Comparator<? super T> comparator);
+  RichIterable<T> sorted(Comparator<? super T> comparator);
 
   <U extends Comparable<? super U>> RichIterable<T> sortBy(Function<? super T, ? extends U> mapper);
 
@@ -500,4 +500,8 @@ public interface RichIterable<T> {
   RichIterable<T> takeWhile(Predicate<? super T> predicate);
 
   boolean isCollection();
+
+  /**Select a subset and total size in one iteration. The iteration might need to consume remaining elements when size is called.
+   * For performance reasons size might be the same on map operations while for filter elements might be needed to be processed.*/
+  Tuple2<RichIterable<T>, Integer> page(int offset, int pageSize);
 }
