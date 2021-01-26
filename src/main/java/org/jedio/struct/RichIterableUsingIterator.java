@@ -114,9 +114,10 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
         return true;
       }
     }
-    Preconditions.checkArgument(origin != null || this.operation.equals("concatAll"),
-      "Origin should not be null when iterable is " + iterable.getClass().getName()
-          + ". Iterable was generated from an origin since this is not a collection.");
+    Preconditions.checkArgument(
+      origin != null || this.operation.equals("concatAll") || this.operation.equals("ofIterable"),
+      "Origin should not be null when operation is [%s] and iterable is %s. Iterable was generated from an origin since this is not a collection.",
+      this.operation, iterable.getClass().getName());
     return false;
   }
 
@@ -1272,12 +1273,12 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
       return Tuple.of(RichIterable.empty(), RichIterable.empty(), RichIterable.empty());
     }
     final io.vavr.collection.Stream<T> that = iterator.toStream();
-    return Tuple.of(rich("split_1", that.iterator().take(offset), offset, pageSize),
-      rich("split_2", that.iterator().drop(offset).take(pageSize), offset, pageSize),
-      rich("split_3", that.iterator().drop(offset + pageSize), offset, pageSize));
+    return Tuple.of(rich("split_1", that.take(offset), offset, pageSize),
+      rich("split_2", that.drop(offset).take(pageSize), offset, pageSize),
+      rich("split_3", that.drop(offset + pageSize), offset, pageSize));
   }
 
-  private RichIterable<T> rich(String operation, Iterator<T> iterator, int offset, int pageSize) {
+  private RichIterable<T> rich(String operation, io.vavr.collection.Stream<T> iterator, int offset, int pageSize) {
     return new RichIterableUsingIterator<>(operation, this, iterator, offset, pageSize);
   }
 
