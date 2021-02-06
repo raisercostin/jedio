@@ -104,11 +104,12 @@ public class GuavaAndDirectoryStreamTraversalWithVirtualDirs implements FileTrav
         @Override
         public Iterator<Path> iterator() {
           return Locations.path(pdfFile).asReadableFile().usingInputStream((InputStream is) -> {
-            PDDocument doc = PDDocument.load(is);
-            return List.ofAll(doc.getPages())
-              .zipWithIndex()
-              .map(pageWithIndex -> toPath(pdfFile, pageWithIndex))
-              .iterator();
+            try (PDDocument doc = PDDocument.load(is)) {
+              return List.ofAll(doc.getPages())
+                .zipWithIndex()
+                .map(pageWithIndex -> toPath(pdfFile, pageWithIndex))
+                .iterator();
+            }
           });
         }
 

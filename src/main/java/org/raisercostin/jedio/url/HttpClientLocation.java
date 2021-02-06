@@ -180,8 +180,6 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
     JedioHttpClientContext jedioContext = new JedioHttpClientContext();
     HttpClientContext context = HttpClientContext.adapt(jedioContext);
     try (CloseableHttpResponse response = this.client.client().execute(request, context)) {
-      int code = response.getStatusLine().getStatusCode();
-      String reason = response.getStatusLine().getReasonPhrase();
       // TODO do not remove this close - we need to close the stream and let the connection be (might be reused by
       // connection pool)
       RequestConfig requestConfig = request instanceof HttpRequestBase ? ((HttpRequestBase) request).getConfig() : null;

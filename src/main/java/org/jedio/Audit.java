@@ -18,6 +18,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Value;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.impl.execchain.RequestAbortedException;
@@ -50,12 +52,13 @@ public class Audit {
     }
   }
 
-  @Data
+  @Value
   @Setter(AccessLevel.NONE)
   @Getter(AccessLevel.NONE)
   @AllArgsConstructor
   public static class Situation {
     public String id;
+    @NonFinal
     public volatile int counter;
     public Object[] values;
     public boolean isWarn;

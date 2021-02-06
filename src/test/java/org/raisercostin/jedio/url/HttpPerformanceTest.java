@@ -39,7 +39,7 @@ public class HttpPerformanceTest {
     // 20000 - 21s - 1000 routes & 2000 threads
     String testUrl = "http://10.3.67.222/";
 
-    JedioHttpClient client = JedioHttpClient.createHighPerfHttpClient();
+    JedioHttpClient client = JedioHttpClient.createHighPerfHttpClient2().withThreads(threads).createClient();
     // log.info("Using the following\nApacheHttpClient Settings:\n{}",
     // Nodes.json.excluding("trustManager", "socketFactoryRegistry", "cookieSpecRegistry").toString(client));
     assertThatTime(Duration.ofSeconds(3), () -> {

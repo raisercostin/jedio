@@ -202,7 +202,7 @@ public class FileTraversals {
   }
 
   // copied from newDirectoryStream(file,regex)
-  public static Optional<Filter<Path>> createFilter(Path dir, String glob) throws IOException {
+  private static Optional<Filter<Path>> createFilter(Path dir, String glob) throws IOException {
     // avoid creating a matcher if all entries are required.
     if (glob.equals("*")) {
       return Optional.empty();

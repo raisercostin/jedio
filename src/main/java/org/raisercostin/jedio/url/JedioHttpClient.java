@@ -59,6 +59,7 @@ import org.apache.http.pool.PoolStats;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import reactor.core.publisher.Mono;
 
 @Data
@@ -217,6 +218,10 @@ public class JedioHttpClient {
 
   public static JedioHttpClient createHighPerfHttpClient() {
     return JedioHttpConfig.create().withName("jedio1").createClient();
+  }
+
+  public static @NonNull JedioHttpConfig createHighPerfHttpClient2() {
+    return JedioHttpConfig.create().withName("jedio1");
   }
 
   public static JedioHttpClient from(JedioHttpConfig config) {

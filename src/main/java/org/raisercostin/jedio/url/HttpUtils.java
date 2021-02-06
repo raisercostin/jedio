@@ -1,5 +1,6 @@
 package org.raisercostin.jedio.url;
 
+import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -45,8 +46,11 @@ public class HttpUtils {
         sslcontext.init(null, trustAllCerts, new java.security.SecureRandom());
         HttpsURLConnection.setDefaultSSLSocketFactory(sslcontext.getSocketFactory());
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext);
-        CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
-        Unirest.setHttpClient(httpclient);
+        try (CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build()) {
+          Unirest.setHttpClient(httpclient);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
       } catch (NoSuchAlgorithmException e) {
         throw new RuntimeException(e);
       } catch (KeyManagementException e) {

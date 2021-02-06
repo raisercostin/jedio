@@ -138,7 +138,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   @Override
   public String toString() {
     if (isCollection()) {
-      return mkString(stringPrefix() + "(", ", ", ")");
+      return take(3).mkString(stringPrefix() + ".take(3)(", ", ", ")");
     } else {
       return stringPrefix() + "(" + operation + ")";
     }
@@ -194,7 +194,8 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   private String internalToString() {
     Iterable<T> iterable = iterableLazy.get();
-    return String.format("%s(op=%s on %s and params %s)", getClass(), this.operation, iterable.getClass(),
+    return String.format("%s(op=%s on %s and %s params %s)", getClass(), this.operation, iterable.getClass(),
+      this.params.length,
       Arrays.toString(this.params));
   }
 
