@@ -385,12 +385,13 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public T last() {
-    return iterator("last").last();
+    return op(l -> l.get(l.size() - 1), c -> null, s -> s.last(), t -> t.last(), v -> v.get(),
+      () -> iterator("last").last());
   }
 
   @Override
   public int length() {
-    return iterator("length").length();
+    return size();
   }
 
   @Override
