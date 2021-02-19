@@ -59,6 +59,7 @@ import io.vavr.control.Either;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
+import org.jedio.LazyToString;
 
 //TODO Couldn't make it work for CrudRepositories
 //  @SuppressWarnings("rawtypes")
@@ -79,7 +80,8 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   private transient final AtomicInteger iterated;
   private transient int maxIterations = 1;
   private transient String lastOperation;
-  private transient RuntimeException lastOperationPlace;
+  private transient Option<RuntimeException> lastOperationPlace;
+  private boolean debugEnabled = false;
 
   public RichIterableUsingIterator(String operation, RichIterableUsingIterator<?> origin, Iterable<T> iterable,
       Object... params)
@@ -178,16 +180,21 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
       int current = iterated.updateAndGet(x -> Math.min(x + 1, maxIterations + 1));
       if (current == maxIterations) {
         this.lastOperation = operation;
-        this.lastOperationPlace = new RuntimeException(
-          "Successful operation " + operation + " on " + internalToString() + ". To store stacktrace.");
+        this.lastOperationPlace = debugEnabled
+            ? Option.of(new RuntimeException(
+              "Successful operation " + operation + " on " + internalToString() + ". To store stacktrace."))
+            : Option.none();
       }
       if (current > maxIterations) {
+        String messageIfDebugNotEnabled = lastOperationPlace.isDefined() ? ""
+            : "\n\nUse debug to get the last successfull location where you could memoize the collection before iterating too many times.";
         throw new IllegalStateException("While doing [" + operation + "] operation a maximum number of iterations of "
             + maxIterations
             + " has been reached.\nPrevious successfull operation was [" + lastOperation
-            + "].\nIs it better to memoize the RichIterable as this will not use iterator for this operation. The root cause is not actually causing this but the stacktrace can help to detect where the memoization would have been helpful.",
-          lastOperationPlace);
-      }
+            + "].\nIs it better to memoize the RichIterable as this will not use iterator for this operation. The root cause is not actually causing this but the stacktrace can help to detect where the memoization would have been helpful."
+            + messageIfDebugNotEnabled,
+          lastOperationPlace.get());
+      } //
       return Iterator.ofAll(iterable.iterator());
     }
   }
@@ -1288,5 +1295,11 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   public Tuple2<RichIterable<T>, Integer> page(int offset, int pageSize) {
     Tuple3<RichIterable<T>, RichIterable<T>, RichIterable<T>> x = split(offset, pageSize);
     return Tuple.of(x._2, x._1.size() + x._2.size() + x._3.size());
+  }
+
+  @Override
+  public RichIterable<T> debug(boolean debugEnabled) {
+    this.debugEnabled = debugEnabled;
+    return this;
   }
 }

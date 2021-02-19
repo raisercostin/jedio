@@ -504,4 +504,6 @@ public interface RichIterable<T> {
   /**Select a subset and total size in one iteration. The iteration might need to consume remaining elements when size is called.
    * For performance reasons size might be the same on map operations while for filter elements might be needed to be processed.*/
   Tuple2<RichIterable<T>, Integer> page(int offset, int pageSize);
+
+  RichIterable<T> debug(boolean debugEnabled);
 }
