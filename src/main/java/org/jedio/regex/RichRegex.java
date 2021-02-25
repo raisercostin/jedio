@@ -3,7 +3,6 @@ package org.jedio.regex;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -19,7 +18,7 @@ import lombok.SneakyThrows;
 //TODO https://stackoverflow.com/questions/5767627/how-to-add-features-missing-from-the-java-regex-implementation/5771326#5771326
 //TODO http://pleac.sourceforge.net/pleac_groovy/patternmatching.html
 public class RichRegex {
-  public static final LoadingCache<String, Pattern> COMPILED_PATTERNS = CacheBuilder.newBuilder()
+  public static final LoadingCache<String, Pattern> patterns = CacheBuilder.newBuilder()
     .maximumSize(100)
     .build(new CacheLoader<String, Pattern>()
       {
@@ -28,6 +27,12 @@ public class RichRegex {
           return Pattern.compile(regexp);
         }
       });
+
+  /**Compiles the regex and caches it. The cache has a 100 values limit and can be accessed via `patterns`.*/
+  @SneakyThrows
+  public static Pattern compiled(String regex) {
+    return patterns.get(regex);
+  }
 
   @Unapply
   @SneakyThrows
@@ -61,7 +66,7 @@ public class RichRegex {
   @Unapply
   @SneakyThrows
   public static Either<String, Matcher> regexpMatcher(String regex, String value, int requiredGroups) {
-    Pattern pattern = COMPILED_PATTERNS.get(regex);
+    Pattern pattern = patterns.get(regex);
     Matcher matcher = pattern.matcher(value);
     if (matcher.find()) {
       int matchedGroups = matcher.groupCount();

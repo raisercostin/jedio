@@ -110,7 +110,7 @@ public class Audit {
   public static Throwable warnAndRetrhrowIfNotKnown(String format, Throwable throwable, Object... values) {
     boolean knownException = warn(DEFAULT_MAX_COUNTER, true, throwable, format, format, values);
     if (!knownException) {
-      return ExceptionUtils.nowrap(throwable, format, values);
+      return RichThrowable.nowrap(throwable, format, values);
     }
     return throwable;
   }

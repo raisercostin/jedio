@@ -4,9 +4,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 //Copied from apache-commons ExceptionUtils
-public class ExceptionUtils {
+public class RichThrowable {
   public static <R> R rethrowNowrap(final Throwable throwable) {
-    return ExceptionUtils.<R, RuntimeException>sneakyThrow(throwable, null);
+    return RichThrowable.<R, RuntimeException>sneakyThrow(throwable, null);
   }
 
   public static <R> R rethrowWrap(final Throwable throwable) {
@@ -26,7 +26,7 @@ public class ExceptionUtils {
   }
 
   @FunctionalInterface
-  public static interface MyCheckedException<R> {
+  public interface MyCheckedException<R> {
     R apply() throws Throwable;
   }
 
@@ -55,7 +55,7 @@ public class ExceptionUtils {
   }
 
   public static <R extends RuntimeException> R nowrap(final Throwable throwable, String format, Object... args) {
-    return ExceptionUtils.<R, RuntimeException>sneakyThrow(throwable, format, args);
+    return RichThrowable.<R, RuntimeException>sneakyThrow(throwable, format, args);
   }
 
   @SuppressWarnings("unchecked")
@@ -78,7 +78,7 @@ public class ExceptionUtils {
     }
   }
 
-  public static String toString(Exception e) {
+  public static String toString(Throwable e) {
     final StringWriter sw = new StringWriter();
     final PrintWriter pw = new PrintWriter(sw, true);
     e.printStackTrace(pw);

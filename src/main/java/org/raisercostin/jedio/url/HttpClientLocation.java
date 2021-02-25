@@ -31,7 +31,7 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpCoreContext;
 import org.jedio.Audit.AuditException;
-import org.jedio.ExceptionUtils;
+import org.jedio.RichThrowable;
 import org.jedio.functions.JedioFunction;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReadableFileLocation;
@@ -198,7 +198,7 @@ public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation>
         return result;
       }
     } catch (Exception e) {
-      throw ExceptionUtils.wrap(e, "When trying to read from %s", this);
+      throw RichThrowable.wrap(e, "When trying to read from %s", this);
     }
   }
 

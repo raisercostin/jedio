@@ -3,7 +3,7 @@ package org.raisercostin.jedio.impl;
 import java.io.InputStream;
 
 import io.vavr.control.Option;
-import org.jedio.ExceptionUtils;
+import org.jedio.RichThrowable;
 import org.jedio.deprecated;
 import org.jedio.functions.JedioFunction;
 import org.jedio.functions.JedioProcedure;
@@ -42,7 +42,7 @@ public interface ReadableFileLocationLike<SELF extends ReadableFileLocationLike<
     try (InputStream in = unsafeInputStream()) {
       return inputStreamConsumer.apply(in);
     } catch (Throwable e) {
-      throw ExceptionUtils.nowrap(e);
+      throw RichThrowable.nowrap(e);
     }
   }
 
@@ -58,10 +58,10 @@ public interface ReadableFileLocationLike<SELF extends ReadableFileLocationLike<
         try {
           return inputStreamConsumer.apply(StreamAndMeta.fromThrowable(e));
         } catch (Throwable e1) {
-          throw ExceptionUtils.nowrap(e1);
+          throw RichThrowable.nowrap(e1);
         }
       } else {
-        throw ExceptionUtils.nowrap(e);
+        throw RichThrowable.nowrap(e);
       }
     }
   }
@@ -85,7 +85,7 @@ public interface ReadableFileLocationLike<SELF extends ReadableFileLocationLike<
     try {
       return Nodes.json.toObject(readMetaContent(), MetaInfo.class);
     } catch (Exception e) {
-      throw ExceptionUtils.wrap(e, "While reading metadata of %s", this);
+      throw RichThrowable.wrap(e, "While reading metadata of %s", this);
     }
   }
 

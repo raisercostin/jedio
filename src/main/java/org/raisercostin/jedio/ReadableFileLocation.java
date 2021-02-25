@@ -7,7 +7,7 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
 import io.vavr.control.Option;
-import org.jedio.ExceptionUtils;
+import org.jedio.RichThrowable;
 import org.jedio.deprecated;
 import org.jedio.functions.JedioFunction;
 import org.jedio.functions.JedioProcedure;
@@ -91,7 +91,7 @@ public interface ReadableFileLocation extends BasicFileLocation {
         return readContent(charset2_ISO_8859_1);
       } catch (Exception e2) {
         e2.addSuppressed(e);
-        throw ExceptionUtils.wrap(e2, "While reading %s with charsets %s and %s. Others could exist %s", this,
+        throw RichThrowable.wrap(e2, "While reading %s with charsets %s and %s. Others could exist %s", this,
           charset1_UTF8, charset2_ISO_8859_1, Charset.availableCharsets().keySet());
       }
     }

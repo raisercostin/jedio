@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.jedio.ExceptionUtils;
+import org.jedio.RichThrowable;
 import org.raisercostin.jedio.Locations;
 import org.raisercostin.jedio.ReadableDirLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
@@ -92,7 +92,7 @@ public class ClasspathLocation
   }
 
   private Path toPath() {
-    return ExceptionUtils.tryWithSuppressed(() -> {
+    return RichThrowable.tryWithSuppressed(() -> {
       URL resource = ClasspathLocation.class.getClassLoader().getResource(this.resourcePath);
       System.out.println("resource=" + resource);
       Preconditions.checkNotNull(resource);
