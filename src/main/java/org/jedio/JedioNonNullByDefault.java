@@ -33,4 +33,5 @@ import javax.annotation.meta.TypeQualifierDefault;
     ElementType.PARAMETER,
     ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface JedioNonNullByDefault {}
+public @interface JedioNonNullByDefault {
+}

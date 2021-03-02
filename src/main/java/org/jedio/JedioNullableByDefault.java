@@ -34,4 +34,5 @@ import org.checkerframework.checker.nullness.qual.Nullable;
     ElementType.PARAMETER,
     ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface JedioNullableByDefault {}
+public @interface JedioNullableByDefault {
+}
