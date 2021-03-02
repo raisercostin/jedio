@@ -3758,9 +3758,9 @@ public class URI implements Cloneable, Comparable, Serializable {
   public static class LocaleToCharsetMap {
 
     /** A mapping of language code to charset */
-    private static final Hashtable LOCALE_TO_CHARSET_MAP;
+    private static final Hashtable<String, String> LOCALE_TO_CHARSET_MAP;
     static {
-      LOCALE_TO_CHARSET_MAP = new Hashtable();
+      LOCALE_TO_CHARSET_MAP = new Hashtable<>();
       LOCALE_TO_CHARSET_MAP.put("ar", "ISO-8859-6");
       LOCALE_TO_CHARSET_MAP.put("be", "ISO-8859-5");
       LOCALE_TO_CHARSET_MAP.put("bg", "ISO-8859-5");
@@ -3811,13 +3811,13 @@ public class URI implements Cloneable, Comparable, Serializable {
      */
     public static String getCharset(Locale locale) {
       // try for an full name match (may include country)
-      String charset = (String) LOCALE_TO_CHARSET_MAP.get(locale.toString());
+      String charset = LOCALE_TO_CHARSET_MAP.get(locale.toString());
       if (charset != null) {
         return charset;
       }
 
       // if a full name didn't match, try just the language
-      charset = (String) LOCALE_TO_CHARSET_MAP.get(locale.getLanguage());
+      charset = LOCALE_TO_CHARSET_MAP.get(locale.getLanguage());
       return charset; // may be null
     }
 

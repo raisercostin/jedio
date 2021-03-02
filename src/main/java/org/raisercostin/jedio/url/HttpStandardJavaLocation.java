@@ -10,10 +10,11 @@ import java.nio.charset.Charset;
 
 import io.vavr.Lazy;
 import lombok.SneakyThrows;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.url.impl.URI;
 
-public class HttpStandardJavaLocation extends BaseHttpLocationLike<HttpStandardJavaLocation>
+public class HttpStandardJavaLocation extends BaseHttpLocationLike<@NonNull HttpStandardJavaLocation>
     implements ReadableFileLocation, Closeable {
   public Lazy<URLConnection> connection = Lazy.of(() -> createConnection());
 

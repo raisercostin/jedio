@@ -28,6 +28,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.SystemUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.Audit;
 import org.jedio.SimpleShell;
 import org.jedio.sugar;
@@ -74,9 +75,10 @@ import reactor.core.publisher.Flux;
  */
 @Data
 public class PathLocation implements FileLocation, ChangeableLocation, NonExistingLocation,
-    ReadableDirLocationLike<PathLocation>, WritableDirLocationLike<PathLocation>, NonExistingLocationLike<PathLocation>,
-    ReadableFileLocationLike<PathLocation>, WritableFileLocationLike<PathLocation>,
-    ChangeableLocationLike<PathLocation>, LinkLocationLike<PathLocation> {
+    ReadableDirLocationLike<@NonNull PathLocation>, WritableDirLocationLike<@NonNull PathLocation>,
+    NonExistingLocationLike<@NonNull PathLocation>, ReadableFileLocationLike<@NonNull PathLocation>,
+    WritableFileLocationLike<@NonNull PathLocation>, ChangeableLocationLike<@NonNull PathLocation>,
+    LinkLocationLike<@NonNull PathLocation> {
 
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PathLocation.class);
 
@@ -244,7 +246,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public Option<PathLocation> existing() {
+  public Option<@NonNull PathLocation> existing() {
     if (Files.exists(this.path)) {
       return Option.of(this);
     } else {
@@ -478,7 +480,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   @Override
   // @tailrec
-  public Option<PathLocation> findAncestor(Function<ReferenceLocationLike<?>, Boolean> fn) {
+  public Option<@NonNull PathLocation> findAncestor(Function<ReferenceLocationLike<?>, Boolean> fn) {
     if (fn.apply(this)) {
       return Option.of(this);
     } else {
@@ -487,7 +489,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public Option<PathLocation> parent() {
+  public Option<@NonNull PathLocation> parent() {
     return Option.of(this.path.getParent()).map(x -> create(x));
   }
 
@@ -803,7 +805,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public Flux<PathLocation> findFilesAndDirs(boolean recursive) {
+  public Flux<@NonNull PathLocation> findFilesAndDirs(boolean recursive) {
     return findFilesAndDirs(createFilter(recursive));
   }
 
@@ -818,7 +820,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public Flux<PathLocation> findFilesAsFlux(boolean recursive) {
+  public Flux<@NonNull PathLocation> findFilesAsFlux(boolean recursive) {
     return find(createFilter(recursive)).flatMap(x -> {
       if (x.isDirectory()) {
         return Flux.empty();
@@ -874,7 +876,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   @Override
   @sugar
-  public RichIterable<PathLocation> ls(boolean recursive) {
+  public RichIterable<@NonNull PathLocation> ls(boolean recursive) {
     return RichIterable.ofIterable(findFilesAndDirs(recursive).toIterable());
   }
 

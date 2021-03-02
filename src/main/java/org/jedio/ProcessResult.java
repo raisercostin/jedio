@@ -16,6 +16,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.Charsets;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.raisercostin.jedio.DirLocation;
 
 @Data
@@ -97,7 +98,7 @@ public class ProcessResult {
     return message;
   }
 
-  private String blurMessage(Pattern sensibleRegex, String message) {
+  private String blurMessage(@Nullable Pattern sensibleRegex, String message) {
     if (sensibleRegex != null) {
       return sensibleRegex.matcher(message).replaceAll("***");
     } else {

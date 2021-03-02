@@ -48,6 +48,7 @@ import io.vavr.control.Either;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Intentionally doesn't implement Iterable to force you to pass RichIterable around.
@@ -413,7 +414,7 @@ public interface RichIterable<T> {
 
   <U> RichIterable<U> flatMapFromIterable(Function<? super T, ? extends Iterable<? extends U>> mapper);
 
-  default <U> RichIterable<U> flatMap(Function<? super T, ? extends RichIterable<? extends U>> mapper) {
+  default <U> RichIterable<U> flatMap(@NonNull Function<? super T, ? extends RichIterable<? extends U>> mapper) {
     return flatMapFromIterable(x -> mapper.apply(x).iterable());
   }
 

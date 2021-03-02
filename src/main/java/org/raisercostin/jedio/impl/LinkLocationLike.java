@@ -1,5 +1,6 @@
 package org.raisercostin.jedio.impl;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.raisercostin.jedio.ReferenceLocation;
 
 /**
@@ -13,6 +14,6 @@ import org.raisercostin.jedio.ReferenceLocation;
  * <li>shortcut (windows)
  * <li>redirect? etc.
  */
-public interface LinkLocationLike<SELF extends LinkLocationLike<SELF>> extends ReferenceLocationLike<SELF> {
+public interface LinkLocationLike<SELF extends @NonNull LinkLocationLike<SELF>> extends ReferenceLocationLike<SELF> {
   ReferenceLocation getTarget();
 }

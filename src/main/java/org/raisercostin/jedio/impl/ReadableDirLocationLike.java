@@ -1,6 +1,7 @@
 package org.raisercostin.jedio.impl;
 
 import io.vavr.collection.Iterator;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.sugar;
 import org.jedio.struct.RichIterable;
 import org.raisercostin.jedio.DirLocation;
@@ -12,8 +13,8 @@ import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 
 /** ReadableDir means you can find children (you can list). */
-public interface ReadableDirLocationLike<SELF extends ReadableDirLocationLike<SELF>>
-    extends BasicDirLocationLike<SELF>, ReadableDirLocation {
+public interface ReadableDirLocationLike<SELF extends @NonNull ReadableDirLocationLike<@NonNull SELF>>
+    extends BasicDirLocationLike<@NonNull SELF>, ReadableDirLocation {
   @Deprecated // @deprecated to reimplement in a efficient way
   default Flux<SELF> findFilesAsFlux(boolean recursive) {
     return findFilesAndDirs(recursive).filter(x -> x.isFile());// .map(x -> x);

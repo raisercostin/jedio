@@ -59,6 +59,8 @@ import io.vavr.control.Either;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jedio.LazyToString;
 
 //TODO Couldn't make it work for CrudRepositories
@@ -106,6 +108,9 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   @Override
   public boolean isCollection() {
     Iterable<T> iterable = iterableLazy.get();
+    if (iterable == null) {
+      return false;
+    }
     if (iterable instanceof Collection) {
       return true;
     }
@@ -172,6 +177,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   }
 
   private Iterator<T> iteratorInternal(String operation, boolean allowIteratorIfCollection) {
+    @NonNull
     Iterable<T> iterable = iterableLazy.get();
     if (allowIteratorIfCollection && isCollection()) {
       //its safe to iterate
@@ -200,6 +206,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   }
 
   private String internalToString() {
+    @NonNull
     Iterable<T> iterable = iterableLazy.get();
     return String.format("%s(op=%s on %s and %s params %s)", getClass(), this.operation, iterable.getClass(),
       this.params.length,
@@ -416,6 +423,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
       Function1<Traversable<T>, R> opForTraversable,
       Function1<Value<T>, R> opForValue,
       Function0<R> opForRest) {
+    @Nullable
     R res = null;
     Iterable<T> iterable = iterableLazy.get();
     if (opForList != null && iterable instanceof List) {
@@ -435,7 +443,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
       res = opForValue.apply((Value<T>) iterable);
     }
     if (res == null) {
-      res = opForRest.apply();
+      return opForRest.apply();
     }
     return res;
   }

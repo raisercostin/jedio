@@ -30,6 +30,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpCoreContext;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.Audit.AuditException;
 import org.jedio.RichThrowable;
 import org.jedio.functions.JedioFunction;
@@ -41,7 +42,8 @@ import reactor.core.publisher.Mono;
 @Getter(lombok.AccessLevel.NONE)
 @Setter(lombok.AccessLevel.NONE)
 @Slf4j
-public class HttpClientLocation extends BaseHttpLocationLike<HttpClientLocation> implements ReadableFileLocation {
+public class HttpClientLocation extends BaseHttpLocationLike<@NonNull HttpClientLocation>
+    implements ReadableFileLocation {
   public static HttpClientLocation url(SimpleUrl url, JedioHttpClient defaultClient) {
     return new HttpClientLocation(url, defaultClient);
   }

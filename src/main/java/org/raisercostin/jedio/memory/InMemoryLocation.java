@@ -1,12 +1,12 @@
 package org.raisercostin.jedio.memory;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
 import com.google.common.base.Charsets;
 import io.vavr.control.Option;
 import org.apache.commons.io.IOUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.raisercostin.jedio.FileLocation;
 import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
@@ -18,8 +18,9 @@ import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.DeleteOptions;
 import reactor.core.publisher.Mono;
 
-public class InMemoryLocation implements FileLocation, NonExistingLocation, ReadableFileLocationLike<InMemoryLocation>,
-    WritableFileLocationLike<InMemoryLocation>, NonExistingLocationLike<InMemoryLocation> {
+public class InMemoryLocation
+    implements FileLocation, NonExistingLocation, ReadableFileLocationLike<@NonNull InMemoryLocation>,
+    WritableFileLocationLike<@NonNull InMemoryLocation>, NonExistingLocationLike<@NonNull InMemoryLocation> {
   public String content;
 
   public InMemoryLocation(String content) {

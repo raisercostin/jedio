@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.impl.ReadableFileLocationLike;
 import reactor.core.publisher.Mono;
@@ -17,7 +18,7 @@ import reactor.core.publisher.Mono;
 @Data
 @Getter(value = AccessLevel.NONE)
 @Setter(value = AccessLevel.NONE)
-public class MemoizedLocation implements ReadableFileLocation, ReadableFileLocationLike<MemoizedLocation> {
+public class MemoizedLocation implements ReadableFileLocation, ReadableFileLocationLike<@NonNull MemoizedLocation> {
   private final ReadableFileLocation location;
   @ToString.Exclude
   @EqualsAndHashCode.Exclude

@@ -9,6 +9,7 @@ import io.vavr.control.Option;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.apache.commons.io.FilenameUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.Cast;
 import org.jedio.deprecated;
 import org.jedio.sugar;
@@ -26,7 +27,7 @@ import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 
 // TODO maybe should contain type <T> of the actual internal instance
-public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
+public interface ReferenceLocationLike<SELF extends @NonNull ReferenceLocationLike<SELF>>
     extends LocationLike<SELF>, ReferenceLocation {
 
   @Override

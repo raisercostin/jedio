@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.impl.LinkLocationLike;
@@ -19,7 +20,7 @@ import reactor.core.publisher.Mono;
 @Data
 @Getter(value = AccessLevel.NONE)
 @Setter(value = AccessLevel.NONE)
-public class DiskCachedLocation implements ReadableFileLocation, ReadableFileLocationLike<DiskCachedLocation> {
+public class DiskCachedLocation implements ReadableFileLocation, ReadableFileLocationLike<@NonNull DiskCachedLocation> {
 
   @Data
   @Getter(value = AccessLevel.NONE)

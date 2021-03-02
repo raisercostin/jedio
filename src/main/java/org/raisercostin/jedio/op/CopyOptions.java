@@ -3,6 +3,7 @@ package org.raisercostin.jedio.op;
 import java.time.Duration;
 
 import com.google.common.base.Predicates;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.raisercostin.jedio.ExistingLocation;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReferenceLocation;
@@ -70,7 +71,7 @@ public interface CopyOptions {
 
   /** Destination can be changed based on the input and metadata. */
   @SuppressWarnings("unchecked")
-  default <T extends WritableFileLocation> T amend(T dest, StreamAndMeta streamAndMeta) {
+  default <T extends @NonNull WritableFileLocation> T amend(T dest, StreamAndMeta streamAndMeta) {
     // if there is no http response status code might be a simple copy from other sources
     int code = streamAndMeta.meta.httpMetaResponseStatusCode().getOrElse(200);
     if (code == 200) {
@@ -94,7 +95,7 @@ public interface CopyOptions {
    * com_darzar_www--http--sitemap.xml#meta-http-json com_darzar_www--http--sitemap.xml.gz
    * com_darzar_www--http--sitemap.xml.gz#meta-http-json
    */
-  static <T extends ReferenceLocationLike<T>> T meta(T referenceLocation, String meta, String extension) {
+  static <T extends @NonNull ReferenceLocationLike<T>> T meta(T referenceLocation, String meta, String extension) {
     return referenceLocation.parent()
       .get()
       .child("." + meta)

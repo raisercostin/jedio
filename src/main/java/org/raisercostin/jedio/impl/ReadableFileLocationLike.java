@@ -3,6 +3,7 @@ package org.raisercostin.jedio.impl;
 import java.io.InputStream;
 
 import io.vavr.control.Option;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.RichThrowable;
 import org.jedio.deprecated;
 import org.jedio.functions.JedioFunction;
@@ -15,7 +16,7 @@ import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.nodes.Nodes;
 
-public interface ReadableFileLocationLike<SELF extends ReadableFileLocationLike<SELF>>
+public interface ReadableFileLocationLike<SELF extends @NonNull ReadableFileLocationLike<SELF>>
     extends ReadableFileLocation, BasicFileLocationLike<SELF> {
 
   @Override

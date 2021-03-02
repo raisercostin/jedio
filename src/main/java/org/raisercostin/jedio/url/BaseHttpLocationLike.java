@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.ToString;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.raisercostin.jedio.impl.ReadableFileLocationLike;
 import org.raisercostin.jedio.url.impl.URI;
 
@@ -14,8 +15,8 @@ import org.raisercostin.jedio.url.impl.URI;
 @Getter(lombok.AccessLevel.NONE)
 @Setter(lombok.AccessLevel.NONE)
 @ToString
-public abstract class BaseHttpLocationLike<SELF extends BaseHttpLocationLike<SELF>>
-    implements ReadableFileLocationLike<SELF> {
+public abstract class BaseHttpLocationLike<SELF extends @NonNull BaseHttpLocationLike<SELF>>
+    implements ReadableFileLocationLike<@NonNull SELF> {
   //
   // @SneakyThrows
   // public static URI uriNormalized(String uri) {

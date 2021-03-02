@@ -23,6 +23,7 @@ import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.impl.execchain.RequestAbortedException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Responsibility: log stuff but not for so many times if is an often warn. - warn - a problem that is temporary and
@@ -77,7 +78,7 @@ public class Audit {
     .build(new CacheLoader<String, Long>()
       {
         @Override
-        public Long load(String key) throws Exception {
+        public Long load(@Nullable String key) throws Exception {
           return 0L;
         }
       });
@@ -116,7 +117,8 @@ public class Audit {
   }
 
   /** @return knownException */
-  private static boolean warn(long maxCounter, boolean isWarn, Throwable throwable, String formatter, Object... args) {
+  private static boolean warn(long maxCounter, boolean isWarn, @Nullable Throwable throwable, String formatter,
+      Object... args) {
     if (throwable instanceof AuditException) {
       formatter = ((AuditException) throwable).formatter;
       args = ((AuditException) throwable).args;
@@ -211,7 +213,7 @@ public class Audit {
     return x % 100000 == 0;
   }
 
-  private static boolean knownThrowable(Throwable throwable, String format) {
+  private static boolean knownThrowable(@Nullable Throwable throwable, String format) {
     if (throwable == null) {
       return true;
     }

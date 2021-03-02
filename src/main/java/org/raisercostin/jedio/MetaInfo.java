@@ -18,6 +18,7 @@ import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jedio.NodeUtils;
 import org.raisercostin.nodes.Nodes;
 
@@ -64,6 +65,7 @@ public class MetaInfo {
     }
 
     public MetaInfo meta;
+    @Nullable
     public InputStream is;
 
     @Override
@@ -86,9 +88,12 @@ public class MetaInfo {
   }
 
   boolean isSuccess;
+  @Nullable
   @JsonProperty(access = Access.READ_ONLY)
   Throwable error;
+  @Nullable
   String errorAsString;
+  @Nullable
   Map<String, Object> payload;
 
   /** Selector is converted to lowercase before search since http header is case insensitive. */

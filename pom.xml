@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+>
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.raisercostin</groupId>
@@ -88,6 +92,11 @@
     <dependency>
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs-annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.checkerframework</groupId>
+      <artifactId>checker-qual</artifactId>
+      <version>3.11.0</version>
     </dependency>
     <!-- <dependency> <groupId>org.jetbrains.kotlin</groupId> <artifactId>kotlin-stdlib</artifactId> <version>${kotlin.version}</version> </dependency> 
       <dependency> <groupId>org.jetbrains.kotlin</groupId> <artifactId>kotlin-test-junit</artifactId> <version>${kotlin.version}</version> <scope>test</scope> 
@@ -483,7 +492,14 @@
         <configuration>
           <target>
             <echo message="ant cleanup started." />
-            <fixcrlf srcdir="${basedir}" eol="unix" tab="remove" tablength="2" includes="**/*.java **/*.xml" preservelastmodified="true" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" />
+            <fixcrlf
+              srcdir="${basedir}"
+              eol="unix"
+              tab="remove"
+              tablength="2"
+              includes="**/*.java **/*.xml"
+              preservelastmodified="true"
+              excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" />
             <echo message="ant cleanup finished." />
           </target>
         </configuration>

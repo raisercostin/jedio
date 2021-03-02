@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import edu.umd.cs.findbugs.annotations.Nullable;
 import io.vavr.collection.Iterator;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
@@ -14,6 +13,8 @@ import io.vavr.collection.Seq;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import lombok.SneakyThrows;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 public class NodeUtils {
@@ -143,21 +144,25 @@ public class NodeUtils {
    *
    * @return the given node object if is mutable or another object if node is imutable.
    */
-  private static <T> T withValueOfInternal(T node, Seq<Object> keys, Object value, boolean caseInsensitive) {
+  @SuppressWarnings("unchecked")
+  private static <T> T withValueOfInternal(@Nullable T node, Seq<Object> keys, Object value, boolean caseInsensitive) {
     if (keys.isEmpty()) {
       return (T) value;
     }
+    @NonNull
+    T node2 = Preconditions.checkNotNull(node);
     Object key = keys.head();
     if (keys.size() == 1) {
-      return (T) setByKey(node, key, value);
+      return (T) setByKey(node2, key, value);
     }
     Object currentValue = withValueOfInternal(getByKey(node, key, false, caseInsensitive), keys.tail(), value,
       caseInsensitive);
-    return (T) setByKey(node, key, currentValue);
+    return (T) setByKey(node2, key, currentValue);
   }
 
   @SneakyThrows
-  private static <T, V> Object setByKey(T object, Object key, V value) {
+  private static <T, V> Object setByKey(@NonNull T object, @Nullable Object key,
+      V value) {
     if (object instanceof java.util.Map) {
       ((java.util.Map<Object, V>) object).put(key, value);
       return object;
@@ -166,7 +171,7 @@ public class NodeUtils {
       return ((Map) object).put(key, value);
     }
     if (object instanceof java.util.List) {
-      ((java.util.List<Object>) object).set((Integer) key, value);
+      ((java.util.List<Object>) object).set((Integer) Preconditions.checkNotNull(key), value);
       return object;
     }
     if (object instanceof Seq) {
@@ -189,18 +194,20 @@ public class NodeUtils {
       String.format("Don't know how to set %s[%s] on object %s", object.getClass(), key, object));
   }
 
-  private static <T> T getByKey(Object object, Object key, boolean nullable, boolean caseInsensitive) {
+  private static <T extends @NonNull Object> @Nullable T getByKey(@Nullable Object object, Object key, boolean nullable,
+      boolean caseInsensitive) {
     @Nullable
     T value = getByKeyNullable(object, key, caseInsensitive);
     if (!nullable) {
-      Preconditions.checkNotNull(value, "%s is null on Object %s", key, object);
+      return Preconditions.checkNotNull(value, "%s is null on Object %s", key, object);
     }
     return value;
   }
 
   @SuppressWarnings("unchecked")
   @SneakyThrows
-  private static <T> T getByKeyNullable(Object object, Object key, boolean caseInsensitive) {
+  private static <T> @org.checkerframework.checker.nullness.qual.Nullable T getByKeyNullable(@Nullable Object object,
+      Object key, boolean caseInsensitive) {
     // return BeanUtils.getValue(node, "rawNodes/adOrgs/0/_key");
     // return PropertyUtils.getProperty(node, key.toString());
     if (object == null) {

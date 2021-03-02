@@ -5,9 +5,10 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import lombok.SneakyThrows;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.raisercostin.jedio.url.impl.URI;
 
-public class UrlLocation extends BaseHttpLocationLike<UrlLocation> {
+public class UrlLocation extends BaseHttpLocationLike<@NonNull UrlLocation> {
   @SneakyThrows
   /**
    * @param escaped

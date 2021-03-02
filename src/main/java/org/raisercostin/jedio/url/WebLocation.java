@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.struct.RichIterable;
 import org.raisercostin.jedio.ReadableDirLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
@@ -26,7 +27,7 @@ import reactor.core.publisher.Flux;
 @Setter(lombok.AccessLevel.NONE)
 @AllArgsConstructor
 @ToString
-public class WebLocation implements ReadableDirLocation, ReadableDirLocationLike<WebLocation> {
+public class WebLocation implements ReadableDirLocation, ReadableDirLocationLike<@NonNull WebLocation> {
   public final boolean isRoot;
   public final String webAddress;
   private static final RichIterable<String> prefixes1 = RichIterable.of(
@@ -48,12 +49,12 @@ public class WebLocation implements ReadableDirLocation, ReadableDirLocationLike
 
   // (http|https)://(wwww)?\.raisercostin\.org(/(favicon.ico|robots.txt|sitemap.xml|sitemap.xml.gz|sitemap.gz))?
   @Override
-  public Flux<WebLocation> findFilesAndDirs(boolean recursive) {
+  public Flux<@NonNull WebLocation> findFilesAndDirs(boolean recursive) {
     return Flux.fromIterable(ls().iterable());
   }
 
   @Override
-  public RichIterable<WebLocation> ls() {
+  public RichIterable<@NonNull WebLocation> ls() {
     return prefixes1
       .flatMap(
         prefix1 -> prefixes2.flatMap(prefix2 -> suffixes.map(suffix -> prefix1 + prefix2 + this.webAddress + suffix)))

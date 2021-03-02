@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.RichThrowable;
 import org.raisercostin.jedio.Locations;
 import org.raisercostin.jedio.ReadableDirLocation;
@@ -44,8 +45,8 @@ import reactor.core.publisher.Flux;
 @Data
 @Slf4j
 public class ClasspathLocation
-    implements ReadableDirLocation, ReadableFileLocation, ReadableDirLocationLike<ClasspathLocation>,
-    ExistingLocationLike<ClasspathLocation>, ReadableFileLocationLike<ClasspathLocation> {
+    implements ReadableDirLocation, ReadableFileLocation, ReadableDirLocationLike<@NonNull ClasspathLocation>,
+    ExistingLocationLike<@NonNull ClasspathLocation>, ReadableFileLocationLike<@NonNull ClasspathLocation> {
   private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
     .getOrElse(ClassLoader.class.getClassLoader());
 
@@ -160,7 +161,7 @@ public class ClasspathLocation
   }
 
   @Override
-  public Flux<ClasspathLocation> findFilesAndDirs(boolean recursive) {
+  public Flux<@NonNull ClasspathLocation> findFilesAndDirs(boolean recursive) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 }

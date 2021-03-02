@@ -5,8 +5,9 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import javax.annotation.Nonnull;
 import javax.annotation.meta.TypeQualifierDefault;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * This annotation can be applied to a package, class or method to indicate that the class fields, method return types
@@ -18,11 +19,11 @@ import javax.annotation.meta.TypeQualifierDefault;
  * <li>there is a default parameter annotation applied to a more tightly nested element.
  * </ul>
  * <p/>
- * 
+ *
  * @see https://stackoverflow.com/a/9256595/14731
  */
 @Documented
-@Nonnull
+@Nullable
 @TypeQualifierDefault({
     ElementType.ANNOTATION_TYPE,
     ElementType.CONSTRUCTOR,
@@ -33,5 +34,4 @@ import javax.annotation.meta.TypeQualifierDefault;
     ElementType.PARAMETER,
     ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface NotNullByDefault {
-}
+public @interface JedioNullableByDefault {}

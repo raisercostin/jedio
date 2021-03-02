@@ -3,6 +3,8 @@ package org.jedio;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 //Copied from apache-commons ExceptionUtils
 public class RichThrowable {
   public static <R> R rethrowNowrap(final Throwable throwable) {
@@ -21,8 +23,9 @@ public class RichThrowable {
     throw new RuntimeException(throwable);
   }
 
-  public static <R extends RuntimeException> R wrap(final Throwable throwable, String format, Object... args) {
-    throw new RuntimeException(String.format(format, args), throwable);
+  public static <R extends RuntimeException> R wrap(final Throwable throwable, @Nullable String format,
+      Object... args) {
+    throw new RuntimeException(String.format(format == null ? "" : format, args), throwable);
   }
 
   @FunctionalInterface
@@ -34,7 +37,7 @@ public class RichThrowable {
     return wrap(function, null);
   }
 
-  public static <T> T wrap(MyCheckedException<T> function, String format, Object... args) {
+  public static <T> T wrap(MyCheckedException<T> function, @Nullable String format, Object... args) {
     try {
       return function.apply();
     } catch (Throwable e) {
@@ -46,7 +49,7 @@ public class RichThrowable {
     return nowrap(function, null);
   }
 
-  public static <T> T nowrap(MyCheckedException<T> function, String format, Object... args) {
+  public static <T> T nowrap(MyCheckedException<T> function, @Nullable String format, Object... args) {
     try {
       return function.apply();
     } catch (Throwable e) {
@@ -54,7 +57,8 @@ public class RichThrowable {
     }
   }
 
-  public static <R extends RuntimeException> R nowrap(final Throwable throwable, String format, Object... args) {
+  public static <R extends RuntimeException> R nowrap(final Throwable throwable, @Nullable String format,
+      Object... args) {
     return RichThrowable.<R, RuntimeException>sneakyThrow(throwable, format, args);
   }
 
@@ -62,7 +66,8 @@ public class RichThrowable {
   //TODO remove this method since suppressed exceptions are not logged properly by lombok
   // DEV-NOTE: we do not plan to expose this as public API
   // claim that the typeErasure invocation throws a RuntimeException
-  private static <R, T extends Throwable> R sneakyThrow(final Throwable throwable, String format, Object... args)
+  private static <R, T extends Throwable> R sneakyThrow(final Throwable throwable, @Nullable String format,
+      Object... args)
       throws T {
     if (format != null) {
       throwable.addSuppressed(new RuntimeException(String.format(format, args)));
