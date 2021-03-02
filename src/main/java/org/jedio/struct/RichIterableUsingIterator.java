@@ -286,7 +286,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   @Override
   @Deprecated
   public T get(int index) {
-    return op(l -> l.get(index), c -> null, s -> s.get(index), t -> null, v -> null, () -> drop(index).head());
+    return op(l -> l.get(index), null, s -> s.get(index), null, null, () -> drop(index).head());
   }
 
   @Override
@@ -393,7 +393,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public T last() {
-    return op(l -> l.get(l.size() - 1), c -> null, s -> s.last(), t -> t.last(), v -> v.get(),
+    return op(l -> l.get(l.size() - 1), null, IndexedSeq::last, Traversable::last, Value::get,
       () -> iterator("last").last());
   }
 
@@ -404,7 +404,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public int size() {
-    return op(l -> l.size(), c -> c.size(), s -> s.size(), t -> t.size(), v -> 1, () -> iterator("size").size());
+    return op(List::size, Collection::size, IndexedSeq::size, Traversable::size, v -> 1, () -> iterator("size").size());
   }
 
   //TODO implement this using wrappers that implement RichIterable operations
@@ -418,20 +418,20 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
       Function0<R> opForRest) {
     R res = null;
     Iterable<T> iterable = iterableLazy.get();
-    if (iterable instanceof List) {
+    if (opForList != null && iterable instanceof List) {
       //TODO should check RandomAccess interface?
       res = opForList.apply((List<T>) iterable);
     }
-    if (res == null && iterable instanceof Collection) {
+    if (opForCollection != null && res == null && iterable instanceof Collection) {
       res = opForCollection.apply((Collection<T>) iterable);
     }
-    if (res == null && iterable instanceof IndexedSeq) {
+    if (opForIndexedSeq != null && res == null && iterable instanceof IndexedSeq) {
       res = opForIndexedSeq.apply((IndexedSeq<T>) iterable);
     }
-    if (res == null && iterable instanceof Traversable) {
+    if (opForTraversable != null && res == null && iterable instanceof Traversable) {
       res = opForTraversable.apply((Traversable<T>) iterable);
     }
-    if (res == null && iterable instanceof Value) {
+    if (opForValue != null && res == null && iterable instanceof Value) {
       res = opForValue.apply((Value<T>) iterable);
     }
     if (res == null) {
@@ -633,8 +633,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public java.util.List<T> toJavaList() {
-    return op(l -> l, c -> null, s -> s.toJavaList(), t -> null, v -> null,
-      () -> iteratorInternal().toJavaList());
+    return op(l -> l, null, s -> s.toJavaList(), null, null, () -> iteratorInternal().toJavaList());
   }
 
   @Override
