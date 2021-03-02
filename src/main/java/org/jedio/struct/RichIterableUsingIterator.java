@@ -193,7 +193,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
             + " has been reached.\nPrevious successfull operation was [" + lastOperation
             + "].\nIs it better to memoize the RichIterable as this will not use iterator for this operation. The root cause is not actually causing this but the stacktrace can help to detect where the memoization would have been helpful."
             + messageIfDebugNotEnabled,
-          lastOperationPlace.get());
+          lastOperationPlace.getOrNull());
       } //
       return Iterator.ofAll(iterable.iterator());
     }
@@ -372,7 +372,8 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public boolean isEmpty() {
-    return iterator("isEmpty").isEmpty();
+    return op(List::isEmpty, Collection::isEmpty, IndexedSeq::isEmpty, Traversable::isEmpty, Value::isEmpty,
+      () -> iterator("isEmpty").isEmpty());
   }
 
   @Override
