@@ -3,7 +3,6 @@ package org.raisercostin.jedio;
 import org.raisercostin.jedio.op.CopyOptions;
 
 public interface ReadableDirLocation extends BasicDirLocation {
-
   // Flux<SELF> findFilesAsFlux(boolean recursive);
   // Iterator<SELF> findFiles(boolean recursive);
   // Flux<DirLocation<?>> findDirs(boolean recursive);

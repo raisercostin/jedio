@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.regex.Matcher;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.base.Preconditions;
 import io.vavr.Lazy;
 import io.vavr.Tuple3;
@@ -110,11 +111,14 @@ public class Locations {
   }
 
   /**Create a location. Shold have a schema.*/
+  @JsonCreator
   public static Location location(String externalUrl) {
     Either<String, Tuple3<Matcher, String, String>> schemaAndUrl2 = RichRegex.regexp2("^([a-z]+)\\:(.*)$",
       externalUrl);
     if (schemaAndUrl2.isLeft()) {
-      throw new IllegalArgumentException(schemaAndUrl2.getLeft());
+      throw new IllegalArgumentException(
+        "Couldn't find a protocol scheme as `<scheme>:<rest>` in [" + externalUrl + "]: " + schemaAndUrl2.getLeft()
+            + "]");
     }
     Tuple3<Matcher, String, String> schemaAndUrl = schemaAndUrl2.get();
     switch (schemaAndUrl._2) {
