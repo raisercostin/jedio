@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-public interface DeleteOptions {
+public interface DeleteOptions extends OperationOptions {
   boolean deleteByRename();
 
   @Data

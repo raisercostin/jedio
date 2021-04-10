@@ -1,6 +1,7 @@
 package org.raisercostin.jedio.impl;
 
 import lombok.Data;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.raisercostin.jedio.RelativeLocation;
 
 @Data

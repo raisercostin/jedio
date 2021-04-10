@@ -10,4 +10,9 @@ public interface WritableDirLocationLike<SELF extends @NonNull WritableDirLocati
     extends BasicDirLocationLike<SELF>, WritableDirLocation {
   @Override
   NonExistingLocation deleteDir(DeleteOptions options);
+
+  @Override
+  default SELF log() {
+    return BasicDirLocationLike.super.log();
+  }
 }

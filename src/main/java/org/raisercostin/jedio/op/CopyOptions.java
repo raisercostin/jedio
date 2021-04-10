@@ -10,7 +10,7 @@ import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.impl.ReferenceLocationLike;
 
-public interface CopyOptions {
+public interface CopyOptions extends OperationOptions {
   // case class CopyOptions(overwriteIfAlreadyExists: Boolean = false, copyMeta:
   // Boolean, optionalMeta: Boolean, monitor: OperationMonitor =
   // LoggingOperationMonitor)

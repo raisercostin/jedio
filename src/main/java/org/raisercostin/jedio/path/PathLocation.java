@@ -19,7 +19,6 @@ import java.util.function.Function;
 
 import com.google.common.base.Preconditions;
 import io.vavr.API;
-import io.vavr.collection.Iterator;
 import io.vavr.control.Option;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -45,6 +44,7 @@ import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
+import org.raisercostin.jedio.WritableDirLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.FindFilters;
@@ -62,6 +62,7 @@ import org.raisercostin.jedio.impl.WritableFileLocationLike;
 import org.raisercostin.jedio.op.CopyEvent;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.DeleteOptions;
+import org.raisercostin.jedio.op.OperationContext;
 import org.raisercostin.nodes.Nodes;
 import org.raisercostin.nodes.impl.JsonNodes;
 import reactor.core.publisher.Flux;
@@ -75,39 +76,42 @@ import reactor.core.publisher.Flux;
  */
 @Data
 public class PathLocation implements FileLocation, ChangeableLocation, NonExistingLocation,
-    ReadableDirLocationLike<@NonNull PathLocation>, WritableDirLocationLike<@NonNull PathLocation>,
+    ReadableDirLocationLike<@NonNull PathLocation>,
+    WritableDirLocationLike<@NonNull PathLocation>, //WritableDirLocation.WritableDirLocationFinal,
     NonExistingLocationLike<@NonNull PathLocation>, ReadableFileLocationLike<@NonNull PathLocation>,
     WritableFileLocationLike<@NonNull PathLocation>, ChangeableLocationLike<@NonNull PathLocation>,
     LinkLocationLike<@NonNull PathLocation> {
 
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PathLocation.class);
 
-  public static PathLocation efficientExistingDir(Path path) {
-    return new PathLocation(path, false);
-  }
-
-  public static PathLocation efficientExistingFile(Path path) {
-    return new PathLocation(path, false);
-  }
-
   protected static Path fixPath(Path path) {
     return path.toAbsolutePath().normalize();
   }
 
-  private final Path path;
-
-  public PathLocation(Path path) {
-    this(path, true);
+  private static PathLocation createEfficient(Path path, OperationContext context) {
+    return create(path, false, context);
   }
 
-  public PathLocation(Path path, boolean normalize) {
+  private static PathLocation create(Path path, boolean normalize, OperationContext context) {
+    return new PathLocation(path, normalize, context);
+  }
+
+  private final Path path;
+  private final OperationContext context;
+
+  public PathLocation(Path path) {
+    this(path, true, OperationContext.defaultContext);
+  }
+
+  public PathLocation(Path path, boolean normalize, OperationContext context) {
     // org.springframework.util.StringUtils.cleanPath(file.getOriginalFilename());
     this.path = normalize ? fixPath(path) : path;
+    this.context = context;
   }
 
   @Override
   public PathLocation child(RelativeLocation child) {
-    return Locations.path(fixPath(this.path.resolve(child.relativePath())));
+    return create(fixPath(this.path.resolve(child.relativePath())), true, this.context);
   }
 
   @Override
@@ -125,11 +129,20 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   @Override
   public PathLocation mkdir() {
-    try {
-      FileUtils.forceMkdir(toFile());
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    return this.context.operation("mkdir", this, () -> {
+      //TODO switch to Files.delete(path);
+      try {
+        FileUtils.forceMkdir(toFile());
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+      return this;
+    });
+  }
+
+  @Override
+  public PathLocation mkdirOnParentIfNeeded() {
+    parent().forEach(x -> x.mkdir());
     return this;
   }
 
@@ -458,21 +471,6 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
         mkdirOnParentIfNeeded();
         Files.move(src, dest);
       }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
-  public PathLocation mkdirOnParentIfNeeded() {
-    parent().forEach(x -> x.createDirectories());
-    return this;
-  }
-
-  void createDirectories() {
-    try {
-      FileUtils.forceMkdir(toFile());
-      // Files.createDirectories(toPath());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -812,9 +810,9 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   public Flux<PathLocation> findFilesAndDirs(TraversalFilter filter) {
     return find(filter).map(x -> {
       if (x.isDirectory()) {
-        return PathLocation.efficientExistingDir(x.path);
+        return PathLocation.createEfficient(x.path, this.context);
       } else {
-        return PathLocation.efficientExistingFile(x.path);
+        return PathLocation.createEfficient(x.path, this.context);
       }
     });
   }
@@ -825,7 +823,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
       if (x.isDirectory()) {
         return Flux.empty();
       } else {
-        return Flux.just(PathLocation.efficientExistingFile(x.path));
+        return Flux.just(PathLocation.createEfficient(x.path, this.context));
       }
     });
   }
@@ -836,7 +834,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
       if (!x.isDirectory()) {
         return Flux.empty();
       } else {
-        return Flux.just(PathLocation.efficientExistingDir(x.path));
+        return Flux.just(PathLocation.createEfficient(x.path, this.context));
       }
     });
   }
@@ -856,13 +854,15 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     return traversal.traverse2(toPath(), filter);
   }
 
-  public PathLocation create(Path x) {
-    return new PathLocation(x);
-  }
-
   @Override
   public PathLocation create(String path) {
     return create(Paths.get(path));
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public PathLocation create(Object x) {
+    return create((Path) x, true, context);
   }
 
   @Override
@@ -883,5 +883,16 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   @Override
   public URI toUri() {
     return this.path.toUri();
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public @NonNull PathLocation createWithContext(@NonNull OperationContext context) {
+    return create(this.path, false, context);
+  }
+
+  @Override
+  public OperationContext context() {
+    return this.context;
   }
 }
