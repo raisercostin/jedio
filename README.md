@@ -24,6 +24,53 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
   - [ ] https - "javax.net.ssl.SSLHandshakeException: java.security.cert.CertificateException: No subject alternative DNS name matching revomatico.com found." 
 - [ ] stop redirects in crawler - we will search for them in meta.json
 
+
+- [ ] If quasar is needed the client should configure pom.xml to use quasar-agent
+```
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <id>one</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>co.paralleluniverse</groupId>
+                  <artifactId>quasar-core</artifactId>
+                  <classifier>jdk8</classifier>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                  <destFileName>quasar-agent.jar</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+          <execution>
+            <id>second</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.1</version>
+        <configuration>
+          <argLine>-javaagent:${co.paralleluniverse:quasar-core:jar}</argLine>
+          <useSystemClassLoader>false</useSystemClassLoader>
+        </configuration>
+      </plugin>
+```
 ### Maven
 
 #### Dependency

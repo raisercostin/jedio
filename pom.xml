@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+>
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.raisercostin</groupId>
@@ -56,6 +60,9 @@
     <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
     <lombok.version>1.18.18</lombok.version>
     <main.class>org.raisercostin.jedio.LocationsTest</main.class>
+    <quasar.version>0.7.10</quasar.version>
+    <!-- used with quasar fibers -->
+    <resilience4j.version>1.1.0</resilience4j.version>
   </properties>
   <licenses>
     <license>
@@ -291,6 +298,45 @@
       <artifactId>spring-boot-devtools</artifactId>
       <scope>runtime</scope>
     </dependency>
+    <!-- quasar optional -->
+    <dependency>
+      <groupId>co.paralleluniverse</groupId>
+      <artifactId>quasar-core</artifactId>
+      <version>${quasar.version}</version>
+      <classifier>jdk8</classifier>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>co.paralleluniverse</groupId>
+      <artifactId>comsat-httpclient</artifactId>
+      <version>0.7.0</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>co.paralleluniverse</groupId>
+      <artifactId>quasar-reactive-streams</artifactId>
+      <version>0.7.10</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.github.resilience4j</groupId>
+      <artifactId>resilience4j-reactor</artifactId>
+      <version>${resilience4j.version}</version>
+      <optional>true</optional>
+    </dependency>
+    <!--already included in all-->
+    <dependency>
+      <groupId>io.github.resilience4j</groupId>
+      <artifactId>resilience4j-circuitbreaker</artifactId>
+      <version>${resilience4j.version}</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.github.resilience4j</groupId>
+      <artifactId>resilience4j-timelimiter</artifactId>
+      <version>${resilience4j.version}</version>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
   <build>
     <finalName>${project.artifactId}</finalName>
@@ -489,7 +535,14 @@
         <configuration>
           <target>
             <echo message="ant cleanup started." />
-            <fixcrlf srcdir="${basedir}" eol="unix" tab="remove" tablength="2" includes="**/*.java **/*.xml" preservelastmodified="true" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" />
+            <fixcrlf
+              srcdir="${basedir}"
+              eol="unix"
+              tab="remove"
+              tablength="2"
+              includes="**/*.java **/*.xml"
+              preservelastmodified="true"
+              excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" />
             <echo message="ant cleanup finished." />
           </target>
         </configuration>
