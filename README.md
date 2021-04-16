@@ -25,6 +25,7 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
 - [ ] stop redirects in crawler - we will search for them in meta.json
 
 
+## Quasar/Comsat/Fibers config
 - [ ] If quasar is needed the client should configure pom.xml to use quasar-agent
 ```
   <build>
@@ -70,7 +71,43 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
           <useSystemClassLoader>false</useSystemClassLoader>
         </configuration>
       </plugin>
+    <!-- <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Premain-Class>co.paralleluniverse.fibers.instrument.JavaAgent</Premain-Class>
+              <Agent-Class>co.paralleluniverse.fibers.instrument.JavaAgent</Agent-Class>
+              <Can-Redefine-Classes>true</Can-Redefine-Classes>
+              <Can-Retransform-Classes>true</Can-Retransform-Classes>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin> -->
 ```
+  - This will run using the quasar agent (with it's own dependencies)
+    ```
+    mvn install -DskipTests
+    java -javaagent:target/dependency/quasar-core-0.7.10-jdk8.jar -Xbootclasspath/a:target/dependency/kryo-serializers-0.42.jar;target/dependency/kryo-4.0.0.jar;target/dependency/guava-26.0-jre.jar -Dco.paralleluniverse.fibers.verifyInstrumentation=true -Dco.paralleluniverse.fibers.detectRunawayFibers=false -jar <yourapp>.jar --server.port=8080
+    ```
+  - macOS run command:
+    ```
+    java -javaagent:target/dependency/quasar-core-0.7.10-jdk8.jar -Xbootclasspath/a:target/dependency/kryo-serializers-0.42.jar:target/dependency/kryo-4.0.0.jar:target/dependency/guava-26.0-jre.jar -Dco.paralleluniverse.fibers.detectRunawayFibers=false -jar <yourapp>.jar --server.port=8080 
+    ```
+### Configure eclipse with quasar
+  Add quasar agent
+   In 'Eclipse -> Preferences -> Java -> Intalled JREs -> edit your jre -> Default VM arguments' add this:
+   (or after maven copies them in target/dependency:
+   `-javaagent:target/dependency/quasar-core-0.7.10-jdk8.jar -Xbootclasspath/a:target/dependency/kryo-serializers-0.42.jar;target/dependency/kryo-4.0.0.jar;target/dependency/guava-26.0-jre.jar -Dco.paralleluniverse.fibers.verifyInstrumentation=true`
+   )
+   old: `-javaagent:C:\Users\$USERNAME\.m2\repository\co\paralleluniverse\quasar-core\0.7.10\quasar-core-0.7.10-jdk8.jar`
+- Fibers are good in blocking threards waiting for IO. If CPU is used too much errors are sent to System.error. In production you can add the following setting to disable it
+  `-Dco.paralleluniverse.fibers.detectRunawayFibers=false`
+  For more details see https://github.com/puniverse/quasar/blob/master/quasar-core/src/main/java/co/paralleluniverse/fibers/FiberTimedScheduler.java
+- To disable CPU complain in fibers configure system properties to with `-Dco.paralleluniverse.fibers.detectRunawayFibers=false`
+      
 ### Maven
 
 #### Dependency
