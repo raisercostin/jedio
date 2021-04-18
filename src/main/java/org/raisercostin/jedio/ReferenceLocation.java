@@ -38,6 +38,11 @@ public interface ReferenceLocation extends Location {
   /** A form that is parsable back to the same type. Usually contains the schema/protocol. */
   String toExternalForm();
 
+  @Override
+  default String toExternalUri() {
+    return toExternalForm();
+  }
+
   URL toUrl();
 
   URI toUri();

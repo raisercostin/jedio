@@ -1,5 +1,6 @@
 package org.jedio.struct;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Collection;
@@ -23,6 +24,15 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
@@ -49,6 +59,9 @@ import io.vavr.control.Option;
 import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.raisercostin.jedio.Location;
+import org.raisercostin.jedio.Locations;
 
 /**
  * Intentionally doesn't implement Iterable to force you to pass RichIterable around.
@@ -61,7 +74,27 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  *   - map keeps indexed addressing
  *   - Map structures allow get(key) but not index
  */
+@JsonDeserialize(using = RichIterable.RichIterableDeserializer.class)
+@JsonSerialize(using = RichIterable.RichIterableSerializer.class)
 public interface RichIterable<T> {
+
+  static class RichIterableDeserializer<T> extends JsonDeserializer<RichIterable<T>> {
+    @Override
+    public RichIterable<T> deserialize(@Nullable JsonParser p, @Nullable DeserializationContext ctxt)
+        throws IOException, JsonProcessingException {
+      if (p == null) {
+        return null;
+      }
+      return RichIterable.ofIterable(p.readValueAs(Iterable.class));
+    }
+  }
+
+  static class RichIterableSerializer<T> extends JsonSerializer<RichIterable<T>> {
+    @Override
+    public void serialize(RichIterable<T> value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+      serializers.findValueSerializer(Iterable.class).serialize(value.iterable(), gen, serializers);
+    }
+  }
 
   static <T> RichIterable<T> ofAll(Iterable<T> iterable) {
     return ofIterable(iterable);

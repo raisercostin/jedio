@@ -16,4 +16,9 @@ public interface RelativeLocation extends Location {
   }
 
   String relativePath();
+
+  @Override
+  default String toExternalUri() {
+    return "./" + relativePath();
+  }
 }

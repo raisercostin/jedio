@@ -14,6 +14,8 @@ import io.vavr.control.Either;
 import lombok.SneakyThrows;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jedio.sugar;
 import org.jedio.regex.RichRegex;
 import org.raisercostin.jedio.classpath.ClasspathLocation;
@@ -142,6 +144,10 @@ public class Locations {
         throw new IllegalArgumentException(
           "Don't know protocol [" + schemaAndUrl._2 + "] for externalUrl [" + externalUrl + "]");
     }
+  }
+
+  public static String toExternalUri(Location location) {
+    return location.toExternalUri();
   }
 
   private static InMemoryLocation mem(String content) {
