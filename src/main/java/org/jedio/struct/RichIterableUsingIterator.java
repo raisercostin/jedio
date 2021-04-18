@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.databind.introspect.TypeResolutionContext.Empty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import io.vavr.API;
 import io.vavr.CheckedConsumer;
 import io.vavr.CheckedFunction0;
 import io.vavr.Function0;
@@ -84,8 +85,10 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   private transient String lastOperation;
   private transient Option<RuntimeException> lastOperationPlace;
   private boolean debugEnabled = false;
+  private Option<Integer> knownSize = Option.none();
 
-  public RichIterableUsingIterator(String operation, RichIterableUsingIterator<?> origin, Iterable<T> iterable,
+  public RichIterableUsingIterator(String operation, Option<Integer> knownSize, RichIterableUsingIterator<?> origin,
+      Iterable<T> iterable,
       Object... params)
   {
     this.operation = operation;
@@ -93,9 +96,11 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
     this.params = params;
     this.iterableLazy = Lazy.of(() -> iterable);
     this.iterated = new AtomicInteger(0);
+    this.knownSize = knownSize;
   }
 
-  public RichIterableUsingIterator(String operation, RichIterableUsingIterator<?> origin, Lazy<List<T>> iterableLazy,
+  public RichIterableUsingIterator(String operation, Option<Integer> knownSize, RichIterableUsingIterator<?> origin,
+      Lazy<List<T>> iterableLazy,
       Object... params)
   {
     this.operation = operation;
@@ -103,6 +108,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
     this.params = params;
     this.iterableLazy = iterableLazy;
     this.iterated = new AtomicInteger(0);
+    this.knownSize = knownSize;
   }
 
   @Override
@@ -215,7 +221,8 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public RichIterable<Seq<T>> grouped(int size) {
-    return new RichIterableUsingIterator<>("grouped", this, () -> iterator("grouped").grouped(size), size);
+    return new RichIterableUsingIterator<>("grouped", Option.none(), this, () -> iterator("grouped").grouped(size),
+      size);
   }
 
   @Override
@@ -265,7 +272,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   @Override
   @SuppressWarnings("unchecked")
   public <U extends T> RichIterable<U> narrow(Class<U> clazz) {
-    return (RichIterable<U>) (Object) new RichIterableUsingIterator<>("narrow", this,
+    return (RichIterable<U>) (Object) new RichIterableUsingIterator<>("narrow", Option.none(), this,
       () -> iterator("narrow").filter(y -> y.getClass() == clazz), clazz);
   }
 
@@ -282,7 +289,8 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public RichIterable<T> concat(Iterable<T> next) {
-    return RichIterable.concatAll(this, new RichIterableUsingIterator<>("concat", this, next, next));
+    return RichIterable.concatAll(this,
+      new RichIterableUsingIterator<>("concat", Option.<Integer>none(), this, next, next));
   }
 
   @Override
@@ -313,7 +321,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
       Arrays.sort(arrayToSort);
       return Arrays.asList(arrayToSort);
     });
-    return new RichIterableUsingIterator<>("sorted", this, sorted);
+    return new RichIterableUsingIterator<>("sorted", this.knownSize, this, sorted);
   }
 
   @Override
@@ -329,7 +337,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
       return Arrays.asList(arrayToSort);
     });
     //return new RichIterableUsingIterator<>("sortedWithComparator", this, () -> sorted.get(), comparator);
-    return new RichIterableUsingIterator<>("sortedWithComparator", this, sorted);
+    return new RichIterableUsingIterator<>("sortedWithComparator", this.knownSize, this, sorted);
   }
 
   @Override
@@ -366,7 +374,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public RichIterable<T> doOnNext(CheckedConsumer<T> consumer) {
-    return new RichIterableUsingIterator<>("doOnNext", this, () -> iterator("doOnNext").map(x -> {
+    return new RichIterableUsingIterator<>("doOnNext", this.knownSize, this, () -> iterator("doOnNext").map(x -> {
       consumer.unchecked().accept(x);
       return x;
     }), consumer);
@@ -411,6 +419,9 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public int size() {
+    if (this.knownSize.isDefined()) {
+      return this.knownSize.get();
+    }
     return op(List::size, Collection::size, IndexedSeq::size, Traversable::size, v -> 1, () -> iterator("size").size());
   }
 
@@ -1002,18 +1013,20 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public <R> RichIterable<R> collect(PartialFunction<? super T, ? extends R> partialFunction) {
-    return new RichIterableUsingIterator<>("collect", this, () -> iteratorInternal().collect(partialFunction),
+    return new RichIterableUsingIterator<>("collect", Option.none(), this,
+      () -> iteratorInternal().collect(partialFunction),
       partialFunction);
   }
 
   @Override
   public RichIterable<T> concat(java.util.Iterator<? extends T> that) {
-    return new RichIterableUsingIterator<>("concat", this, () -> iteratorInternal().concat(that), that);
+    return new RichIterableUsingIterator<>("concat", Option.none(), this, () -> iteratorInternal().concat(that), that);
   }
 
   @Override
   public RichIterable<T> intersperse(T element) {
-    return new RichIterableUsingIterator<>("intersperse", this, () -> iteratorInternal().intersperse(element), element);
+    return new RichIterableUsingIterator<>("intersperse", Option.none(), this,
+      () -> iteratorInternal().intersperse(element), element);
   }
 
   @Override
@@ -1023,31 +1036,35 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public <U> RichIterable<Tuple2<T, U>> zip(Iterable<? extends U> that) {
-    return new RichIterableUsingIterator<>("zip", this, () -> iteratorInternal().zip(that), that);
+    return new RichIterableUsingIterator<>("zip", this.knownSize, this, () -> iteratorInternal().zip(that), that);
   }
 
   @Override
   public <U, R> RichIterable<R> zipWith(Iterable<? extends U> that,
       BiFunction<? super T, ? super U, ? extends R> mapper) {
-    return new RichIterableUsingIterator<>("zipWith", this, () -> iteratorInternal().zipWith(that, mapper), that,
+    return new RichIterableUsingIterator<>("zipWith", this.knownSize, this,
+      () -> iteratorInternal().zipWith(that, mapper), that,
       mapper);
   }
 
   @Override
   public <U> RichIterable<Tuple2<T, U>> zipAll(Iterable<? extends U> that, T thisElem, U thatElem) {
-    return new RichIterableUsingIterator<>("zipAll", this, () -> iteratorInternal().zipAll(that, thisElem, thatElem),
+    return new RichIterableUsingIterator<>("zipAll", this.knownSize, this,
+      () -> iteratorInternal().zipAll(that, thisElem, thatElem),
       that,
       thisElem, thatElem);
   }
 
   @Override
   public RichIterable<Tuple2<T, Integer>> zipWithIndex() {
-    return new RichIterableUsingIterator<>("zipWithIndex", this, () -> iteratorInternal().zipWithIndex());
+    return new RichIterableUsingIterator<>("zipWithIndex", this.knownSize, this,
+      () -> iteratorInternal().zipWithIndex());
   }
 
   @Override
   public <U> RichIterable<U> zipWithIndex(BiFunction<? super T, ? super Integer, ? extends U> mapper) {
-    return new RichIterableUsingIterator<>("zipWithIndex", this, () -> iteratorInternal().zipWithIndex(mapper), mapper);
+    return new RichIterableUsingIterator<>("zipWithIndex", this.knownSize, this,
+      () -> iteratorInternal().zipWithIndex(mapper), mapper);
   }
 
   @Override
@@ -1068,49 +1085,58 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public RichIterable<T> distinct() {
-    return new RichIterableUsingIterator<>("distinct", this, () -> iteratorInternal().distinct());
+    return new RichIterableUsingIterator<>("distinct", Option.none(), this, () -> iteratorInternal().distinct());
   }
 
   @Override
   public RichIterable<T> distinctBy(Comparator<? super T> comparator) {
-    return new RichIterableUsingIterator<>("distinctBy", this, () -> iteratorInternal().distinctBy(comparator),
+    return new RichIterableUsingIterator<>("distinctBy", Option.none(), this,
+      () -> iteratorInternal().distinctBy(comparator),
       comparator);
   }
 
   @Override
   public <U> RichIterable<T> distinctBy(Function<? super T, ? extends U> keyExtractor) {
-    return new RichIterableUsingIterator<>("distinctBy", this, () -> iteratorInternal().distinctBy(keyExtractor),
+    return new RichIterableUsingIterator<>("distinctBy", Option.none(), this,
+      () -> iteratorInternal().distinctBy(keyExtractor),
       keyExtractor);
   }
 
   @Override
   public RichIterable<T> drop(int n) {
-    return new RichIterableUsingIterator<>("drop", this, () -> iterator("drop").drop(n), n);
+    return new RichIterableUsingIterator<>("drop", this.knownSize.map(x -> Math.max(x - n, 0)), this,
+      () -> iterator("drop").drop(n),
+      n);
   }
 
   @Override
   public RichIterable<T> dropRight(int n) {
-    return new RichIterableUsingIterator<>("dropRight", this, () -> iteratorInternal().dropRight(n), n);
+    return new RichIterableUsingIterator<>("dropRight", this.knownSize.map(x -> Math.max(x - n, 0)), this,
+      () -> iteratorInternal().dropRight(n), n);
   }
 
   @Override
   public RichIterable<T> dropUntil(Predicate<? super T> predicate) {
-    return new RichIterableUsingIterator<>("dropUntil", this, () -> iteratorInternal().dropUntil(predicate), predicate);
+    return new RichIterableUsingIterator<>("dropUntil", Option.none(), this,
+      () -> iteratorInternal().dropUntil(predicate), predicate);
   }
 
   @Override
   public RichIterable<T> dropWhile(Predicate<? super T> predicate) {
-    return new RichIterableUsingIterator<>("dropWhile", this, () -> iteratorInternal().dropWhile(predicate), predicate);
+    return new RichIterableUsingIterator<>("dropWhile", Option.none(), this,
+      () -> iteratorInternal().dropWhile(predicate), predicate);
   }
 
   @Override
   public RichIterable<T> filter(Predicate<? super T> predicate) {
-    return new RichIterableUsingIterator<>("filter", this, () -> iteratorInternal().filter(predicate), predicate);
+    return new RichIterableUsingIterator<>("filter", Option.none(), this, () -> iteratorInternal().filter(predicate),
+      predicate);
   }
 
   @Override
   public RichIterable<T> reject(Predicate<? super T> predicate) {
-    return new RichIterableUsingIterator<>("reject", this, () -> iteratorInternal().reject(predicate), predicate);
+    return new RichIterableUsingIterator<>("reject", Option.none(), this, () -> iteratorInternal().reject(predicate),
+      predicate);
   }
 
   @Override
@@ -1120,7 +1146,8 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public <U> RichIterable<U> flatMapFromIterable(Function<? super T, ? extends Iterable<? extends U>> mapper) {
-    return new RichIterableUsingIterator<>("flatMapFromIterable", this, () -> iteratorInternal().flatMap(mapper),
+    return new RichIterableUsingIterator<>("flatMapFromIterable", Option.none(), this,
+      () -> iteratorInternal().flatMap(mapper),
       mapper);
   }
 
@@ -1146,7 +1173,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public RichIterable<T> init() {
-    return new RichIterableUsingIterator<>("init", this, () -> iteratorInternal().init());
+    return new RichIterableUsingIterator<>("init", Option.none(), this, () -> iteratorInternal().init());
   }
 
   @Override
@@ -1158,17 +1185,17 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public <U> RichIterable<U> map(Function<? super T, ? extends U> mapper) {
-    return new RichIterableUsingIterator<>("map", this, () -> iterator("map").map(mapper));
+    return new RichIterableUsingIterator<>("map", this.knownSize, this, () -> iterator("map").map(mapper));
   }
 
   @Override
   public RichIterable<T> orElse(Iterable<? extends T> other) {
-    return new RichIterableUsingIterator<>("orElse", this, () -> iterator("orElse").orElse(other));
+    return new RichIterableUsingIterator<>("orElse", Option.none(), this, () -> iterator("orElse").orElse(other));
   }
 
   @Override
   public RichIterable<T> orElse(Supplier<? extends Iterable<? extends T>> supplier) {
-    return new RichIterableUsingIterator<>("orElse", this, () -> iterator("orElse").orElse(supplier));
+    return new RichIterableUsingIterator<>("orElse", Option.none(), this, () -> iterator("orElse").orElse(supplier));
   }
 
   @Override
@@ -1179,7 +1206,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public RichIterable<T> peek(Consumer<? super T> action) {
-    return new RichIterableUsingIterator<>("peek", this, () -> iterator("peek").peek(action));
+    return new RichIterableUsingIterator<>("peek", Option.none(), this, () -> iterator("peek").peek(action));
   }
 
   @Override
@@ -1194,21 +1221,22 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public RichIterable<T> replace(T currentElement, T newElement) {
-    return new RichIterableUsingIterator<>("replace", this,
+    return new RichIterableUsingIterator<>("replace", Option.none(), this,
       () -> iterator("replace").replace(currentElement, newElement),
       currentElement, newElement);
   }
 
   @Override
   public RichIterable<T> replaceAll(T currentElement, T newElement) {
-    return new RichIterableUsingIterator<>("replaceAll", this,
+    return new RichIterableUsingIterator<>("replaceAll", Option.none(), this,
       () -> iterator("replaceAll").replaceAll(currentElement, newElement),
       currentElement, newElement);
   }
 
   @Override
   public RichIterable<T> retainAll(Iterable<? extends T> elements) {
-    return new RichIterableUsingIterator<>("retainAll", this, () -> iterator("retainAll").retainAll(elements),
+    return new RichIterableUsingIterator<>("retainAll", Option.none(), this,
+      () -> iterator("retainAll").retainAll(elements),
       elements);
   }
 
@@ -1219,29 +1247,34 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public <U> RichIterable<U> scanLeft(U zero, BiFunction<? super U, ? super T, ? extends U> operation) {
-    return new RichIterableUsingIterator<>("scanLeft", this, () -> iterator("scanLeft").scanLeft(zero, operation),
+    return new RichIterableUsingIterator<>("scanLeft", Option.none(), this,
+      () -> iterator("scanLeft").scanLeft(zero, operation),
       zero);
   }
 
   @Override
   public <U> RichIterable<U> scanRight(U zero, BiFunction<? super T, ? super U, ? extends U> operation) {
-    return new RichIterableUsingIterator<>("scanRight", this, () -> iterator("scanRight").scanRight(zero, operation),
+    return new RichIterableUsingIterator<>("scanRight", Option.none(), this,
+      () -> iterator("scanRight").scanRight(zero, operation),
       zero);
   }
 
   @Override
   public RichIterable<Seq<T>> slideBy(Function<? super T, ?> classifier) {
-    return new RichIterableUsingIterator<>("slideBy", this, () -> iterator("slideBy").slideBy(classifier));
+    return new RichIterableUsingIterator<>("slideBy", Option.none(), this,
+      () -> iterator("slideBy").slideBy(classifier));
   }
 
   @Override
   public RichIterable<Seq<T>> sliding(int size) {
-    return new RichIterableUsingIterator<>("sliding", this, () -> iterator("sliding").sliding(size), size);
+    return new RichIterableUsingIterator<>("sliding", Option.none(), this, () -> iterator("sliding").sliding(size),
+      size);
   }
 
   @Override
   public RichIterable<Seq<T>> sliding(int size, int step) {
-    return new RichIterableUsingIterator<>("sliding", this, () -> iterator("sliding").sliding(size, step), size, step);
+    return new RichIterableUsingIterator<>("sliding", Option.none(), this,
+      () -> iterator("sliding").sliding(size, step), size, step);
   }
 
   @Override
@@ -1253,7 +1286,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public RichIterable<T> tail() {
-    return new RichIterableUsingIterator<>("tail", this, () -> iterator("span").tail());
+    return new RichIterableUsingIterator<>("tail", Option.none(), this, () -> iterator("span").tail());
   }
 
   @Override
@@ -1265,22 +1298,26 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public RichIterable<T> take(int n) {
-    return new RichIterableUsingIterator<>("take", this, () -> iterator("take").take(n), n);
+    return new RichIterableUsingIterator<>("take", this.knownSize.map(x -> Math.min(n, x)), this,
+      () -> iterator("take").take(n), n);
   }
 
   @Override
   public RichIterable<T> takeRight(int n) {
-    return new RichIterableUsingIterator<>("takeRight", this, () -> iterator("takeRight").takeRight(n), n);
+    return new RichIterableUsingIterator<>("takeRight", this.knownSize.map(x -> Math.min(n, x)), this,
+      () -> iterator("takeRight").takeRight(n), n);
   }
 
   @Override
   public RichIterable<T> takeUntil(Predicate<? super T> predicate) {
-    return new RichIterableUsingIterator<>("takeUntil", this, () -> iterator("takeUntil").takeUntil(predicate));
+    return new RichIterableUsingIterator<>("takeUntil", Option.none(), this,
+      () -> iterator("takeUntil").takeUntil(predicate));
   }
 
   @Override
   public RichIterable<T> takeWhile(Predicate<? super T> predicate) {
-    return new RichIterableUsingIterator<>("takeWhile", this, () -> iterator("takeWhile").takeWhile(predicate));
+    return new RichIterableUsingIterator<>("takeWhile", Option.none(), this,
+      () -> iterator("takeWhile").takeWhile(predicate));
   }
 
   public Tuple3<RichIterable<T>, RichIterable<T>, RichIterable<T>> split(int offset, int pageSize) {
@@ -1296,7 +1333,7 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   }
 
   private RichIterable<T> rich(String operation, io.vavr.collection.Stream<T> iterator, int offset, int pageSize) {
-    return new RichIterableUsingIterator<>(operation, this, iterator, offset, pageSize);
+    return new RichIterableUsingIterator<>(operation, Option.none(), this, iterator, offset, pageSize);
   }
 
   @Override

@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import io.vavr.API;
 import io.vavr.CheckedConsumer;
 import io.vavr.CheckedFunction0;
 import io.vavr.PartialFunction;
@@ -113,15 +114,16 @@ public interface RichIterable<T> {
     if (iterable instanceof Value) {
       return ofVavr((Value<T>) iterable);
     }
-    return new RichIterableUsingIterator<>("ofIterable", null, iterable, iterable);
+    return new RichIterableUsingIterator<>("ofIterable", Option.none(), null, iterable, iterable);
   }
 
   static <T> RichIterable<T> ofJava(Collection<T> collection) {
-    return new RichIterableUsingIterator<>("ofJava", null, collection, collection);
+    return new RichIterableUsingIterator<>("ofJava", Option.of(collection.size()), null, collection, collection);
   }
 
+  @SuppressWarnings("unchecked")
   static <T> RichIterable<T> ofVavr(Value<T> iterable) {
-    return new RichIterableUsingIterator<>("ofVavr", null, iterable, iterable);
+    return new RichIterableUsingIterator<>("ofVavr", smartSize(iterable), null, iterable, iterable);
   }
 
   @SafeVarargs
@@ -135,14 +137,14 @@ public interface RichIterable<T> {
 
   @SafeVarargs
   static <T> RichIterable<T> concatAll(RichIterable<T>... iterables) {
-    return new RichIterableUsingIterator<>("concatAll", null,
+    return new RichIterableUsingIterator<>("concatAll", Option.none(), null,
       () -> Iterator.concat(io.vavr.collection.List.of(iterables).map(x -> x.iterator("concat"))),
       (Object[]) iterables);
   }
 
   @SafeVarargs
   static <T> RichIterable<T> concatAll(Iterable<T>... iterables) {
-    return new RichIterableUsingIterator<>("concatAll", null,
+    return new RichIterableUsingIterator<>("concatAll", Option.none(), null,
       () -> {
         io.vavr.collection.List<Iterable<T>> all = io.vavr.collection.List.of(iterables);
         return Iterator.concat(all);
@@ -395,6 +397,20 @@ public interface RichIterable<T> {
   Option<T> singleOption();
 
   int size();
+
+  static <T> Option<Integer> smartSize(Value<T> iterable) {
+    if (iterable.isEmpty()) {
+      return Option.of(0);
+    }
+    if (iterable.isSingleValued()) {
+      return Option.of(1);
+    }
+    if (iterable instanceof Traversable) {
+      return ((Traversable) iterable).hasDefiniteSize() ? Option.of(((Traversable) iterable).size()) : Option.none();
+    } else {
+      return API.TODO("Don't know how to get smartSize for " + iterable.getClass());
+    }
+  }
 
   Spliterator<T> spliterator();
 
