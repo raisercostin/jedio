@@ -123,9 +123,8 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
 #### Repository
 ```
 <repository>
-  <id>raisercostin-bintray</id>
-  <url>https://dl.bintray.com/raisercostin/maven</url>
-  <releases><enabled>true</enabled></releases>
+  <id>raisercostin-github</id>
+  <url>https://raw.githubusercontent.com/raisercostin/maven-repo/master/</url>
   <snapshots><enabled>false</enabled></snapshots>
 </repository>
 ```
