@@ -19,9 +19,13 @@
   </scm>
   <distributionManagement>
     <repository>
-      <id>bintray</id>
-      <url>https://api.bintray.com/maven/${bintray.user}/${bintray.repo}/${bintray.package}/;publish=1</url>
+      <id>github</id>
+      <url>scm:git:${dist.url}</url>
     </repository>
+    <snapshotRepository>
+      <id>git-release-snapshot</id>
+      <url>git:${dist.snapshot.url}</url>
+    </snapshotRepository>
   </distributionManagement>
   <issueManagement>
     <system>Github</system>
@@ -32,13 +36,10 @@
     <git.repo>${project.artifactId}</git.repo>
     <git.host>github.com</git.host>
     <git.url>https://${git.host}/${git.userOrGroup}/${git.repo}</git.url>
-    <bintray.user>raisercostin</bintray.user>
-    <bintray.repo>maven</bintray.repo>
-    <bintray.package>${project.artifactId}</bintray.package>
     <maven.build.timestamp.format>yyyyMMdd'T'HHmmss</maven.build.timestamp.format>
-    <dist.url>https://api.bintray.com/maven/${bintray.user}/${bintray.repo}/${bintray.package}</dist.url>
-    <dist.release.url>${dist.url}/releases/</dist.release.url>
-    <dist.snapshot.url>${dist.url}/snapshots/</dist.snapshot.url>
+    <dist.url>${git.url}</dist.url>
+    <dist.release.url>https://github.com/raisercostin/maven-repo.git</dist.release.url>
+    <dist.snapshot.url>target/snapshots/</dist.snapshot.url>
     <dist.site.url>${dist.url}/sites/${project.groupId}-${project.artifactId}-${project.version}</dist.site.url>
     <createChecksum>false</createChecksum>
     <maven.test.skip>false</maven.test.skip>
@@ -74,6 +75,12 @@
       <organizationUrl>http://raisercostin.org</organizationUrl>
     </developer>
   </developers>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>synergian-repo</id>
+      <url>https://raw.github.com/synergian/wagon-git/releases</url>
+    </pluginRepository>
+  </pluginRepositories>
   <dependencyManagement>
     <dependencies>
       <!-- https://stackoverflow.com/questions/16894032/how-to-use-poms-as-a-dependency-in-maven -->
@@ -97,8 +104,8 @@
       <artifactId>checker-qual</artifactId>
       <version>3.11.0</version>
     </dependency>
-    <!-- <dependency> <groupId>org.jetbrains.kotlin</groupId> <artifactId>kotlin-stdlib</artifactId> <version>${kotlin.version}</version> </dependency> 
-      <dependency> <groupId>org.jetbrains.kotlin</groupId> <artifactId>kotlin-test-junit</artifactId> <version>${kotlin.version}</version> <scope>test</scope> 
+    <!-- <dependency> <groupId>org.jetbrains.kotlin</groupId> <artifactId>kotlin-stdlib</artifactId> <version>${kotlin.version}</version> </dependency>
+      <dependency> <groupId>org.jetbrains.kotlin</groupId> <artifactId>kotlin-test-junit</artifactId> <version>${kotlin.version}</version> <scope>test</scope>
       </dependency> -->
     <dependency>
       <groupId>org.raisercostin</groupId>
@@ -157,7 +164,7 @@
       <scope>test</scope>
     </dependency>
  -->
-    <!-- <dependency> <groupId>org.junit.platform</groupId> <artifactId>junit-platform-launcher</artifactId> <version>1.1.0</version> <scope>test</scope> 
+    <!-- <dependency> <groupId>org.junit.platform</groupId> <artifactId>junit-platform-launcher</artifactId> <version>1.1.0</version> <scope>test</scope>
       </dependency> -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -240,7 +247,7 @@
       <optional>true</optional>
     </dependency>
     <!-- tests -->
-    <!-- 
+    <!--
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
@@ -271,7 +278,7 @@
     </dependency>
      -->
     <!-- <dependency> <groupId>org.mapstruct</groupId> <artifactId>mapstruct-jdk8</artifactId> <version>${org.mapstruct.version}</version> </dependency> -->
-    <!-- <dependency> <groupId>org.mapstruct</groupId> <artifactId>mapstruct-processor</artifactId> <version>${org.mapstruct.version}</version> 
+    <!-- <dependency> <groupId>org.mapstruct</groupId> <artifactId>mapstruct-processor</artifactId> <version>${org.mapstruct.version}</version>
       </dependency> -->
     <!-- pdfbox, poi, tabula -->
     <dependency>
@@ -337,24 +344,24 @@
   <build>
     <finalName>${project.artifactId}</finalName>
     <plugins>
-      <!-- <sourceDirectory>src/main/kotlin</sourceDirectory> <testSourceDirectory>src/test/kotlin</testSourceDirectory> <plugin> <groupId>org.jetbrains.kotlin</groupId> 
-        <artifactId>kotlin-maven-plugin</artifactId> <version>${kotlin.version}</version> <configuration> <nowarn>false</nowarn> <args> <arg>-Xjsr305=strict</arg> 
-        Enable strict mode for JSR-305 annotations </args> </configuration> <executions> <execution> <id>compile</id> <phase>compile</phase> <goals> 
-        <goal>compile</goal> </goals> <configuration> <sourceDirs> <sourceDir>${project.basedir}/src/main/kotlin</sourceDir> <sourceDir>${project.basedir}/src/main/java</sourceDir> 
-        </sourceDirs> </configuration> </execution> <execution> <id>test-compile</id> <phase>test-compile</phase> <goals> <goal>test-compile</goal> </goals> 
-        <configuration> <sourceDirs> <sourceDir>${project.basedir}/src/test/kotlin</sourceDir> <sourceDir>${project.basedir}/src/test/java</sourceDir> 
+      <!-- <sourceDirectory>src/main/kotlin</sourceDirectory> <testSourceDirectory>src/test/kotlin</testSourceDirectory> <plugin> <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-maven-plugin</artifactId> <version>${kotlin.version}</version> <configuration> <nowarn>false</nowarn> <args> <arg>-Xjsr305=strict</arg>
+        Enable strict mode for JSR-305 annotations </args> </configuration> <executions> <execution> <id>compile</id> <phase>compile</phase> <goals>
+        <goal>compile</goal> </goals> <configuration> <sourceDirs> <sourceDir>${project.basedir}/src/main/kotlin</sourceDir> <sourceDir>${project.basedir}/src/main/java</sourceDir>
+        </sourceDirs> </configuration> </execution> <execution> <id>test-compile</id> <phase>test-compile</phase> <goals> <goal>test-compile</goal> </goals>
+        <configuration> <sourceDirs> <sourceDir>${project.basedir}/src/test/kotlin</sourceDir> <sourceDir>${project.basedir}/src/test/java</sourceDir>
         </sourceDirs> </configuration> </execution> </executions> </plugin> -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <!-- <version>3.8.1</version> -->
-        <!-- to use eclipse compiler like in 
+        <!-- to use eclipse compiler like in
           - https://stackoverflow.com/questions/33164976/using-eclipse-java-compiler-ecj-in-maven-builds
           - https://projectlombok.org/setup/ecj
           - https://projectlombok.org/setup/ecj-in-maven-pom-example.xml
           -->
         <!--$NO-MVN-MAN-VER$ -->
-        <!-- 
+        <!--
         <dependencies>
           <dependency>
             <groupId>org.codehaus.plexus</groupId>
@@ -374,11 +381,11 @@
           <showWarnings>true</showWarnings>
           <showDeprecation>true</showDeprecation>
           <!-- eclipse compiler -->
-          <!-- 
+          <!--
             set MAVEN_OPTS=-javaagent:target/lombok.jar=ECJ-
             <release>11</release>
            -->
-          <!-- 
+          <!--
           <compilerId>eclipse</compilerId>
           <fork>true</fork>
           <compilerArgs>
@@ -394,9 +401,9 @@
           </annotationProcessorPaths>
           <generatedSourcesDirectory>${project.build.directory}/generated-sources</generatedSourcesDirectory>
         </configuration>
-        <!-- <executions> Replacing default-compile as it is treated specially by maven <execution> <id>default-compile</id> <phase>none</phase> 
-          </execution> Replacing default-testCompile as it is treated specially by maven <execution> <id>default-testCompile</id> <phase>none</phase> </execution> 
-          <execution> <id>java-compile</id> <phase>compile</phase> <goals> <goal>compile</goal> </goals> </execution> <execution> <id>java-test-compile</id> 
+        <!-- <executions> Replacing default-compile as it is treated specially by maven <execution> <id>default-compile</id> <phase>none</phase>
+          </execution> Replacing default-testCompile as it is treated specially by maven <execution> <id>default-testCompile</id> <phase>none</phase> </execution>
+          <execution> <id>java-compile</id> <phase>compile</phase> <goals> <goal>compile</goal> </goals> </execution> <execution> <id>java-test-compile</id>
           <phase>test-compile</phase> <goals> <goal>testCompile</goal> </goals> </execution> </executions> -->
       </plugin>
       <!-- lombok for ecj compiler
@@ -444,7 +451,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore />
+                  <ignore/>
                 </action>
               </pluginExecution>
               <pluginExecution>
@@ -457,7 +464,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore />
+                  <ignore/>
                 </action>
               </pluginExecution>
             </pluginExecutions>
@@ -476,10 +483,10 @@
           </archive>
         </configuration>
       </plugin>
+      <!--
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <!--$NO-MVN-MAN-VER$ -->
         <executions>
           <execution>
             <id>make-assembly</id>
@@ -500,6 +507,7 @@
           </execution>
         </executions>
       </plugin>
+       -->
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
@@ -521,7 +529,7 @@
         </configuration>
       </plugin>
       <!-- https://github.com/coveo/fmt-maven-plugin -->
-      <!-- <plugin> <groupId>com.coveo</groupId> <artifactId>fmt-maven-plugin</artifactId> <version>2.6.0</version> <executions> <execution> <goals> 
+      <!-- <plugin> <groupId>com.coveo</groupId> <artifactId>fmt-maven-plugin</artifactId> <version>2.6.0</version> <executions> <execution> <goals>
         <goal>format</goal> </goals> </execution> </executions> </plugin> -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -530,9 +538,9 @@
         <!--$NO-MVN-MAN-VER$ -->
         <configuration>
           <target>
-            <echo message="ant cleanup started." />
-            <fixcrlf srcdir="${basedir}" eol="unix" tab="remove" tablength="2" includes="**/*.java **/*.xml" preservelastmodified="true" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" />
-            <echo message="ant cleanup finished." />
+            <echo message="ant cleanup started."/>
+            <fixcrlf srcdir="${basedir}" eol="unix" tab="remove" tablength="2" includes="**/*.java **/*.xml" preservelastmodified="true" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*"/>
+            <echo message="ant cleanup finished."/>
           </target>
         </configuration>
         <!-- not always needed -->
@@ -584,7 +592,7 @@
           </execution>
         </executions>
         <dependencies>
-          <!-- to use eclipse compiler like in 
+          <!-- to use eclipse compiler like in
           - https://stackoverflow.com/questions/33164976/using-eclipse-java-compiler-ecj-in-maven-builds
           - https://projectlombok.org/setup/ecj
           - https://projectlombok.org/setup/ecj-in-maven-pom-example.xml
@@ -682,6 +690,13 @@
         </configuration>
       </plugin>
     </plugins>
+    <extensions>
+      <extension>
+        <groupId>ar.com.synergian</groupId>
+        <artifactId>wagon-git</artifactId>
+        <version>0.2.5</version>
+      </extension>
+    </extensions>
     <pluginManagement>
       <plugins>
         <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
@@ -702,7 +717,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore />
+                    <ignore/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>
@@ -719,18 +734,11 @@
       <url>https://repo.spring.io/milestone</url>
     </repository>
     <repository>
-      <id>jcenter-bintray</id>
-      <url>https://jcenter.bintray.com/</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
-    </repository>
-    <repository>
-      <id>raisercostin-bintray</id>
-      <url>https://dl.bintray.com/raisercostin/maven</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
+      <id>raisercostin-github</id>
+      <url>https://raw.githubusercontent.com/raisercostin/maven-repo/master/</url>
     </repository>
   </repositories>
 </project>
