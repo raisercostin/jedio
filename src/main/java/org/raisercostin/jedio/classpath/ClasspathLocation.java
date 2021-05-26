@@ -137,8 +137,7 @@ public class ClasspathLocation
   @Override
   public InputStream unsafeInputStream() {
     final InputStream res = specialClassLoader.getResourceAsStream(this.resourcePath);
-    Preconditions.checkNotNull(res);
-    return res;
+    return Preconditions.checkNotNull(res);
   }
 
   @Override

@@ -13,42 +13,45 @@ import io.vavr.collection.Seq;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.util.ReflectionUtils;
 
+@Slf4j
 public class NodeUtils {
   public static Object object(Object object, Object firstKey, Object... restKeys) {
-    return nullableInternal(object, Iterator.of(firstKey).concat(Iterator.of(restKeys)), false, true);
+    return nullableInternal(object, Iterator.of(firstKey).concat(Iterator.of(restKeys)), false, true, true);
   }
 
   public static String notNullString(Object object, Object... keys) {
-    return Objects.toString(nullableInternal(object, Iterator.of(keys), false, true), "returnedNullString");
+    return Objects.toString(nullableInternal(object, Iterator.of(keys), false, true, true), "returnedNullString");
   }
 
   public static String notNullString(Object object, String... keys) {
-    return Objects.toString(nullableInternal(object, Iterator.of(keys), false, true), "returnedNullString");
+    return Objects.toString(nullableInternal(object, Iterator.of(keys), false, true, true), "returnedNullString");
   }
 
   public static String nullableString(Object object, String firstKey, Object... restKeys) {
     return Objects.toString(
-      nullableInternal(object, Iterator.<Object>of(firstKey).concat(Iterator.of(restKeys)), true, true), null);
+      nullableInternal(object, Iterator.<Object>of(firstKey).concat(Iterator.of(restKeys)), true, true, true), null);
   }
 
   public static String nullableOrInexistentString(Object object, String firstKey, Object... restKeys) {
     return Try
       .of(() -> (String) nullableInternal(object, Iterator.<Object>of(firstKey).concat(Iterator.of(restKeys)), true,
-        true))
+        true, true))
       .getOrNull();
   }
 
   public static String nullableString(Object object, Object... keys) {
-    return Objects.toString(nullableInternal(object, Iterator.of(keys), true, true), null);
+    return Objects.toString(nullableInternal(object, Iterator.of(keys), true, true, true), null);
   }
 
   public static String nullableStringWithFallback(String fallbackValue, Object object, Object firstKey,
       Object... restKeys) {
-    return Objects.toString(nullableInternal(object, Iterator.of(firstKey).concat(Iterator.of(restKeys)), true, true),
+    return Objects.toString(
+      nullableInternal(object, Iterator.of(firstKey).concat(Iterator.of(restKeys)), true, true, true),
       fallbackValue);
   }
 
@@ -56,76 +59,77 @@ public class NodeUtils {
    * The legitimate keys are String or Number.
    */
   public static <T> T notNull(Object object, String firstKey) {
-    return nullableInternal(object, Iterator.<Object>of(firstKey), false, true);
+    return nullableInternal(object, Iterator.<Object>of(firstKey), false, true, true);
   }
 
   /**FirstKey must exist (otherwise compilation error) and must not be an array by mistake.
    * The legitimate keys are String or Number.
    */
   public static <T> T notNull(Object object, Number firstKey, Object... restKeys) {
-    return nullableInternal(object, Iterator.<Object>of(firstKey).concat(Iterator.of(restKeys)), false, true);
+    return nullableInternal(object, Iterator.<Object>of(firstKey).concat(Iterator.of(restKeys)), false, true, true);
   }
 
   /**FirstKey must exist (otherwise compilation error) and must not be an array by mistake.
    * The legitimate keys are String or Number.
    */
   public static <T> T notNull(Object object, Object... keys) {
-    return nullableInternal(object, Iterator.of(keys), false, true);
+    return nullableInternal(object, Iterator.of(keys), false, true, true);
   }
 
   /**FirstKey must exist (otherwise compilation error) and must not be an array by mistake.
    * The legitimate keys are String or Number.
    */
   public static <T> T notNull(Object object, String... keys) {
-    return nullableInternal(object, Iterator.of((Object[]) keys), false, true);
+    return nullableInternal(object, Iterator.of((Object[]) keys), false, true, true);
   }
 
   /**FirstKey must exist (otherwise compilation error) and must not be an array by mistake.
    * The legitimate keys are String or Number.
    */
   public static <T> T nullable(Object object, String firstKey) {
-    return nullableInternal(object, Iterator.<Object>of(firstKey), true, true);
+    return nullableInternal(object, Iterator.<Object>of(firstKey), true, true, true);
   }
 
   /**FirstKey must exist (otherwise compilation error) and must not be an array by mistake.
    * The legitimate keys are String or Number.
    */
   public static <T> T nullable(Object object, Number firstKey, Object... restKeys) {
-    return nullableInternal(object, Iterator.<Object>of(firstKey).concat(Iterator.of(restKeys)), true, true);
+    return nullableInternal(object, Iterator.<Object>of(firstKey).concat(Iterator.of(restKeys)), true, true, true);
   }
 
   /**FirstKey must exist (otherwise compilation error) and must not be an array by mistake.
    * The legitimate keys are String or Number.
    */
   public static <T> T nullable(Object object, Object... keys) {
-    return nullableInternal(object, Iterator.of(keys), true, true);
+    return nullableInternal(object, Iterator.of(keys), true, true, true);
   }
 
   /**FirstKey must exist (otherwise compilation error) and must not be an array by mistake.
    * The legitimate keys are String or Number.
    */
   public static <T> T nullable(Object object, String... keys) {
-    return nullableInternal(object, Iterator.of((Object[]) keys), true, true);
+    return nullableInternal(object, Iterator.of((Object[]) keys), true, true, true);
   }
 
   public static <T> T nullableWithFallback(T fallbackValue, Object object, Object firstKey, Object... restKeys) {
-    T res = nullableInternal(object, Iterator.of(firstKey).concat(Iterator.of(restKeys)), true, true);
+    T res = nullableInternal(object, Iterator.of(firstKey).concat(Iterator.of(restKeys)), true, true, true);
     return res == null ? fallbackValue : res;
   }
 
-  public static <T> T nullable(Object object, Iterator<Object> keys, boolean nullable, boolean caseInsensitive) {
-    return nullableInternal(object, keys, nullable, caseInsensitive);
+  public static <T> T nullable(Object object, Iterator<Object> keys, boolean nullable, boolean caseInsensitive,
+      boolean nullIfInvalid) {
+    return nullableInternal(object, keys, nullable, caseInsensitive, nullIfInvalid);
   }
 
   public static <T> T nullableInternal(Object object, Iterator<Object> keys, boolean nullable,
-      boolean caseInsensitive) {
+      boolean caseInsensitive, boolean nullIfInvalid) {
     T value = (T) keys.foldLeft(object,
-      (currentObject, key) -> getByKey(currentObject, key, nullable, caseInsensitive));
+      (currentObject, key) -> getByKey(currentObject, key, nullable, caseInsensitive, nullIfInvalid));
     return value;
   }
 
   public static <T> T withValueOf(T node, Object keyHead, Object... keysTailAndValue) {
-    return withValueOf(false, node, keyHead, keysTailAndValue);
+    return withValueOf(false, true, node, keyHead, keysTailAndValue);
   }
 
   /**
@@ -133,10 +137,11 @@ public class NodeUtils {
    *
    * @return the given node object if is mutable or another object if node is imutable.
    */
-  public static <T> T withValueOf(boolean caseInsensitive, T node, Object keyHead, Object... keysTailAndValue) {
+  public static <T> T withValueOf(boolean caseInsensitive, boolean nullIfInvalid, T node, Object keyHead,
+      Object... keysTailAndValue) {
     // return Iterator.of(keys).foldLeft(node, (last, key) -> setByKey(last, key, value));
     List<Object> all = List.of(keyHead).appendAll(List.of(keysTailAndValue));
-    return withValueOfInternal(node, all.dropRight(1), all.last(), caseInsensitive);
+    return withValueOfInternal(node, all.dropRight(1), all.last(), caseInsensitive, nullIfInvalid);
   }
 
   /**
@@ -145,7 +150,8 @@ public class NodeUtils {
    * @return the given node object if is mutable or another object if node is imutable.
    */
   @SuppressWarnings("unchecked")
-  private static <T> T withValueOfInternal(@Nullable T node, Seq<Object> keys, Object value, boolean caseInsensitive) {
+  private static <T> T withValueOfInternal(@Nullable T node, Seq<Object> keys, Object value, boolean caseInsensitive,
+      boolean nullIfInvalid) {
     if (keys.isEmpty()) {
       return (T) value;
     }
@@ -155,8 +161,9 @@ public class NodeUtils {
     if (keys.size() == 1) {
       return (T) setByKey(node2, key, value);
     }
-    Object currentValue = withValueOfInternal(getByKey(node, key, false, caseInsensitive), keys.tail(), value,
-      caseInsensitive);
+    Object currentValue = withValueOfInternal(getByKey(node, key, false, caseInsensitive, nullIfInvalid), keys.tail(),
+      value,
+      caseInsensitive, nullIfInvalid);
     return (T) setByKey(node2, key, currentValue);
   }
 
@@ -187,6 +194,7 @@ public class NodeUtils {
     }
     Field field = ReflectionUtils.findField(object.getClass(), (String) key);
     if (field != null) {
+      field.setAccessible(true);
       field.set(object, value);
       return object;
     }
@@ -195,9 +203,9 @@ public class NodeUtils {
   }
 
   private static <T extends @NonNull Object> @Nullable T getByKey(@Nullable Object object, Object key, boolean nullable,
-      boolean caseInsensitive) {
+      boolean caseInsensitive, boolean nullIfInvalid) {
     @Nullable
-    T value = getByKeyNullable(object, key, caseInsensitive);
+    T value = getByKeyNullable(object, key, caseInsensitive, nullIfInvalid);
     if (!nullable) {
       return Preconditions.checkNotNull(value, "%s is null on Object %s", key, object);
     }
@@ -207,7 +215,7 @@ public class NodeUtils {
   @SuppressWarnings("unchecked")
   @SneakyThrows
   private static <T> @org.checkerframework.checker.nullness.qual.Nullable T getByKeyNullable(@Nullable Object object,
-      Object key, boolean caseInsensitive) {
+      Object key, boolean caseInsensitive, boolean nullIfInvalid) {
     // return BeanUtils.getValue(node, "rawNodes/adOrgs/0/_key");
     // return PropertyUtils.getProperty(node, key.toString());
     if (object == null) {
@@ -241,20 +249,24 @@ public class NodeUtils {
       return ((Seq<T>) object).get((Integer) key);
     }
     if (object instanceof Option) {
-      return getByKeyNullable(((Option<T>) object).get(), key, caseInsensitive);
+      return getByKeyNullable(((Option<T>) object).get(), key, caseInsensitive, nullIfInvalid);
     }
     if (object instanceof Optional) {
-      return getByKeyNullable(((Optional<T>) object).get(), key, caseInsensitive);
+      return getByKeyNullable(((Optional<T>) object).get(), key, caseInsensitive, nullIfInvalid);
     }
     if (object instanceof com.google.common.base.Optional) {
-      return getByKeyNullable(((com.google.common.base.Optional<T>) object).get(), key, caseInsensitive);
+      return getByKeyNullable(((com.google.common.base.Optional<T>) object).get(), key, caseInsensitive, nullIfInvalid);
     }
     Field field = ReflectionUtils.findField(object.getClass(), (String) key);
     if (field != null) {
       field.setAccessible(true);
       return (T) field.get(object);
     }
-    throw new RuntimeException(
-      String.format("Don't know how to get %s[%s] on object %s", object.getClass(), key, object));
+    String msg = String.format("Don't know how to get %s[%s] on object %s", object.getClass(), key, object);
+    if (nullIfInvalid) {
+      log.warn(msg);
+      return null;
+    }
+    throw new RuntimeException(msg);
   }
 }
