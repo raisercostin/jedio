@@ -692,6 +692,11 @@
     </plugins>
     <extensions>
       <extension>
+        <groupId>org.apache.maven.scm</groupId>
+        <artifactId>maven-scm-provider-gitexe</artifactId>
+        <version>1.11.2</version>
+      </extension>
+      <extension>
         <groupId>ar.com.synergian</groupId>
         <artifactId>wagon-git</artifactId>
         <version>0.2.5</version>
