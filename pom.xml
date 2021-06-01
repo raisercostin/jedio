@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+>
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.raisercostin</groupId>
@@ -24,7 +28,12 @@
     </repository>
     <snapshotRepository>
       <id>git-release-snapshot</id>
-      <url>git:${dist.snapshot.url}</url>
+      <url>git:master:https2://github.com/raisercostin/jedio.git</url>
+      <!--
+      <url>git:master://git@github.com:raisercostin/jedio.git</url>
+      -->
+      <!-- <url>https://github.com/raisercostin/jedio.git</url> -->
+      <!--<url>git:${dist.snapshot.url}</url> ${dist.url}-->
     </snapshotRepository>
   </distributionManagement>
   <issueManagement>
@@ -95,6 +104,31 @@
     </dependencies>
   </dependencyManagement>
   <dependencies>
+    <dependency>
+      <groupId>org.apache.maven.scm</groupId>
+      <artifactId>maven-scm-provider-gitexe</artifactId>
+      <version>1.11.2</version>
+    </dependency>
+    <dependency>
+      <groupId>ar.com.synergian</groupId>
+      <artifactId>wagon-git</artifactId>
+      <version>0.3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.resolver</groupId>
+      <artifactId>maven-resolver-transport-wagon</artifactId>
+      <version>1.6.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.resolver</groupId>
+      <artifactId>maven-resolver-impl</artifactId>
+      <version>1.6.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-artifact-transfer</artifactId>
+      <version>0.12.0</version>
+    </dependency>
     <dependency>
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs-annotations</artifactId>
@@ -539,7 +573,14 @@
         <configuration>
           <target>
             <echo message="ant cleanup started." />
-            <fixcrlf srcdir="${basedir}" eol="unix" tab="remove" tablength="2" includes="**/*.java **/*.xml" preservelastmodified="true" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" />
+            <fixcrlf
+              srcdir="${basedir}"
+              eol="unix"
+              tab="remove"
+              tablength="2"
+              includes="**/*.java **/*.xml"
+              preservelastmodified="true"
+              excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" />
             <echo message="ant cleanup finished." />
           </target>
         </configuration>
@@ -699,7 +740,7 @@
       <extension>
         <groupId>ar.com.synergian</groupId>
         <artifactId>wagon-git</artifactId>
-        <version>0.2.5</version>
+        <version>0.3.0</version>
       </extension>
     </extensions>
     <pluginManagement>
@@ -733,6 +774,10 @@
     </pluginManagement>
   </build>
   <repositories>
+    <repository>
+      <id>synergian-repo</id>
+      <url>https://raw.github.com/synergian/wagon-git/releases</url>
+    </repository>
     <repository>
       <id>spring-milestones</id>
       <name>Spring Milestones</name>

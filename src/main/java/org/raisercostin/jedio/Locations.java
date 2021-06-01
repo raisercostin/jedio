@@ -60,6 +60,10 @@ public class Locations {
     return new PathLocation(path);
   }
 
+  public static PathLocation path(java.net.URI path) {
+    return new PathLocation(Paths.get(path));
+  }
+
   @sugar
   public static PathLocation path(File path) {
     return path(path.toPath());
@@ -114,6 +118,7 @@ public class Locations {
 
   /**Create a location. Shold have a schema.*/
   @JsonCreator
+  @SneakyThrows
   public static Location location(String externalUrl) {
     Either<String, Tuple3<Matcher, String, String>> schemaAndUrl2 = RichRegex.regexp2("^([a-z]+)\\:(.*)$",
       externalUrl);
@@ -130,7 +135,7 @@ public class Locations {
       case "classpath":
         return classpath(schemaAndUrl._3);
       case "file":
-        return path(schemaAndUrl._3);
+        return path(new java.net.URI(externalUrl));
       case "relative":
         return pathFromRelative(relative(schemaAndUrl._3));
       case "current":
