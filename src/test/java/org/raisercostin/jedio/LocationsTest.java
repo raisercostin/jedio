@@ -10,19 +10,23 @@ import java.net.URISyntaxException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Paths;
 
+import org.jedio.Audit.AuditException;
 import org.junit.jupiter.api.Test;
 import org.raisercostin.jedio.op.CopyOptions;
 
 class LocationsTest {
   @Test
   void test() {
-    assertEquals("PathLocation(path=" + Paths.get(".").toAbsolutePath().normalize() + ")",
-      Locations.current().toString());
+    assertThat(Locations.current().toString()).contains(Paths.get(".").toAbsolutePath().normalize().toString());
   }
 
   @Test
   void testCopyTo() {
-    assertEquals(346622, Locations.classpath("a b.jpg").copyToFile(Locations.path("target/ab-copied.jpg")).length());
+    assertThat(
+      Locations.path("target/ab-copied.jpg")
+        .copyFrom(Locations.classpath("a b.jpg"), CopyOptions.copyOverwrite())
+        .length())
+          .isEqualTo(346622);
   }
 
   @Test
@@ -30,8 +34,8 @@ class LocationsTest {
     final ReadableFileLocation src = Locations.classpath("a b.jpg");
     final WritableFileLocation dest = Locations.path("target/ab-copied.jpg").mkdirOnParentIfNeeded();
     dest.deleteFile();
-    assertEquals(346622, src.copyToFile(dest).length());
-    assertThrows(FileAlreadyExistsException.class, () -> {
+    assertEquals(346622, dest.copyFrom(src, CopyOptions.copyDefault()).length());
+    assertThrows(AuditException.class, () -> {
       src.copyToFile(dest, CopyOptions.copyDoNotOverwriteAndThrow());
     });
   }
@@ -52,5 +56,11 @@ class LocationsTest {
         .toURL()
         .toExternalForm())
           .isEqualTo(FILE);
+  }
+
+  @Test
+  void locationsFromUrl2() {
+    Location loc = Locations.location("file:/C:\\Users\\raiser/.revobet/lsports-cache");
+    assertThat(loc).isNotNull();
   }
 }

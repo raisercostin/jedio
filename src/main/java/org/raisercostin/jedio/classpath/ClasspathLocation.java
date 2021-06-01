@@ -47,6 +47,11 @@ import reactor.core.publisher.Flux;
 public class ClasspathLocation
     implements ReadableDirLocation, ReadableFileLocation, ReadableDirLocationLike<@NonNull ClasspathLocation>,
     ExistingLocationLike<@NonNull ClasspathLocation>, ReadableFileLocationLike<@NonNull ClasspathLocation> {
+
+  public static ClasspathLocation classpath(String path) {
+    return new ClasspathLocation(path);
+  }
+
   private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
     .getOrElse(ClassLoader.class.getClassLoader());
 

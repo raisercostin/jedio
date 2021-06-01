@@ -31,47 +31,52 @@ import org.raisercostin.jedio.url.impl.URI;
 public class Locations {
   private static Lazy<JedioHttpClient> defaultClient = Lazy.of(() -> JedioHttpClient.createHighPerfHttpClient());
 
-  @sugar
   public static RelativeLocation relative(Path path) {
-    return relative(path.normalize().toString());
+    return RelativeLocation.relative(path);
   }
 
   public static RelativeLocation relative(String path) {
-    return RelativeLocation.create(path);
+    return RelativeLocation.relative(path);
   }
 
   public static ClasspathLocation classpath(String path) {
-    return new ClasspathLocation(path);
+    return ClasspathLocation.classpath(path);
   }
 
   public static PathLocation pathFromRelative(String relativePath) {
-    return pathFromRelative(relative(relativePath));
+    return PathLocation.pathFromRelative(relativePath);
   }
 
   public static PathLocation pathFromRelative(RelativeLocation relative) {
-    return current().child(relative).mkdirIfNeeded();
+    return PathLocation.pathFromRelative(relative);
   }
 
   public static PathLocation current() {
-    return new PathLocation(Paths.get("."));
+    return PathLocation.current();
   }
 
   public static PathLocation path(Path path) {
-    return new PathLocation(path);
+    return PathLocation.path(path);
   }
 
-  public static PathLocation path(java.net.URI path) {
-    return new PathLocation(Paths.get(path));
+  public static PathLocation path(File file) {
+    return PathLocation.path(file);
   }
 
-  @sugar
-  public static PathLocation path(File path) {
-    return path(path.toPath());
-  }
-
-  @sugar
   public static PathLocation path(String path) {
-    return path(Paths.get(path));
+    return PathLocation.path(path);
+  }
+
+  public static PathLocation pathFromExternalForm(String path) {
+    return PathLocation.pathFromExternalForm(path);
+  }
+
+  public static PathLocation path(java.net.URI uri) {
+    return PathLocation.path(uri);
+  }
+
+  public static PathLocation temp() {
+    return PathLocation.temp();
   }
 
   public static InputStreamLocation stream(InputStream inputStream) {
@@ -135,7 +140,7 @@ public class Locations {
       case "classpath":
         return classpath(schemaAndUrl._3);
       case "file":
-        return path(new java.net.URI(externalUrl));
+        return pathFromExternalForm(externalUrl);
       case "relative":
         return pathFromRelative(relative(schemaAndUrl._3));
       case "current":
@@ -157,9 +162,5 @@ public class Locations {
 
   private static InMemoryLocation mem(String content) {
     return new InMemoryLocation(content);
-  }
-
-  public static PathLocation temp() {
-    return path(System.getProperty("java.io.tmpdir"));
   }
 }

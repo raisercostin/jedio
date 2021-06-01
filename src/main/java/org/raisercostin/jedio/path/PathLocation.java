@@ -82,6 +82,43 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     WritableFileLocationLike<@NonNull PathLocation>, ChangeableLocationLike<@NonNull PathLocation>,
     LinkLocationLike<@NonNull PathLocation> {
 
+  public static PathLocation pathFromRelative(String relativePath) {
+    return pathFromRelative(Locations.relative(relativePath));
+  }
+
+  public static PathLocation pathFromRelative(RelativeLocation relative) {
+    return current().child(relative).mkdirIfNeeded();
+  }
+
+  public static PathLocation current() {
+    return new PathLocation(Paths.get("."));
+  }
+
+  public static PathLocation path(Path path) {
+    return new PathLocation(path);
+  }
+
+  public static PathLocation path(File file) {
+    return path(file.toPath());
+  }
+
+  public static PathLocation path(String path) {
+    return path(Paths.get(path));
+  }
+
+  @SneakyThrows
+  public static PathLocation pathFromExternalForm(String path) {
+    return path(new URI(path.replace('\\', '/')));
+  }
+
+  public static PathLocation path(java.net.URI uri) {
+    return new PathLocation(Paths.get(uri));
+  }
+
+  public static PathLocation temp() {
+    return path(System.getProperty("java.io.tmpdir"));
+  }
+
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PathLocation.class);
 
   protected static Path fixPath(Path path) {
