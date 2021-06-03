@@ -121,7 +121,8 @@ public class Locations {
     return (ReadableFileLocation) location(externalUrl);
   }
 
-  /**Create a location. Shold have a schema.*/
+  /**Create a location. Shold have a schema.
+   * */
   @JsonCreator
   @SneakyThrows
   public static Location location(String externalUrl) {

@@ -26,6 +26,7 @@ import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.Audit;
@@ -107,8 +108,27 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @SneakyThrows
+  /**
+  * A valid file URI must therefore begin with either file:/path (no hostname), file:///path (empty hostname), or file://hostname/path.
+  * file://path (i.e. two slashes, without a hostname) is never correct, but is often used.
+  */
   public static PathLocation pathFromExternalForm(String path) {
-    return path(new URI(path.replace('\\', '/')));
+    path = path.replace('\\', '/');
+    if (path.startsWith("file:") && !path.startsWith("file:/"))
+      return pathFromRelative(path.substring("file:".length()));
+    if (path.startsWith("file://") && !path.startsWith("file:///") && !path.startsWith("file://localhost/")) {
+      String corrected = path;
+      corrected = StringUtils.removeStart(corrected, "file://");
+      corrected = StringUtils.removeStart(corrected, "localhost");
+      corrected = StringUtils.removeStart(corrected, "/");
+      throw new RuntimeException(
+        "The hostname [" + path.substring("file://".length(), path.indexOf('/', "file://".length()))
+            + "] should be empty(`file:///<path>`) or localhost (`file://localhost/<path>`) for [" + path
+            + "].\nMaybe you wanted to pass [file://localhost/" + corrected + "]?");
+    }
+    if (path.startsWith("file://localhost/"))
+      path = "file:///" + path.substring("file://localhost/".length());
+    return path(new URI(path));
   }
 
   public static PathLocation path(java.net.URI uri) {
@@ -931,5 +951,27 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   @Override
   public OperationContext context() {
     return this.context;
+  }
+
+  /**On windows is the current folder's drive letter, like `D:\`
+   */
+  public static String rootDir() {
+    if (SystemUtils.IS_OS_WINDOWS) {
+      return rootDir(current());
+    }
+    return "/";
+  }
+
+  private static String rootDir(PathLocation current) {
+    File root = current.toFile();
+    while (root.getParentFile() != null) {
+      root = root.getParentFile();
+    }
+    return root.getPath();
+  }
+
+  @Override
+  public String toExternalForm() {
+    return "file://localhost/" + absoluteAndNormalized();
   }
 }

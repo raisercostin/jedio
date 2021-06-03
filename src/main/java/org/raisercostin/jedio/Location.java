@@ -17,6 +17,7 @@ import org.raisercostin.jedio.impl.LocationLike;
 
 @JsonDeserialize(using = Location.LocationDeserializer.class)
 @JsonSerialize(using = Location.LocationSerializer.class)
+/**@see https://en.wikipedia.org/wiki/File_URI_scheme*/
 public interface Location {
   //interface LocationFinal extends Location, LocationLike<LocationFinal> {}
 

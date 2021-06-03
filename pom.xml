@@ -52,7 +52,7 @@
     <docker.image.prefix>com.revomatico</docker.image.prefix>
     <reactor.version>3.2.5.RELEASE</reactor.version>
     <spring.version>5.2.10.RELEASE</spring.version>
-    <springboot.version>2.3.5.RELEASE</springboot.version>
+    <springboot.version>2.3.11.RELEASE</springboot.version>
     <checkerframework.version>2.10.0</checkerframework.version>
     <kotlin.version>1.2.71</kotlin.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
@@ -329,9 +329,8 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-devtools</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <!-- quasar optional -->
+      <scope>test</scope>
+    </dependency>    <!-- quasar optional -->
     <dependency>
       <groupId>co.paralleluniverse</groupId>
       <artifactId>quasar-core</artifactId>
