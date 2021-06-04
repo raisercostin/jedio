@@ -137,7 +137,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     Either<String, Tuple2<Matcher, String>> letterDrive = RichRegex.regexp1(WINDOWS_ABSOLUTE_FILE_PATTERN, path);
     if (letterDrive.isRight()) {
       //already checkedThat is absolute
-      return path(path.substring("file:".length()));
+      return path("/" + path.substring("file:".length()));
     }
     if (path.startsWith("file:") && !path.startsWith("file:/"))
       return pathFromRelative(path.substring("file:".length()));
