@@ -13,7 +13,7 @@ readonly green=`tput setaf 2`
 readonly reset=`tput sgr0` 
 
 function releasePrepare(){
-  mvn release:prepare -DskipTests=true -Prelease -Darguments=\"-DskipTests=true -Prelease\"
+  mvn -B release:prepare -DskipTests=true -Prelease -Darguments="-DskipTests=true -Prelease"
 }
 function releasePerformLocal(){
   local -r version=${1?Missing version like 0.72}
