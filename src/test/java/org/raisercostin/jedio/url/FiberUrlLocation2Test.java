@@ -27,6 +27,7 @@ import reactor.core.publisher.Flux;
 @Slf4j
 @Tag("slow")
 @Tag("integration")
+@Disabled
 class FiberUrlLocation2Test {
   final FiberUrlLocationFactory factory = FiberUrlLocation2.defaultFactory;
   // final String betsApiBaseUrl = "https://api.betsapi.com";
