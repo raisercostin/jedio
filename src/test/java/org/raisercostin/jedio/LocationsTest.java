@@ -50,19 +50,19 @@ class LocationsTest {
   @Test
   void locations0Relative() {
     assertThat(Locations.pathFromExternalForm("file:raiser/file1.txt").absoluteAndNormalized())
-      .isEqualTo(Locations.current().absoluteAndNormalized() + "\\raiser\\file1.txt");
+      .isEqualTo(Locations.current().absoluteAndNormalized() + "/raiser/file1.txt");
   }
 
   @Test
   void locations0RelativeUserHome() {
     assertThat(Locations.pathFromExternalForm("file:C:/Users/raiser/file1.txt").absoluteAndNormalized())
-      .isEqualTo("C:\\Users\\raiser\\file1.txt");
+      .isEqualTo("C:/Users/raiser/file1.txt");
   }
 
   @Test
   void locations1() {
     assertThat(Locations.pathFromExternalForm("file:/C:/Users/raiser/file1.txt").absoluteAndNormalized())
-      .isEqualTo("C:\\Users\\raiser\\file1.txt");
+      .isEqualTo("C:/Users/raiser/file1.txt");
   }
 
   @SuppressWarnings("null")
@@ -84,56 +84,56 @@ class LocationsTest {
   @Test
   void locations3Absolute() {
     assertThat(Locations.pathFromExternalForm("file:///C:/Users/raiser/file1.txt").absoluteAndNormalized())
-      .isEqualTo("C:\\Users\\raiser\\file1.txt");
+      .isEqualTo("C:/Users/raiser/file1.txt");
   }
 
   @Test
   void locations3AbsoluteWithLocalhost() {
     assertThat(Locations.pathFromExternalForm("file://localhost/C:/Users/raiser/file1.txt").absoluteAndNormalized())
-      .isEqualTo("C:\\Users\\raiser\\file1.txt");
+      .isEqualTo("C:/Users/raiser/file1.txt");
   }
 
   @Test
   void locations3AbsoluteLinux() {
     assertThat(Locations.pathFromExternalForm("file:////home/raiser/file1.txt").absoluteAndNormalized())
-      .isEqualTo(PathLocation.rootDir() + "home\\raiser\\file1.txt");
+      .isEqualTo(PathLocation.rootDir() + "home/raiser/file1.txt");
   }
 
   @Test
   void locations3AbsoluteLinuxWithLocalhost() {
     assertThat(Locations.pathFromExternalForm("file://localhost//home/raiser/file1.txt").absoluteAndNormalized())
-      .isEqualTo(PathLocation.rootDir() + "home\\raiser\\file1.txt");
+      .isEqualTo(PathLocation.rootDir() + "home/raiser/file1.txt");
   }
 
   @Test
   void locations3AbsoluteButRelativeToRootDir() {
     assertThat(Locations.pathFromExternalForm("file:///raiser/file1.txt").absoluteAndNormalized())
-      .isEqualTo(PathLocation.rootDir() + "raiser\\file1.txt");
+      .isEqualTo(PathLocation.rootDir() + "raiser/file1.txt");
   }
 
   @Test
   void locations3AbsoluteButRelativeToRootDirWithLocalhost() {
     assertThat(Locations.pathFromExternalForm("file://localhost/raiser/file1.txt").absoluteAndNormalized())
-      .isEqualTo(PathLocation.rootDir() + "raiser\\file1.txt");
+      .isEqualTo(PathLocation.rootDir() + "raiser/file1.txt");
   }
 
   @Test
   void locations4() {
     assertThat(Locations.pathFromExternalForm("file:////raiser/file1.txt").absoluteAndNormalized())
-      .isEqualTo(PathLocation.rootDir() + "raiser\\file1.txt");
+      .isEqualTo(PathLocation.rootDir() + "raiser/file1.txt");
   }
 
   @Test
   void locations4WithLocalhost() {
     assertThat(Locations.pathFromExternalForm("file://localhost//raiser/file1.txt").absoluteAndNormalized())
-      .isEqualTo(PathLocation.rootDir() + "raiser\\file1.txt");
+      .isEqualTo(PathLocation.rootDir() + "raiser/file1.txt");
   }
 
   static Iterable<Arguments> configsNoArgs() {
     return RichIterable
-      .of(Arguments.of("file:/C:/Users/raiser/file1.txt", "file://localhost/C:\\Users\\raiser\\file1.txt"),
-        Arguments.of("file:///C:/Users/raiser/file1.txt", "file://localhost/C:\\Users\\raiser\\file1.txt"),
-        Arguments.of("file://localhost/C:/Users/raiser/file1.txt", "file://localhost/C:\\Users\\raiser\\file1.txt"))
+      .of(Arguments.of("file:/C:/Users/raiser/file1.txt", "file://localhost/C:/Users/raiser/file1.txt"),
+        Arguments.of("file:///C:/Users/raiser/file1.txt", "file://localhost/C:/Users/raiser/file1.txt"),
+        Arguments.of("file://localhost/C:/Users/raiser/file1.txt", "file://localhost/C:/Users/raiser/file1.txt"))
       .iterable();
   }
 

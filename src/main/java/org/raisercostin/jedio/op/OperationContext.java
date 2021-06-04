@@ -22,6 +22,7 @@ public class OperationContext {
   CopyOptions copy;
   DeleteOptions delete;
   boolean report;
+  boolean useOsDirSeparators = false;
 
   public <R> R operation(String operationName, Object object, Supplier<R> operation) {
     return operation(operationName, object, operation, null);

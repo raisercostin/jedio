@@ -45,7 +45,6 @@ import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
-import org.raisercostin.jedio.WritableDirLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.FindFilters;
@@ -83,8 +82,11 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     WritableFileLocationLike<@NonNull PathLocation>, ChangeableLocationLike<@NonNull PathLocation>,
     LinkLocationLike<@NonNull PathLocation> {
 
+  private static final char GENERIC_FILE_SEPARATOR_CHAR = '/';
+  private static final String GENERIC_FILE_SEPARATOR = GENERIC_FILE_SEPARATOR_CHAR + "";
+
   private static PathLocation pathfromAbsolute(String path) {
-    Preconditions.checkArgument(path.startsWith("/"));
+    Preconditions.checkArgument(path.startsWith(GENERIC_FILE_SEPARATOR));
     return path(path);
   }
 
@@ -118,14 +120,14 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   * file://path (i.e. two slashes, without a hostname) is never correct, but is often used.
   */
   public static PathLocation pathFromExternalForm(String path) {
-    path = path.replace('\\', '/');
+    path = replaceSeparators(path, false);
     if (path.startsWith("file:") && !path.startsWith("file:/"))
       return pathFromRelative(path.substring("file:".length()));
     if (path.startsWith("file://") && !path.startsWith("file:///") && !path.startsWith("file://localhost/")) {
       String corrected = path;
       corrected = StringUtils.removeStart(corrected, "file://");
       corrected = StringUtils.removeStart(corrected, "localhost");
-      corrected = StringUtils.removeStart(corrected, "/");
+      corrected = StringUtils.removeStart(corrected, GENERIC_FILE_SEPARATOR);
       throw new RuntimeException(
         "The hostname [" + path.substring("file://".length(), path.indexOf('/', "file://".length()))
             + "] should be empty(`file:///<path>`) or localhost (`file://localhost/<path>`) for [" + path
@@ -162,6 +164,31 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   private static PathLocation create(Path path, boolean normalize, OperationContext context) {
     return new PathLocation(path, normalize, context);
+  }
+
+  private static String replaceSeparators(String path, boolean useOsDirSeparators) {
+    return useOsDirSeparators ? path : path.replace(File.separatorChar, GENERIC_FILE_SEPARATOR_CHAR);
+  }
+
+  public static String rootDir() {
+    return rootDir(false);
+  }
+
+  /**On windows is the current folder's drive letter, like `D:\`
+   */
+  public static String rootDir(boolean useOsDirSeparators) {
+    if (SystemUtils.IS_OS_WINDOWS) {
+      return replaceSeparators(rootDir(current()), useOsDirSeparators);
+    }
+    return GENERIC_FILE_SEPARATOR;
+  }
+
+  private static String rootDir(PathLocation current) {
+    File root = current.toFile();
+    while (root.getParentFile() != null) {
+      root = root.getParentFile();
+    }
+    return root.getPath();
   }
 
   private final Path path;
@@ -238,7 +265,8 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   @Override
   public String absoluteAndNormalized() {
-    return toPath().toAbsolutePath().normalize().toString();
+    String normalized = toPath().toAbsolutePath().normalize().toString();
+    return replaceSeparators(normalized, context.useOsDirSeparators);
   }
 
   @Override
@@ -962,23 +990,6 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   @Override
   public OperationContext context() {
     return this.context;
-  }
-
-  /**On windows is the current folder's drive letter, like `D:\`
-   */
-  public static String rootDir() {
-    if (SystemUtils.IS_OS_WINDOWS) {
-      return rootDir(current());
-    }
-    return "/";
-  }
-
-  private static String rootDir(PathLocation current) {
-    File root = current.toFile();
-    while (root.getParentFile() != null) {
-      root = root.getParentFile();
-    }
-    return root.getPath();
   }
 
   @Override

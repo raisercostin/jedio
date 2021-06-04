@@ -36,7 +36,10 @@ function normalizePom(){
     -Dsort.sortExecutions=true -Dsort.sortDependencyExclusions=artifactId -Dsort.lineSeparator="\n" -Dsort.ignoreLineSeparators=false -Dsort.expandEmptyElements=false \
     -Dsort.nrOfIndentSpace=2 -Dsort.indentSchemaLocation=true
 }
-
+function runTest(){
+  local -r test=${1:-LocationsTest}
+  mvn -Dtest=$test test
+}
 
 echo Commands
 echo ---------
