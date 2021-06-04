@@ -96,7 +96,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   private static PathLocation pathfromAbsoluteWindowsStyle(String path) {
-    var letterDrive = RichRegex.regexp1(WINDOWS_ABSOLUTE_FILE_PATTERN, path);
+    Either<String, Tuple2<Matcher, String>> letterDrive = RichRegex.regexp1(WINDOWS_ABSOLUTE_FILE_PATTERN, path);
     Preconditions.checkArgument(letterDrive.isRight(),
       "Path [%s] should be windows absolute file and should start with a drive letter followed by a colon and slash (like c:\\).",
       path);
@@ -136,7 +136,8 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     path = replaceSeparators(path, false);
     Either<String, Tuple2<Matcher, String>> letterDrive = RichRegex.regexp1(WINDOWS_ABSOLUTE_FILE_PATTERN, path);
     if (letterDrive.isRight()) {
-      return pathfromAbsoluteWindowsStyle(path.substring("file:".length()));
+      //already checkedThat is absolute
+      return path(path.substring("file:".length()));
     }
     if (path.startsWith("file:") && !path.startsWith("file:/"))
       return pathFromRelative(path.substring("file:".length()));
