@@ -16,6 +16,7 @@ import org.jedio.struct.RichIterable;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.path.PathLocation;
@@ -95,13 +96,13 @@ class LocationsTest {
   @Test
   void locations3AbsoluteLinux() {
     assertThat(Locations.pathFromExternalForm("file:////home/raiser/file1.txt").absoluteAndNormalized())
-      .isEqualTo("\\\\home\\raiser\\file1.txt");
+      .isEqualTo(PathLocation.rootDir() + "home\\raiser\\file1.txt");
   }
 
   @Test
   void locations3AbsoluteLinuxWithLocalhost() {
     assertThat(Locations.pathFromExternalForm("file://localhost//home/raiser/file1.txt").absoluteAndNormalized())
-      .isEqualTo("\\\\home\\raiser\\file1.txt");
+      .isEqualTo(PathLocation.rootDir() + "home\\raiser\\file1.txt");
   }
 
   @Test
@@ -119,7 +120,7 @@ class LocationsTest {
   @Test
   void locations4() {
     assertThat(Locations.pathFromExternalForm("file:////raiser/file1.txt").absoluteAndNormalized())
-      .isEqualTo("C:\\Users\\raiser\\file1.txt");
+      .isEqualTo(PathLocation.rootDir() + "raiser\\file1.txt");
   }
 
   @Test
@@ -128,21 +129,21 @@ class LocationsTest {
       .isEqualTo(PathLocation.rootDir() + "raiser\\file1.txt");
   }
 
-  static Iterable<String> configsNoArgs() {
+  static Iterable<Arguments> configsNoArgs() {
     return RichIterable
-      .of("file:/C:/Users/raiser/file1.txt",
-        "file:///C:/Users/raiser/file1.txt",
-        "file://localhost/C:/Users/raiser/file1.txt")
+      .of(Arguments.of("file:/C:/Users/raiser/file1.txt", "file://localhost/C:\\Users\\raiser\\file1.txt"),
+        Arguments.of("file:///C:/Users/raiser/file1.txt", "file://localhost/C:\\Users\\raiser\\file1.txt"),
+        Arguments.of("file://localhost/C:/Users/raiser/file1.txt", "file://localhost/C:\\Users\\raiser\\file1.txt"))
       .iterable();
   }
 
   @ParameterizedTest
   @MethodSource("configsNoArgs")
-  void locationsFromUrl(String file) throws MalformedURLException, URISyntaxException {
+  void locationsFromUrl(String file, String expected) throws MalformedURLException, URISyntaxException {
     Location loc = Locations.location(file);
     assertThat(loc).isNotNull();
     assertThat(loc.toExternalUri())
-      .isEqualTo(file);
+      .isEqualTo(expected);
   }
 
   @ParameterizedTest

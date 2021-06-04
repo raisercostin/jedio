@@ -83,6 +83,11 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     WritableFileLocationLike<@NonNull PathLocation>, ChangeableLocationLike<@NonNull PathLocation>,
     LinkLocationLike<@NonNull PathLocation> {
 
+  private static PathLocation pathfromAbsolute(String path) {
+    Preconditions.checkArgument(path.startsWith("/"));
+    return path(path);
+  }
+
   public static PathLocation pathFromRelative(String relativePath) {
     return pathFromRelative(Locations.relative(relativePath));
   }
@@ -125,6 +130,12 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
         "The hostname [" + path.substring("file://".length(), path.indexOf('/', "file://".length()))
             + "] should be empty(`file:///<path>`) or localhost (`file://localhost/<path>`) for [" + path
             + "].\nMaybe you wanted to pass [file://localhost/" + corrected + "]?");
+    }
+    if (path.startsWith("file://localhost//")) {
+      return pathfromAbsolute(path.substring("file://localhost//".length() - 1));
+    }
+    if (path.startsWith("file:////")) {
+      return pathfromAbsolute(path.substring("file:////".length() - 1));
     }
     if (path.startsWith("file://localhost/"))
       path = "file:///" + path.substring("file://localhost/".length());
