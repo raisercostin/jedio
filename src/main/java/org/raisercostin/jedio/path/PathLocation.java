@@ -16,9 +16,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 
 import com.google.common.base.Preconditions;
 import io.vavr.API;
+import io.vavr.Tuple2;
+import io.vavr.control.Either;
 import io.vavr.control.Option;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -131,7 +134,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   */
   public static PathLocation pathFromExternalForm(String path) {
     path = replaceSeparators(path, false);
-    var letterDrive = RichRegex.regexp1(WINDOWS_ABSOLUTE_FILE_PATTERN, path);
+    Either<String, Tuple2<Matcher, String>> letterDrive = RichRegex.regexp1(WINDOWS_ABSOLUTE_FILE_PATTERN, path);
     if (letterDrive.isRight()) {
       return pathfromAbsoluteWindowsStyle(path.substring("file:".length()));
     }
