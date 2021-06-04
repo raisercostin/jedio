@@ -32,6 +32,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.Audit;
 import org.jedio.SimpleShell;
 import org.jedio.sugar;
+import org.jedio.regex.RichRegex;
 import org.jedio.struct.RichIterable;
 import org.raisercostin.jedio.BasicDirLocation;
 import org.raisercostin.jedio.ChangeableLocation;
@@ -82,6 +83,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     WritableFileLocationLike<@NonNull PathLocation>, ChangeableLocationLike<@NonNull PathLocation>,
     LinkLocationLike<@NonNull PathLocation> {
 
+  private static final String WINDOWS_ABSOLUTE_FILE_PATTERN = "^file:([A-Za-z]):\\\\";
   private static final char GENERIC_FILE_SEPARATOR_CHAR = '/';
   private static final String GENERIC_FILE_SEPARATOR = GENERIC_FILE_SEPARATOR_CHAR + "";
 
@@ -90,12 +92,20 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     return path(path);
   }
 
+  private static PathLocation pathfromAbsoluteWindowsStyle(String path) {
+    var letterDrive = RichRegex.regexp1(WINDOWS_ABSOLUTE_FILE_PATTERN, path);
+    Preconditions.checkArgument(letterDrive.isRight(),
+      "Path [%s] should be windows absolute file and should start with a drive letter followed by a colon and slash (like c:\\).",
+      path);
+    return path(path);
+  }
+
   public static PathLocation pathFromRelative(String relativePath) {
     return pathFromRelative(Locations.relative(relativePath));
   }
 
   public static PathLocation pathFromRelative(RelativeLocation relative) {
-    return current().child(relative).mkdirIfNeeded();
+    return current().child(relative);
   }
 
   public static PathLocation current() {
@@ -121,6 +131,10 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   */
   public static PathLocation pathFromExternalForm(String path) {
     path = replaceSeparators(path, false);
+    var letterDrive = RichRegex.regexp1(WINDOWS_ABSOLUTE_FILE_PATTERN, path);
+    if (letterDrive.isRight()) {
+      return pathfromAbsoluteWindowsStyle(path.substring("file:".length()));
+    }
     if (path.startsWith("file:") && !path.startsWith("file:/"))
       return pathFromRelative(path.substring("file:".length()));
     if (path.startsWith("file://") && !path.startsWith("file:///") && !path.startsWith("file://localhost/")) {

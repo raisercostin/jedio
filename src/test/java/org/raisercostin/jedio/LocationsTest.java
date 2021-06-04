@@ -54,9 +54,16 @@ class LocationsTest {
   }
 
   @Test
-  void locations0RelativeUserHome() {
+  void locations0RelativeUserHomeOnWindows() {
+    //C:/ acts as an absolute path
     assertThat(Locations.pathFromExternalForm("file:C:/Users/raiser/file1.txt").absoluteAndNormalized())
       .isEqualTo("C:/Users/raiser/file1.txt");
+  }
+
+  @Test
+  void locations0RelativeUserHomeOnLinux() {
+    assertThat(Locations.pathFromExternalForm("file:Users/raiser/file1.txt").absoluteAndNormalized())
+      .isEqualTo(Locations.current().absoluteAndNormalized() + "/Users/raiser/file1.txt");
   }
 
   @Test
