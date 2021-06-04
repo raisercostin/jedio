@@ -16,7 +16,6 @@ function releasePrepare(){
   mvn release:prepare -DskipTests=true -Prelease -Darguments=\"-DskipTests=true -Prelease\"
 }
 function releasePerformLocal(){
-  set -x
   local -r version=${1?Missing version like 0.72}
   local -r repo=${2:-d:/home/raiser/work/maven-repo}
   local -r localMavenRepo=${3:-c:/Users/raiser/.m2/repository}
@@ -30,9 +29,14 @@ function releasePerformLocal(){
   git -C $repo add .
   git -C $repo commit -m "Release $artifactId-$version"
   git -C $repo push
-  set +x
   echo ${green}done${reset}
 }
+function normalizePom(){
+  mvn com.github.ekryd.sortpom:sortpom-maven-plugin:sort -Dsort.encoding=UTF-8 -Dsort.sortDependencies=scope,artifactId -Dsort.sortPlugins=artifactId -Dsort.sortProperties=true \
+    -Dsort.sortExecutions=true -Dsort.sortDependencyExclusions=artifactId -Dsort.lineSeparator="\n" -Dsort.ignoreLineSeparators=false -Dsort.expandEmptyElements=false \
+    -Dsort.nrOfIndentSpace=2 -Dsort.indentSchemaLocation=true
+}
+
 
 echo Commands
 echo ---------
@@ -42,4 +46,6 @@ echo ---------
 command="$1"; shift 1;
 echo Executing $command
 echo ---------
+set -x
 $command $*
+set +x
