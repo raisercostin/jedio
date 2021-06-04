@@ -12,6 +12,11 @@ readonly red=`tput setaf 1`
 readonly green=`tput setaf 2`
 readonly reset=`tput sgr0` 
 
+function releasePrepareAndPerform(){
+  releasePrepare
+  releasePerform
+}
+
 function releasePrepare(){
   mvn -B release:prepare -DskipTests=true -Prelease -Darguments="-DskipTests=true -Prelease"
 }
