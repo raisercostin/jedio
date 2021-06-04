@@ -171,4 +171,11 @@ class LocationsTest {
     Location loc = Locations.location("file:/C:\\Users\\raiser/.revobet/lsports-cache");
     assertThat(loc).isNotNull();
   }
+
+  @Test
+  void locationsBug1OnLinuxCannotParseIt() {
+    Location loc = Locations.location("file://localhost//root/.revobet/lsports-cache");
+    assertThat(loc).isNotNull();
+  }
+
 }
