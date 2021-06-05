@@ -14,7 +14,7 @@ readonly reset=`tput sgr0`
 
 function releasePrepareAndPerform(){
   releasePrepare
-  releasePerform
+  releasePerformLocal
 }
 
 function releasePrepare(){
@@ -34,6 +34,8 @@ function releasePerformLocal(){
   git -C $repo add .
   git -C $repo commit -m "Release $artifactId-$version"
   git -C $repo push
+  rm pom.xml.releaseBackup
+  rm release.properties
   echo ${green}done${reset}
 }
 function normalizePom(){

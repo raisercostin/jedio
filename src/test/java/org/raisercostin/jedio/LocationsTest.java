@@ -178,4 +178,9 @@ class LocationsTest {
     assertThat(loc).isNotNull();
   }
 
+  @Test
+  void locationsBug2OnLinuxCannotParseIt() {
+    Location loc = Locations.location("file:////root/.revobet/lsports-cache");
+    assertThat(loc).isNotNull();
+  }
 }
