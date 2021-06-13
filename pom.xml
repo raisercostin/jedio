@@ -7,7 +7,7 @@
     <version>1.15</version>
   </parent>
   <artifactId>jedio</artifactId>
-  <version>0.74</version>
+  <version>0.75-SNAPSHOT</version>
   <name>jedio</name>
   <description>Uniform, fluent access to files, urls and other resources API for java, kotlin and scala.</description>
   <url>${git.url}</url>
@@ -28,7 +28,7 @@
   <scm>
     <connection>scm:git:${git.url}.git</connection>
     <developerConnection>scm:git:${git.url}.git</developerConnection>
-    <tag>jedio-0.74</tag>
+    <tag>${project.artifactId}-${project.version}</tag>
     <url>${git.url}</url>
   </scm>
   <issueManagement>
@@ -418,7 +418,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore/>
+                    <ignore />
                   </action>
                 </pluginExecution>
               </pluginExecutions>
@@ -565,7 +565,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore/>
+                  <ignore />
                 </action>
               </pluginExecution>
               <pluginExecution>
@@ -578,7 +578,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore/>
+                  <ignore />
                 </action>
               </pluginExecution>
             </pluginExecutions>
@@ -595,9 +595,9 @@
         <!--$NO-MVN-MAN-VER$ -->
         <configuration>
           <target>
-            <echo message="ant cleanup started."/>
-            <fixcrlf eol="unix" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" includes="**/*.java **/*.xml" preservelastmodified="true" srcdir="${basedir}" tab="remove" tablength="2"/>
-            <echo message="ant cleanup finished."/>
+            <echo message="ant cleanup started." />
+            <fixcrlf eol="unix" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" includes="**/*.java **/*.xml" preservelastmodified="true" srcdir="${basedir}" tab="remove" tablength="2" />
+            <echo message="ant cleanup finished." />
           </target>
         </configuration>
         <!-- not always needed -->
