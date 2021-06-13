@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+>
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.raisercostin</groupId>
@@ -64,6 +68,7 @@
     <git.repo>${project.artifactId}</git.repo>
     <git.url>https://${git.host}/${git.userOrGroup}/${git.repo}</git.url>
     <git.userOrGroup>raisercostin</git.userOrGroup>
+    <jackson-bom.version>2.12.3</jackson-bom.version>
     <kotlin.compiler.apiVersion>1.3</kotlin.compiler.apiVersion>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
@@ -83,7 +88,13 @@
   <dependencyManagement>
     <dependencies>
       <!-- https://stackoverflow.com/questions/16894032/how-to-use-poms-as-a-dependency-in-maven -->
-      <!-- Spring Boot BOM -->
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson-bom.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
@@ -589,7 +600,14 @@
         <configuration>
           <target>
             <echo message="ant cleanup started." />
-            <fixcrlf eol="unix" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" includes="**/*.java **/*.xml" preservelastmodified="true" srcdir="${basedir}" tab="remove" tablength="2" />
+            <fixcrlf
+              eol="unix"
+              excludes="target/**/* .git/**/* src/test/resources/lsports/**/*"
+              includes="**/*.java **/*.xml"
+              preservelastmodified="true"
+              srcdir="${basedir}"
+              tab="remove"
+              tablength="2" />
             <echo message="ant cleanup finished." />
           </target>
         </configuration>

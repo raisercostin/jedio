@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.Audit;
+import org.jedio.RichThrowable;
 import org.jedio.SimpleShell;
 import org.jedio.sugar;
 import org.jedio.regex.RichRegex;
@@ -89,6 +90,16 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   private static final String WINDOWS_ABSOLUTE_FILE_PATTERN = "^file:([A-Za-z]):\\\\";
   private static final char GENERIC_FILE_SEPARATOR_CHAR = '/';
   private static final String GENERIC_FILE_SEPARATOR = GENERIC_FILE_SEPARATOR_CHAR + "";
+
+  @SneakyThrows
+  public static PathLocation tempDir(String prefix) {
+    return path(Files.createTempDirectory(prefix));
+  }
+
+  @SneakyThrows
+  public static PathLocation tempFile(String prefix, String sufix) {
+    return path(Files.createTempFile(prefix, sufix));
+  }
 
   private static PathLocation pathfromAbsolute(String path) {
     Preconditions.checkArgument(path.startsWith(GENERIC_FILE_SEPARATOR));
@@ -166,6 +177,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     return new PathLocation(Paths.get(uri));
   }
 
+  /**A path under standard java temp folder defined by `java.io.tmpdir`.*/
   public static PathLocation temp() {
     return path(System.getProperty("java.io.tmpdir"));
   }
@@ -426,11 +438,29 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   @Override
   public String readContentSync(Charset charset) {
+    try {
+      String content = Files.readString(toPath(), charset);
+      return content;
+    } catch (IOException e) {
+      try {
+        return readContentSyncUsingCommonsIo(charset);
+      } catch (Throwable e2) {
+        e.addSuppressed(e2);
+        log.debug("Other charsets: {}", Charset.availableCharsets().keySet());
+        throw RichThrowable.wrap(e2,
+          "While reading %s with charset %s. Others could exist. Enable debug to see them.", this, charset);
+      }
+    }
+  }
+
+  //it seems both methods have a 0.300-0.800 s for a file of 100MB
+  public String readContentSyncUsingCommonsIo(Charset charset) {
     try (BufferedReader b = reader(toPath(), charset)) {
       return IOUtils.toString(b);
     } catch (IOException e) {
-      throw org.jedio.RichThrowable.wrap(e, "While reading %s with charset %s. Others could exist %s", this, charset,
-        Charset.availableCharsets().keySet());
+      log.debug("Other charsets: {}", Charset.availableCharsets().keySet());
+      throw RichThrowable.wrap(e,
+        "While reading %s with charset %s. Others could exist. Enable debug to see them.", this, charset);
     }
   }
 

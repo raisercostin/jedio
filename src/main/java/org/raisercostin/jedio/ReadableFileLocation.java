@@ -17,6 +17,8 @@ import org.raisercostin.jedio.op.CopyOptions;
 import reactor.core.publisher.Mono;
 
 public interface ReadableFileLocation extends BasicFileLocation {
+  org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ReadableFileLocation.class);
+
   @Override
   default ReadableFileLocation asReadableFile() {
     return this;
@@ -91,8 +93,10 @@ public interface ReadableFileLocation extends BasicFileLocation {
         return readContent(charset2_ISO_8859_1);
       } catch (Exception e2) {
         e2.addSuppressed(e);
-        throw RichThrowable.wrap(e2, "While reading %s with charsets %s and %s. Others could exist %s", this,
-          charset1_UTF8, charset2_ISO_8859_1, Charset.availableCharsets().keySet());
+        log.debug("Other charsets: {}", Charset.availableCharsets().keySet());
+        throw RichThrowable.wrap(e2,
+          "While reading %s with charsets %s and %s. Others could exist. Enable debug to see them.", this,
+          charset1_UTF8, charset2_ISO_8859_1);
       }
     }
   }

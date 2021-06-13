@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.With;
 import org.raisercostin.jedio.ExistingLocation;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
@@ -23,6 +24,7 @@ public class SimpleCopyOptions implements CopyOptions {
   public final boolean throwIfIgnored;
   public final Predicate<StreamAndMeta> acceptStreamAndMeta;
   @Builder.Default
+  @ToString.Exclude
   public final OperationListener operationListener = OperationListener.defaultListener;
 
   @Override

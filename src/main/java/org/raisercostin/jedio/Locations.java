@@ -2,6 +2,7 @@ package org.raisercostin.jedio;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.regex.Matcher;
@@ -75,8 +76,21 @@ public class Locations {
     return PathLocation.path(uri);
   }
 
+  /**A path under standard java temp folder defined by `java.io.tmpdir`.*/
   public static PathLocation temp() {
     return PathLocation.temp();
+  }
+
+  /**A path under standard java temp folder defined by `java.io.tmpdir`.*/
+  @sugar
+  public static PathLocation tempDir(String prefix) {
+    return PathLocation.tempDir(prefix);
+  }
+
+  @SneakyThrows
+  @sugar
+  public static PathLocation tempFile(String prefix, String sufix) {
+    return PathLocation.tempFile(prefix, sufix);
   }
 
   public static InputStreamLocation stream(InputStream inputStream) {
