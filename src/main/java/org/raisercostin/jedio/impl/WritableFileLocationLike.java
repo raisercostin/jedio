@@ -1,6 +1,8 @@
 package org.raisercostin.jedio.impl;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.sugar;
@@ -13,7 +15,12 @@ import org.raisercostin.jedio.op.CopyOptions;
 public interface WritableFileLocationLike<SELF extends @NonNull WritableFileLocationLike<SELF>>
     extends WritableFileLocation, BasicFileLocationLike<SELF> {
   @Override
-  SELF write(String content, String encoding);
+  default SELF write(String content, String charset) {
+    return write(content, Charset.forName(charset));
+  }
+
+  @Override
+  SELF write(String content, Charset charset);
 
   @Override
   @sugar
@@ -33,6 +40,13 @@ public interface WritableFileLocationLike<SELF extends @NonNull WritableFileLoca
   @Override
   @sugar
   default SELF write(String content) {
-    return write(content, "UTF-8");
+    return write(content, StandardCharsets.UTF_8);
+  }
+
+  default SELF writeContentIfNotExists(String content) {
+    if (exists()) {
+      return (SELF) this;
+    }
+    return write(content, StandardCharsets.UTF_8);
   }
 }

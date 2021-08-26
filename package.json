@@ -3,6 +3,6 @@
   "scripts": {
     "normalize-pom": "bash .\\scripts.sh normalizePom",
     "release-prepare": "bash .\\scripts.sh releasePrepare",
-    "release-perform-local": "bash .\\scripts.sh releasePerformLocal 0.72"
+    "release-perform-local": "bash .\\scripts.sh releasePerformLocal"
   }
 }

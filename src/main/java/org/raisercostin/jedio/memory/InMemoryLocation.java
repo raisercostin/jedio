@@ -102,7 +102,7 @@ public class InMemoryLocation
   }
 
   @Override
-  public InMemoryLocation write(String content, String encoding) {
+  public InMemoryLocation write(String content, Charset charset) {
     this.content = content;
     return this;
   }

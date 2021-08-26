@@ -510,7 +510,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public PathLocation write(String content, String charset) {
+  public PathLocation write(String content, Charset charset) {
     mkdirOnParentIfNeeded();
     try {
       FileUtils.write(toFile(), content, charset);

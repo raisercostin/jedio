@@ -32,10 +32,10 @@ function releasePerformLocal(){
   rm -rf $repo/$groupPath/$artifactId/$version/*main*
   git -C $repo status
   git -C $repo add .
-  git -C $repo commit -m "Release $artifactId-$version"
+  git -C $repo commit -m "Release $artifactId-$version" || echo "ignore commit failure, proceed"
   git -C $repo push
-  rm pom.xml.releaseBackup
-  rm release.properties
+  rm -f pom.xml.releaseBackup
+  rm -f release.properties
   echo ${green}done${reset}
 }
 function normalizePom(){
