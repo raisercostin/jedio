@@ -1,11 +1,13 @@
 package org.jedio.regex;
 
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import io.vavr.Function1;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;
@@ -78,5 +80,24 @@ public class RichRegex {
       return Either.right(matcher);
     }
     return Either.left(String.format("No matching on [%s] with [%s]", value, regex));
+  }
+
+  public static String replaceAll(String text, String regex, String replacement) {
+    return compiled(regex).matcher(text).replaceAll(replacement);
+  }
+
+  public static String replaceForEachMatchResult(String text, String regex,
+      Function1<MatchResult, String> replacement) {
+    return replace(compiled(regex), text, replacement);
+  }
+
+  public static String replace(Pattern pattern, String text, Function1<MatchResult, String> replacement) {
+    Matcher m = pattern.matcher(text);
+    StringBuffer sb = new StringBuffer();
+    while (m.find()) {
+      m.appendReplacement(sb, replacement.apply(m.toMatchResult()));
+    }
+    m.appendTail(sb);
+    return sb.toString();
   }
 }

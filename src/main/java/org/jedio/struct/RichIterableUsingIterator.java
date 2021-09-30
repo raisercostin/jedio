@@ -387,6 +387,9 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
 
   @Override
   public boolean isEmpty() {
+    if (this.knownSize.isDefined()) {
+      return this.knownSize.get() == 0;
+    }
     return op(List::isEmpty, Collection::isEmpty, IndexedSeq::isEmpty, Traversable::isEmpty, Value::isEmpty,
       () -> iterator("isEmpty").isEmpty());
   }
