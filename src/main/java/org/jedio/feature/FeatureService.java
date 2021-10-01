@@ -5,6 +5,8 @@ import java.util.Map;
 import io.vavr.API;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
+import io.vavr.Tuple3;
+import io.vavr.control.Option;
 import org.jedio.struct.RichIterable;
 
 //TODO improve with config from properties and database
@@ -33,13 +35,13 @@ public class FeatureService {
   @SuppressWarnings("unchecked")
   public static Tuple2<Map<String, Object>, RichIterable<Tuple2<String, Object>>> featuresOverride(
       Map<String, Object> overrides) {
-    var parts = RichIterable
+    Tuple2<RichIterable<Tuple3<String, Option<Feature<?>>, Object>>, RichIterable<Tuple3<String, Option<Feature<?>>, Object>>> parts = RichIterable
       .ofJava(overrides.entrySet())
       .map(x -> Tuple.of(x.getKey(), features.get(x.getKey()), x.getValue()))
       .partition(x -> x._2.isDefined());
     parts._1.forEach(x -> ((Feature<Object>) x._2.get()).setRuntimeValue(x._3));
-    var ignored = parts._2.map(x -> Tuple.of(x._1, x._3)).memoizeJava();
-    var all = (Map<String, Object>) features.mapValues(x -> x.runtimeValue().getOrNull()).toJavaMap();
+    RichIterable<Tuple2<String, Object>> ignored = parts._2.map(x -> Tuple.of(x._1, x._3)).memoizeJava();
+    Map<String, Object> all = (Map<String, Object>) features.mapValues(x -> x.runtimeValue().getOrNull()).toJavaMap();
     return Tuple.of(all, ignored);
   }
 }
