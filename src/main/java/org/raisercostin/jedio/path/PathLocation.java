@@ -70,6 +70,7 @@ import org.raisercostin.jedio.op.DeleteOptions;
 import org.raisercostin.jedio.op.OperationContext;
 import org.raisercostin.nodes.Nodes;
 import org.raisercostin.nodes.impl.JsonNodes;
+import org.springframework.core.io.ClassPathResource;
 import reactor.core.publisher.Flux;
 
 /**
@@ -86,6 +87,11 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     NonExistingLocationLike<@NonNull PathLocation>, ReadableFileLocationLike<@NonNull PathLocation>,
     WritableFileLocationLike<@NonNull PathLocation>, ChangeableLocationLike<@NonNull PathLocation>,
     LinkLocationLike<@NonNull PathLocation> {
+
+  @SneakyThrows
+  public static PathLocation path(ClassPathResource classPathResource) {
+    return path(classPathResource.getFile());
+  }
 
   private static final String WINDOWS_ABSOLUTE_FILE_PATTERN = "^file:([A-Za-z]):\\\\";
   private static final char GENERIC_FILE_SEPARATOR_CHAR = '/';

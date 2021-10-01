@@ -26,8 +26,10 @@ import org.raisercostin.jedio.path.PathLocation;
 import org.raisercostin.jedio.url.HttpClientLocation;
 import org.raisercostin.jedio.url.JedioHttpClient;
 import org.raisercostin.jedio.url.SimpleUrl;
+import org.raisercostin.jedio.url.WebClientLocation;
 import org.raisercostin.jedio.url.WebLocation;
 import org.raisercostin.jedio.url.impl.URI;
+import org.springframework.core.io.ClassPathResource;
 
 public class Locations {
   private static Lazy<JedioHttpClient> defaultClient = Lazy.of(() -> JedioHttpClient.createHighPerfHttpClient());
@@ -94,7 +96,7 @@ public class Locations {
   }
 
   public static InputStreamLocation stream(InputStream inputStream) {
-    return new InputStreamLocation(inputStream);
+    return InputStreamLocation.stream(inputStream);
   }
 
   public static WebLocation web(String webAddress) {
@@ -177,5 +179,21 @@ public class Locations {
 
   private static InMemoryLocation mem(String content) {
     return new InMemoryLocation(content);
+  }
+
+  public static ClasspathLocation classpath(Class<?> clazz, String relative) {
+    return ClasspathLocation.classpath(clazz, relative);
+  }
+
+  public static InputStreamLocation stream(ClassPathResource classPathResource) {
+    return InputStreamLocation.stream(classPathResource);
+  }
+
+  public static PathLocation path(ClassPathResource classPathResource) {
+    return PathLocation.path(classPathResource);
+  }
+
+  public static WebClientLocation url(ClassPathResource classPathResource) {
+    throw new RuntimeException("Not implemented yet!!!");
   }
 }

@@ -1,5 +1,7 @@
 package org.raisercostin.jedio;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -7,6 +9,7 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
 import io.vavr.control.Option;
+import org.apache.commons.io.IOUtils;
 import org.jedio.RichThrowable;
 import org.jedio.deprecated;
 import org.jedio.functions.JedioFunction;
@@ -56,7 +59,13 @@ public interface ReadableFileLocation extends BasicFileLocation {
   /**
    * Forces reading synchronously on current thread.
    */
-  String readContentSync(Charset charset);
+  default String readContentSync(Charset charset) {
+    try (BufferedInputStream b = new BufferedInputStream(unsafeInputStream())) {
+      return IOUtils.toString(b, charset);
+    } catch (IOException e) {
+      throw new RuntimeException("Can't read resource [" + this + "]", e);
+    }
+  }
 
   String readMetaContent();
 

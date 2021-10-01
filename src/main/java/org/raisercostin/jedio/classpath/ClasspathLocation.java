@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.RichThrowable;
+import org.jedio.struct.RichIterable;
 import org.raisercostin.jedio.Locations;
 import org.raisercostin.jedio.ReadableDirLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
@@ -52,6 +53,10 @@ public class ClasspathLocation
     return new ClasspathLocation(path);
   }
 
+  public static ClasspathLocation classpath(Class<?> clazz, String relative) {
+    return new ClasspathLocation(clazz.getPackage().getName().replace('.', '/') + "/" + relative);
+  }
+
   private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
     .getOrElse(ClassLoader.class.getClassLoader());
 
@@ -65,6 +70,11 @@ public class ClasspathLocation
   private final URL resourceUrl;
 
   public ClasspathLocation(String path) {
+    this.resourcePath = fixPath(path);
+    this.resourceUrl = toUrl(this.resourcePath);
+  }
+
+  private ClasspathLocation(String path, URL resourcePath) {
     this.resourcePath = fixPath(path);
     this.resourceUrl = toUrl(this.resourcePath);
   }
@@ -93,7 +103,7 @@ public class ClasspathLocation
     }
   }
 
-  private PathLocation toPathLocation() {
+  public PathLocation toPathLocation() {
     return new PathLocation(toPath());
   }
 
@@ -166,6 +176,7 @@ public class ClasspathLocation
 
   @Override
   public Flux<@NonNull ClasspathLocation> findFilesAndDirs(boolean recursive) {
+    //return toPathLocation().findFilesAndDirs(recursive);
     throw new RuntimeException("Not implemented yet!!!");
   }
 }
