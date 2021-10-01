@@ -116,12 +116,12 @@ import org.apache.commons.codec.net.URLCodec;
  * @version $Revision: 564973 $ $Date: 2002/03/14 15:14:01
  */
 @Slf4j
-public class URI implements Cloneable, Comparable, Serializable {
+public class ModifiedURI implements Cloneable, Comparable, Serializable {
 
   // ----------------------------------------------------------- Constructors
 
   /** Create an instance as an internal use */
-  protected URI() {
+  protected ModifiedURI() {
   }
 
   /**
@@ -140,7 +140,7 @@ public class URI implements Cloneable, Comparable, Serializable {
    *
    * @since 3.0
    */
-  public URI(String s, boolean escaped, String charset)
+  public ModifiedURI(String s, boolean escaped, String charset)
       throws URIException, NullPointerException
   {
     protocolCharset = charset;
@@ -162,7 +162,7 @@ public class URI implements Cloneable, Comparable, Serializable {
    *
    * @since 3.0
    */
-  public URI(String s, boolean escaped)
+  public ModifiedURI(String s, boolean escaped)
       throws URIException, NullPointerException
   {
     parseUriReference(s, escaped);
@@ -181,7 +181,7 @@ public class URI implements Cloneable, Comparable, Serializable {
    * @deprecated Use #URI(String, boolean, String)
    */
   @Deprecated
-  public URI(char[] escaped, String charset)
+  public ModifiedURI(char[] escaped, String charset)
       throws URIException, NullPointerException
   {
     protocolCharset = charset;
@@ -201,7 +201,7 @@ public class URI implements Cloneable, Comparable, Serializable {
    * @deprecated Use #URI(String, boolean)
    */
   @Deprecated
-  public URI(char[] escaped)
+  public ModifiedURI(char[] escaped)
       throws URIException, NullPointerException
   {
     parseUriReference(new String(escaped), true);
@@ -219,7 +219,7 @@ public class URI implements Cloneable, Comparable, Serializable {
    * @deprecated Use #URI(String, boolean, String)
    */
   @Deprecated
-  public URI(String original, String charset) throws URIException {
+  public ModifiedURI(String original, String charset) throws URIException {
     protocolCharset = charset;
     parseUriReference(original, false);
   }
@@ -240,7 +240,7 @@ public class URI implements Cloneable, Comparable, Serializable {
    * @deprecated Use #URI(String, boolean)
    */
   @Deprecated
-  public URI(String original) throws URIException {
+  public ModifiedURI(String original) throws URIException {
     parseUriReference(original, false);
   }
 
@@ -260,7 +260,7 @@ public class URI implements Cloneable, Comparable, Serializable {
    * @throws URIException If the URI cannot be created.
    * @see #getDefaultProtocolCharset
    */
-  public URI(String scheme, String schemeSpecificPart, String fragment)
+  public ModifiedURI(String scheme, String schemeSpecificPart, String fragment)
       throws URIException
   {
 
@@ -269,7 +269,7 @@ public class URI implements Cloneable, Comparable, Serializable {
       throw new URIException(URIException.PARSING, "scheme required");
     }
     char[] s = scheme.toLowerCase().toCharArray();
-    if (validate(s, URI.scheme)) {
+    if (validate(s, ModifiedURI.scheme)) {
       _scheme = s; // is_absoluteURI
     } else {
       throw new URIException(URIException.PARSING, "incorrect scheme");
@@ -302,7 +302,7 @@ public class URI implements Cloneable, Comparable, Serializable {
    * @throws URIException If the new URI cannot be created.
    * @see #getDefaultProtocolCharset
    */
-  public URI(String scheme, String authority, String path, String query,
+  public ModifiedURI(String scheme, String authority, String path, String query,
       String fragment) throws URIException
   {
 
@@ -345,7 +345,7 @@ public class URI implements Cloneable, Comparable, Serializable {
    * @throws URIException If the new URI cannot be created.
    * @see #getDefaultProtocolCharset
    */
-  public URI(String scheme, String userinfo, String host, int port)
+  public ModifiedURI(String scheme, String userinfo, String host, int port)
       throws URIException
   {
 
@@ -363,7 +363,7 @@ public class URI implements Cloneable, Comparable, Serializable {
    * @throws URIException If the new URI cannot be created.
    * @see #getDefaultProtocolCharset
    */
-  public URI(String scheme, String userinfo, String host, int port,
+  public ModifiedURI(String scheme, String userinfo, String host, int port,
       String path) throws URIException
   {
 
@@ -382,7 +382,7 @@ public class URI implements Cloneable, Comparable, Serializable {
    * @throws URIException If the new URI cannot be created.
    * @see #getDefaultProtocolCharset
    */
-  public URI(String scheme, String userinfo, String host, int port,
+  public ModifiedURI(String scheme, String userinfo, String host, int port,
       String path, String query) throws URIException
   {
 
@@ -402,7 +402,7 @@ public class URI implements Cloneable, Comparable, Serializable {
    * @throws URIException If the new URI cannot be created.
    * @see #getDefaultProtocolCharset
    */
-  public URI(String scheme, String userinfo, String host, int port,
+  public ModifiedURI(String scheme, String userinfo, String host, int port,
       String path, String query, String fragment) throws URIException
   {
 
@@ -422,10 +422,9 @@ public class URI implements Cloneable, Comparable, Serializable {
    * @throws URIException If the new URI cannot be created.
    * @see #getDefaultProtocolCharset
    */
-  public URI(String scheme, String host, String path, String fragment)
+  public ModifiedURI(String scheme, String host, String path, String fragment)
       throws URIException
   {
-
     this(scheme, host, path, null, fragment);
   }
 
@@ -439,8 +438,8 @@ public class URI implements Cloneable, Comparable, Serializable {
    * @deprecated Use #URI(URI, String, boolean)
    */
   @Deprecated
-  public URI(URI base, String relative) throws URIException {
-    this(base, new URI(relative));
+  public ModifiedURI(ModifiedURI base, String relative) throws URIException {
+    this(base, new ModifiedURI(relative));
   }
 
   /**
@@ -455,8 +454,8 @@ public class URI implements Cloneable, Comparable, Serializable {
    *
    * @since 3.0
    */
-  public URI(URI base, String relative, boolean escaped) throws URIException {
-    this(base, new URI(relative, escaped));
+  public ModifiedURI(ModifiedURI base, String relative, boolean escaped) throws URIException {
+    this(base, new ModifiedURI(relative, escaped));
   }
 
   /**
@@ -509,7 +508,7 @@ public class URI implements Cloneable, Comparable, Serializable {
    * @param relative the relative URI
    * @throws URIException If the new URI cannot be created.
    */
-  public URI(URI base, URI relative) throws URIException {
+  public ModifiedURI(ModifiedURI base, ModifiedURI relative) throws URIException {
 
     if (base._scheme == null) {
       throw new URIException(URIException.PARSING, "base URI required");
@@ -3430,10 +3429,10 @@ public class URI implements Cloneable, Comparable, Serializable {
     if (obj == this) {
       return true;
     }
-    if (!(obj instanceof URI)) {
+    if (!(obj instanceof ModifiedURI)) {
       return false;
     }
-    URI another = (URI) obj;
+    ModifiedURI another = (ModifiedURI) obj;
     // scheme
     if (!equals(_scheme, another._scheme)) {
       return false;
@@ -3529,7 +3528,7 @@ public class URI implements Cloneable, Comparable, Serializable {
   @Override
   public int compareTo(Object obj) throws ClassCastException {
 
-    URI another = (URI) obj;
+    ModifiedURI another = (ModifiedURI) obj;
     if (!equals(_authority, another.getRawAuthority())) {
       return -1;
     }
@@ -3551,7 +3550,7 @@ public class URI implements Cloneable, Comparable, Serializable {
   @Override
   public synchronized Object clone() throws CloneNotSupportedException {
 
-    URI instance = (URI) super.clone();
+    ModifiedURI instance = (ModifiedURI) super.clone();
 
     instance._uri = _uri;
     instance._scheme = _scheme;

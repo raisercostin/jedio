@@ -2,9 +2,8 @@ package org.raisercostin.jedio;
 
 import java.io.File;
 import java.io.InputStream;
-import java.nio.file.Files;
+import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.regex.Matcher;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -15,8 +14,6 @@ import io.vavr.control.Either;
 import lombok.SneakyThrows;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jedio.sugar;
 import org.jedio.regex.RichRegex;
 import org.raisercostin.jedio.classpath.ClasspathLocation;
@@ -26,9 +23,8 @@ import org.raisercostin.jedio.path.PathLocation;
 import org.raisercostin.jedio.url.HttpClientLocation;
 import org.raisercostin.jedio.url.JedioHttpClient;
 import org.raisercostin.jedio.url.SimpleUrl;
-import org.raisercostin.jedio.url.WebClientLocation;
 import org.raisercostin.jedio.url.WebLocation;
-import org.raisercostin.jedio.url.impl.URI;
+import org.raisercostin.jedio.url.impl.ModifiedURI;
 import org.springframework.core.io.ClassPathResource;
 
 public class Locations {
@@ -107,7 +103,7 @@ public class Locations {
     return new HttpClientLocation(url, false, defaultClient.get());
   }
 
-  public static HttpClientLocation url(URI uri) {
+  public static HttpClientLocation url(ModifiedURI uri) {
     return url(new SimpleUrl(uri));
   }
 
@@ -135,6 +131,21 @@ public class Locations {
   /**Create a location. Shold have a schema.*/
   public static ReadableFileLocation readable(String externalUrl) {
     return (ReadableFileLocation) location(externalUrl);
+  }
+
+  /**
+   * Create a location. Shold have a schema.
+   */
+  public static Location location(URL externalUrl) {
+    return location(externalUrl.toExternalForm());
+  }
+
+  /**
+   * Create a location. Shold have a schema.
+   */
+  @SneakyThrows
+  public static Location location(java.net.URI externalUrl) {
+    return location(externalUrl.toURL());
   }
 
   /**Create a location. Shold have a schema.
@@ -193,7 +204,8 @@ public class Locations {
     return PathLocation.path(classPathResource);
   }
 
-  public static WebClientLocation url(ClassPathResource classPathResource) {
-    throw new RuntimeException("Not implemented yet!!!");
+  @SneakyThrows
+  public static Location url(ClassPathResource classPathResource) {
+    return location(classPathResource.getURL());
   }
 }

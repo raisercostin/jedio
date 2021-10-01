@@ -9,7 +9,7 @@ import lombok.SneakyThrows;
 import lombok.ToString;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.raisercostin.jedio.impl.ReadableFileLocationLike;
-import org.raisercostin.jedio.url.impl.URI;
+import org.raisercostin.jedio.url.impl.ModifiedURI;
 
 @Data
 @Getter(lombok.AccessLevel.NONE)
@@ -46,13 +46,13 @@ public abstract class BaseHttpLocationLike<SELF extends @NonNull BaseHttpLocatio
   }
 
   @SneakyThrows
-  private static URI toApacheUri(URL url, boolean escaped) {
-    return new URI(url.toExternalForm(), escaped);
+  private static ModifiedURI toApacheUri(URL url, boolean escaped) {
+    return new ModifiedURI(url.toExternalForm(), escaped);
   }
 
   @SneakyThrows
-  private static URI toApacheUri(String url, boolean escaped) {
-    return new URI(url, escaped);
+  private static ModifiedURI toApacheUri(String url, boolean escaped) {
+    return new ModifiedURI(url, escaped);
   }
 
   /** Url is always escaped properly. */
@@ -71,7 +71,7 @@ public abstract class BaseHttpLocationLike<SELF extends @NonNull BaseHttpLocatio
   }
 
   @SneakyThrows
-  BaseHttpLocationLike(URI uri) {
+  BaseHttpLocationLike(ModifiedURI uri) {
     this.url = new URL(uri.toString());
   }
 

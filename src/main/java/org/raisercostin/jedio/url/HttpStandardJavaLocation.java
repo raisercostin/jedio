@@ -12,7 +12,7 @@ import io.vavr.Lazy;
 import lombok.SneakyThrows;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.raisercostin.jedio.ReadableFileLocation;
-import org.raisercostin.jedio.url.impl.URI;
+import org.raisercostin.jedio.url.impl.ModifiedURI;
 
 public class HttpStandardJavaLocation extends BaseHttpLocationLike<@NonNull HttpStandardJavaLocation>
     implements ReadableFileLocation, Closeable {
@@ -26,7 +26,7 @@ public class HttpStandardJavaLocation extends BaseHttpLocationLike<@NonNull Http
     super(url, escaped);
   }
 
-  public HttpStandardJavaLocation(URI uri) {
+  public HttpStandardJavaLocation(ModifiedURI uri) {
     super(uri);
   }
 

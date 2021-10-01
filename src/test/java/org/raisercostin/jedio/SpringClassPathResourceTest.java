@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.raisercostin.jedio.fs.stream.InputStreamLocation;
 import org.raisercostin.jedio.path.PathLocation;
-import org.raisercostin.jedio.url.WebClientLocation;
 import org.springframework.core.io.ClassPathResource;
 
 public class SpringClassPathResourceTest {
@@ -26,8 +25,9 @@ public class SpringClassPathResourceTest {
 
   @Test
   void testClasspathFromSpringClasspathResouceAsUrlLocation() {
-    WebClientLocation classpathFile = Locations
-      .url(new ClassPathResource("classpath-resource1.md", ClasspathLocationTest.class));
+    PathLocation classpathFile = Locations
+      .url(new ClassPathResource("classpath-resource1.md", ClasspathLocationTest.class))
+      .toPathLocation();
     assertThat(classpathFile.readContentSync()).isEqualTo("resource content");
   }
 }

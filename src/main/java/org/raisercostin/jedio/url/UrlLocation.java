@@ -6,7 +6,7 @@ import java.nio.charset.Charset;
 
 import lombok.SneakyThrows;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.raisercostin.jedio.url.impl.URI;
+import org.raisercostin.jedio.url.impl.ModifiedURI;
 
 public class UrlLocation extends BaseHttpLocationLike<@NonNull UrlLocation> {
   @SneakyThrows
@@ -34,7 +34,7 @@ public class UrlLocation extends BaseHttpLocationLike<@NonNull UrlLocation> {
     super(url, escaped);
   }
 
-  public UrlLocation(URI uri) {
+  public UrlLocation(ModifiedURI uri) {
     super(uri);
   }
 

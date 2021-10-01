@@ -15,6 +15,7 @@ import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.impl.LinkLocationLike;
 import org.raisercostin.jedio.impl.NonExistingLocationLike;
 import org.raisercostin.jedio.path.PathLocation;
+import org.raisercostin.jedio.url.impl.ModifiedURI;
 import reactor.core.publisher.Flux;
 
 public interface ReferenceLocation extends Location {
@@ -47,7 +48,7 @@ public interface ReferenceLocation extends Location {
 
   URI toUri();
 
-  org.raisercostin.jedio.url.impl.URI toApacheUri();
+  ModifiedURI toApacheUri();
 
   Option<RelativeLocation> stripAncestor(BasicDirLocation x);
 

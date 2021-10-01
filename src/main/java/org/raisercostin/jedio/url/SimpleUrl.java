@@ -10,7 +10,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang3.StringUtils;
-import org.raisercostin.jedio.url.impl.URI;
+import org.raisercostin.jedio.url.impl.ModifiedURI;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE, force = true)
 @AllArgsConstructor
@@ -32,26 +32,26 @@ public class SimpleUrl {
     if (StringUtils.isEmpty(childOrAbsolute)) {
       return url;
     }
-    URI child = new URI(childOrAbsolute, false);
+    ModifiedURI child = new ModifiedURI(childOrAbsolute, false);
     if (url == null || child.isAbsoluteURI()) {
       return new URL(child.getEscapedURI());
     }
     child.normalize();
-    URI base = new URI(url.toExternalForm(), true);
-    URI result = new URI(base, child);
+    ModifiedURI base = new ModifiedURI(url.toExternalForm(), true);
+    ModifiedURI result = new ModifiedURI(base, child);
     return new URL(result.toString());
   }
 
   @SneakyThrows
   public static SimpleUrl from(String uri) {
-    return new SimpleUrl(new URI(uri, false));
+    return new SimpleUrl(new ModifiedURI(uri, false));
   }
 
   public static SimpleUrl from(String uri, boolean keepQuery) {
     return from(uri).keepQuery(keepQuery);
   }
 
-  URI uri;
+  ModifiedURI uri;
 
   @SneakyThrows
   public SimpleUrl withoutQuery() {

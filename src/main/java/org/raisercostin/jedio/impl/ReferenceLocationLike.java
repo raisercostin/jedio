@@ -24,6 +24,7 @@ import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.path.PathLocation;
+import org.raisercostin.jedio.url.impl.ModifiedURI;
 import reactor.core.publisher.Flux;
 
 // TODO maybe should contain type <T> of the actual internal instance
@@ -93,8 +94,8 @@ public interface ReferenceLocationLike<SELF extends @NonNull ReferenceLocationLi
 
   @Override
   @SneakyThrows
-  default org.raisercostin.jedio.url.impl.URI toApacheUri() {
-    return new org.raisercostin.jedio.url.impl.URI(toUrl().toExternalForm(), true);
+  default ModifiedURI toApacheUri() {
+    return new ModifiedURI(toUrl().toExternalForm(), true);
   }
 
   @Override

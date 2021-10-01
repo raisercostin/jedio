@@ -36,6 +36,7 @@ import org.jedio.RichThrowable;
 import org.jedio.functions.JedioFunction;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReadableFileLocation;
+import org.raisercostin.jedio.url.impl.ModifiedURI;
 import org.raisercostin.nodes.Nodes;
 import reactor.core.publisher.Mono;
 
@@ -328,7 +329,7 @@ public class HttpClientLocation extends BaseHttpLocationLike<@NonNull HttpClient
 
   @SneakyThrows
   public HttpClientLocation withEscapedQuery(Function<String, String> escapedQuery) {
-    org.raisercostin.jedio.url.impl.URI uri = toApacheUri();
+    ModifiedURI uri = toApacheUri();
     String newEscapedQuery = escapedQuery.apply(uri.getEscapedQuery());
     uri.setEscapedQuery(newEscapedQuery);
     return create(new URL(uri.getEscapedURI()), true);

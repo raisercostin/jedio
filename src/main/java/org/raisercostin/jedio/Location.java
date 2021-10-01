@@ -13,7 +13,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.raisercostin.jedio.classpath.ClasspathLocation;
 import org.raisercostin.jedio.impl.LocationLike;
+import org.raisercostin.jedio.path.PathLocation;
 
 @JsonDeserialize(using = Location.LocationDeserializer.class)
 @JsonSerialize(using = Location.LocationSerializer.class)
@@ -52,4 +54,14 @@ public interface Location {
   //  <R extends Location> R log();
 
   String toExternalUri();
+
+  /**Convenient conversion. Sometimes location is a ClasspathLocation.*/
+  default ClasspathLocation toClasspathLocation() {
+    return (ClasspathLocation) this;
+  }
+
+  /**Convenient conversion. Sometimes location is a PathLocation.*/
+  default PathLocation toPathLocation() {
+    return (PathLocation) this;
+  }
 }
