@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+>
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.raisercostin</groupId>
@@ -70,7 +74,7 @@
     <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
     <kotlin.compiler.languageVersion>1.3</kotlin.compiler.languageVersion>
     <kotlin.version>1.2.71</kotlin.version>
-    <lombok.version>1.18.18</lombok.version>
+    <lombok.version>1.18.20</lombok.version>
     <main.class>org.raisercostin.jedio.LocationsTest</main.class>
     <maven.build.timestamp.format>yyyyMMdd'T'HHmmss</maven.build.timestamp.format>
     <maven.test.skip>false</maven.test.skip>
@@ -131,13 +135,7 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
     </dependency>
-    <dependency>
-      <groupId>co.paralleluniverse</groupId>
-      <artifactId>comsat-httpclient</artifactId>
-      <version>0.7.0</version>
-      <optional>true</optional>
-    </dependency>
-    <!-- <dependency> <groupId>io.reactivex.rxjava2</groupId> <artifactId>rxjava</artifactId> <version>2.2.4</version> </dependency> -->
+     <!-- <dependency> <groupId>io.reactivex.rxjava2</groupId> <artifactId>rxjava</artifactId> <version>2.2.4</version> </dependency> -->
     <dependency>
       <groupId>com.typesafe</groupId>
       <artifactId>config</artifactId>
@@ -195,6 +193,7 @@
       <groupId>org.java-websocket</groupId>
       <artifactId>Java-WebSocket</artifactId>
       <version>1.5.0</version>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -207,13 +206,14 @@
     <dependency>
       <groupId>org.raisercostin</groupId>
       <artifactId>jedi-nodes-java</artifactId>
-      <version>0.22</version>
+      <version>0.23</version>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <optional>true</optional>
     </dependency>
+    <!-- 
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-artifact-transfer</artifactId>
@@ -234,18 +234,24 @@
       <artifactId>maven-scm-provider-gitexe</artifactId>
       <version>1.11.2</version>
     </dependency>
-    <!-- quasar optional -->
+     -->
+   <dependency>
+      <groupId>co.paralleluniverse</groupId>
+      <artifactId>comsat-httpclient</artifactId>
+      <version>0.7.0</version>
+      <optional>true</optional>
+    </dependency>
     <dependency>
       <groupId>co.paralleluniverse</groupId>
       <artifactId>quasar-core</artifactId>
       <version>${quasar.version}</version>
-      <classifier>jdk8</classifier>
+      <!-- <classifier>jdk8</classifier> -->
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>co.paralleluniverse</groupId>
       <artifactId>quasar-reactive-streams</artifactId>
-      <version>0.7.10</version>
+      <version>${quasar.version}</version>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -346,6 +352,7 @@
       <groupId>technology.tabula</groupId>
       <artifactId>tabula</artifactId>
       <version>1.0.2</version>
+      <optional>true</optional>
       <exclusions>
         <exclusion>
           <groupId>commons-logging</groupId>
@@ -361,6 +368,7 @@
       <groupId>com.mashape.unirest</groupId>
       <artifactId>unirest-java</artifactId>
       <version>1.4.9</version>
+      <optional>true</optional>
       <exclusions>
         <exclusion>
           <groupId>commons-logging</groupId>
@@ -376,6 +384,7 @@
       <groupId>ar.com.synergian</groupId>
       <artifactId>wagon-git</artifactId>
       <version>0.3.0</version>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -613,7 +622,14 @@
         <configuration>
           <target>
             <echo message="ant cleanup started." />
-            <fixcrlf eol="unix" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" includes="**/*.java **/*.xml" preservelastmodified="true" srcdir="${basedir}" tab="remove" tablength="2" />
+            <fixcrlf
+              eol="unix"
+              excludes="target/**/* .git/**/* src/test/resources/lsports/**/*"
+              includes="**/*.java **/*.xml"
+              preservelastmodified="true"
+              srcdir="${basedir}"
+              tab="remove"
+              tablength="2" />
             <echo message="ant cleanup finished." />
           </target>
         </configuration>

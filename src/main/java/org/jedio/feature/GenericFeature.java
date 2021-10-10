@@ -4,8 +4,8 @@ import java.time.Duration;
 import java.util.function.BiConsumer;
 
 import ch.qos.logback.classic.Level;
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
-import com.google.inject.internal.util.Objects;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.vavr.CheckedFunction2;
