@@ -10,6 +10,7 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
 ## Usage
 
 ## ToDo
+- [ ] check https://codehaus-plexus.github.io/plexus-utils/apidocs/org/codehaus/plexus/util/DirectoryScanner.html
 - [ ] add deserializers
   - to specific implementations
   - to interfaces https://stackoverflow.com/questions/25387978/how-to-add-custom-deserializer-to-interface-using-jackson

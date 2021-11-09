@@ -52,7 +52,7 @@
   </distributionManagement>
   <properties>
     <checkerframework.version>2.10.0</checkerframework.version>
-    <createChecksum>false</createChecksum>
+    <createChecksum>true</createChecksum>
     <dist.release.url>https://github.com/raisercostin/maven-repo.git</dist.release.url>
     <dist.site.url>${dist.url}/sites/${project.groupId}-${project.artifactId}-${project.version}</dist.site.url>
     <dist.snapshot.url>target/snapshots/</dist.snapshot.url>
