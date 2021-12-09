@@ -6,9 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.net.URL;
 
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import lombok.SneakyThrows;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.xerces.util.URI;
 import org.junit.jupiter.api.Test;
+import org.raisercostin.jedio.Locations;
+import org.raisercostin.nodes.Nodes;
 
 class HttpClientLocationTest {
   @Test
@@ -96,5 +103,16 @@ class HttpClientLocationTest {
     assertThat(
       UrlLocation.of("http://www.revomatico.com/benefits/clients/DFPRADM").child("/portofolio").toExternalForm())
         .isEqualTo("http://www.revomatico.com/portofolio");
+  }
+
+  @Test
+  void test9() throws UnirestException {
+    //Implement posts as simple as this Unirest.post to add headers and body to requests
+    //HttpClientLocation.url(url, new HttpPost(), new StringEntity(body), Locations.defaultClient.get());
+    HttpResponse<String> response = Unirest.post("http://revomatico")
+      .header("Content-type", "application/json")
+      .body("{body=a}")
+      .asString();
+    assertThat(false).isTrue();
   }
 }
