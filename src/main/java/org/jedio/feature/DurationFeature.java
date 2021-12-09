@@ -1,7 +1,12 @@
 package org.jedio.feature;
 
+import static java.time.temporal.ChronoUnit.NANOS;
+
+import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 
 import lombok.ToString;
@@ -28,6 +33,12 @@ public class DurationFeature extends GenericFeature<Duration> implements Feature
     return Duration.between(lastUpdate, now);
   }
 
+  /**Faster since is using millis.*/
+  public Duration ageIgnoringNano(Instant first, Instant second) {
+    //return first.until(second, ChronoUnit.MILLIS);
+    return Duration.ofMillis(ageInMillis(first.getEpochSecond(), second.getEpochSecond()));
+  }
+
   public Duration age(OffsetDateTime lastUpdate) {
     return ClockFeature.clock.ageFrom(lastUpdate);
   }
@@ -52,5 +63,15 @@ public class DurationFeature extends GenericFeature<Duration> implements Feature
 
   public void deleteRuntimeValue() {
     setRuntimeValue(null);
+  }
+
+  public int compareToTimeout(Clock clock, Duration duration, OffsetDateTime lastUpdate) {
+    //    return timestamp == null ? ChronoUnit.FOREVER.getDuration()
+    //        : Duration.between(timestamp, ClockFeature.clock.nowOffsetDateTime());
+    return Long.compare(ageInMillis(clock.millis(), lastUpdate.toInstant().toEpochMilli()), duration.toMillis());
+  }
+
+  private long ageInMillis(long now, long old) {
+    return now - old;
   }
 }
