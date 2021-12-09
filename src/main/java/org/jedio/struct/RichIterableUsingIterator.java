@@ -226,47 +226,68 @@ public class RichIterableUsingIterator<T> implements RichIterable<T> {
   }
 
   @Override
-  public <C> RichIterable<Tuple2<? extends C, RichIterable<T>>> groupBy(Function<? super T, ? extends C> classifier) {
-    return RichIterable.ofJava(groupByInternal(this, classifier))
-      .map(x -> Tuple.of(x.getKey(), RichIterable.ofJava(x.getValue())));
-  }
-
-  @Override
-  public <C> Map<C, Iterator<T>> groupByAsVavrIterator(Function<? super T, ? extends C> classifier) {
+  public <C, ClassifierSubtype extends C> Map<C, Iterator<T>> groupByAsVavrIterator(
+      Function<? super T, ClassifierSubtype> classifier) {
     return groupByWithGenericMapper(this, classifier, Iterator::ofAll);
   }
 
   @Override
-  public <C> Map<C, RichIterable<T>> groupByAsRichIterable(Function<? super T, ? extends C> classifier) {
+  public <C, ClassifierSubtype extends C> Map<C, RichIterable<T>> groupByAsRichIterable(
+      Function<? super T, ClassifierSubtype> classifier) {
     return groupByWithGenericMapper(this, classifier, RichIterable::ofIterable);
   }
 
-  private static <T, C, R extends Iterable<T>> Map<C, R> groupBy(RichIterable<T> source,
-      Function<? super T, ? extends C> classifier, Function<? super Iterable<T>, R> mapper) {
+  private static <T, C, ClassifierSubtype extends C, R extends Iterable<T>> Map<C, R> groupBy(RichIterable<T> source,
+      Function<? super T, ClassifierSubtype> classifier, Function<? super Iterable<T>, R> mapper) {
     return groupByWithGenericMapper(source, classifier, mapper);
   }
 
   //Copied from vavr Collections.groupBy
-  private static <T, C, R> Map<C, R> groupByWithGenericMapper(RichIterable<T> source,
-      Function<? super T, ? extends C> classifier, Function<? super Iterable<T>, R> mapper) {
+  private static <T, Key, KeySubtype extends Key, R> Map<Key, R> groupByWithGenericMapper(RichIterable<T> source,
+      Function<? super T, KeySubtype> classifier, Function<? super Iterable<T>, R> mapper) {
     Objects.requireNonNull(classifier, "classifier is null");
     Objects.requireNonNull(mapper, "mapper is null");
-    Map<C, R> results = LinkedHashMap.empty();
-    for (java.util.Map.Entry<? extends C, Collection<T>> entry : groupByInternal(source, classifier)) {
+    Map<Key, R> results = LinkedHashMap.empty();
+    for (Entry<KeySubtype, ArrayList<T>> entry : groupByInternal(source, classifier).entrySet()) {
       results = results.put(entry.getKey(), mapper.apply(entry.getValue()));
     }
     return results;
   }
 
-  private static <T, C> java.util.Set<java.util.Map.Entry<C, Collection<T>>> groupByInternal(RichIterable<T> source,
-      Function<? super T, ? extends C> classifier) {
-    final java.util.Map<C, Collection<T>> results = new java.util.LinkedHashMap<>(
+  @Override
+  public <Key, KeySubtype extends Key> java.util.Map<Key, ArrayList<T>> groupByToMap(
+      Function<? super T, KeySubtype> classifier) {
+    return groupByInternal(this, classifier);
+  }
+
+  //  @Override
+  @Override
+  @SuppressWarnings("unchecked")
+  public <Key, KeySubtype extends Key> java.util.Map<Key, RichIterable<T>> groupByToMapOfRichIterables(
+      Function<? super T, KeySubtype> classifier) {
+    //Inplace replacement of values
+    @SuppressWarnings("rawtypes")
+    java.util.Map map = groupByToMap(classifier);
+    map.replaceAll((k, v) -> RichIterable.ofJava((ArrayList<T>) v));
+    return map;
+  }
+
+  private static <T, Key, KeySubtype extends Key> java.util.LinkedHashMap<Key, ArrayList<T>> groupByInternal(
+      RichIterable<T> source, Function<? super T, KeySubtype> classifier) {
+    final java.util.LinkedHashMap<Key, ArrayList<T>> results = new java.util.LinkedHashMap<>(
       source.isTraversableAgain() ? source.size() : 16);
     for (T value : source.iterator("groupByInternal")) {
-      final C key = classifier.apply(value);
+      final Key key = classifier.apply(value);
       results.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
     }
-    return results.entrySet();
+    return results;
+  }
+
+  @Override
+  public <C, ClassifierSubtype extends C> RichIterable<Tuple2<ClassifierSubtype, RichIterable<T>>> groupBy(
+      Function<? super T, ClassifierSubtype> classifier) {
+    return RichIterable.ofJava(groupByInternal(this, classifier).entrySet())
+      .map(x -> Tuple.of(x.getKey(), RichIterable.ofJava(x.getValue())));
   }
 
   @Override

@@ -3,6 +3,7 @@ package org.jedio.struct;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -128,11 +129,14 @@ public interface RichIterable<T> {
 
   @SafeVarargs
   static <T> RichIterable<T> of(T... elements) {
-    return ofJava(elements == null ? Lists.newArrayList() : Lists.newArrayList(elements));
+    return ofJava(elements == null || elements.length == 0 ? List.of() : Lists.newArrayList(elements));
   }
 
+  RichIterable<?> EMPTY = ofJava(List.of());
+
+  @SuppressWarnings("unchecked")
   static <T> RichIterable<T> empty() {
-    return of();
+    return (RichIterable<T>) EMPTY;
   }
 
   @SafeVarargs
@@ -471,11 +475,26 @@ public interface RichIterable<T> {
 
   T get();
 
-  <C> RichIterable<Tuple2<? extends C, RichIterable<T>>> groupBy(Function<? super T, ? extends C> classifier);
+  /**Most performant group by. All others are using this as intermediary.*/
+  <Key, KeySubtype extends Key> Map<Key, ArrayList<T>> groupByToMap(Function<? super T, KeySubtype> classifier);
 
-  <C> io.vavr.collection.Map<C, RichIterable<T>> groupByAsRichIterable(Function<? super T, ? extends C> classifier);
+  <Key, KeySubtype extends Key> Map<Key, RichIterable<T>> groupByToMapOfRichIterables(
+      Function<? super T, KeySubtype> classifier);
 
-  <C> io.vavr.collection.Map<C, Iterator<T>> groupByAsVavrIterator(Function<? super T, ? extends C> classifier);
+  @Deprecated
+  /**Use groupByToMap. */
+  <C, ClassifierSubtype extends C> RichIterable<Tuple2<ClassifierSubtype, RichIterable<T>>> groupBy(
+      Function<? super T, ClassifierSubtype> classifier);
+
+  @Deprecated
+  /**Use groupByToMap. */
+  <C, ClassifierSubtype extends C> io.vavr.collection.Map<C, RichIterable<T>> groupByAsRichIterable(
+      Function<? super T, ClassifierSubtype> classifier);
+
+  @Deprecated
+  /**Use groupByToMap. */
+  <C, ClassifierSubtype extends C> io.vavr.collection.Map<C, Iterator<T>> groupByAsVavrIterator(
+      Function<? super T, ClassifierSubtype> classifier);
 
   RichIterable<Seq<T>> grouped(int size);
 
