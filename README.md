@@ -136,4 +136,7 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
 
 ## Development
 
-- To release `mvn release:prepare release:perform -DskipTests=true -Prelease -Darguments="-DskipTests=true -Prelease"`
+- To release 
+  - `npm run normalize-pom release-prepare release-perform-local`
+- Deprecated
+  - `mvn release:prepare release:perform -DskipTests=true -Prelease -Darguments="-DskipTests=true -Prelease"`
