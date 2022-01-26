@@ -54,6 +54,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.Audit;
+import org.jedio.deprecated;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.nodes.Nodes;
 import reactor.core.publisher.Mono;
@@ -63,6 +64,8 @@ import reactor.core.publisher.Mono;
 // @Setter(lombok.AccessLevel.NONE)
 @ToString
 @Slf4j
+@Deprecated
+@deprecated("use WebClientLocation as a modern, async, better api wrapper of reactive WebClient")
 public class FiberUrlLocation2 extends BaseHttpLocationLike<@NonNull FiberUrlLocation2>
     implements ReadableFileLocation {
   private static final int retries = 5;

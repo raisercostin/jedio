@@ -33,11 +33,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Hashtable;
 import java.util.Locale;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
@@ -3819,7 +3822,15 @@ public class ModifiedURI implements Cloneable, Comparable, Serializable {
       charset = LOCALE_TO_CHARSET_MAP.get(locale.getLanguage());
       return charset; // may be null
     }
-
   }
 
+  @SneakyThrows
+  public URL toURL() {
+    return new URL(getEscapedURI());
+  }
+
+  @SneakyThrows
+  public URI toURI() {
+    return new URI(this.getEscapedURI());
+  }
 }

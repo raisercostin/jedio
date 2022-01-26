@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.base.Preconditions;
+import io.vavr.Function1;
 import io.vavr.Lazy;
 import io.vavr.Tuple3;
 import io.vavr.control.Either;
@@ -23,9 +24,14 @@ import org.raisercostin.jedio.path.PathLocation;
 import org.raisercostin.jedio.url.HttpClientLocation;
 import org.raisercostin.jedio.url.JedioHttpClient;
 import org.raisercostin.jedio.url.SimpleUrl;
+import org.raisercostin.jedio.url.WebClientLocation;
 import org.raisercostin.jedio.url.WebLocation;
 import org.raisercostin.jedio.url.impl.ModifiedURI;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
+import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec;
+import org.springframework.web.reactive.function.client.WebClient.UriSpec;
 
 public class Locations {
   private static Lazy<JedioHttpClient> defaultClient = Lazy.of(() -> JedioHttpClient.createHighPerfHttpClient());
@@ -99,32 +105,45 @@ public class Locations {
     return new WebLocation(true, webAddress);
   }
 
-  public static HttpClientLocation url(String url) {
+  public static <S extends RequestHeadersUriSpec<S>> WebClientLocation httpGet(String url,
+      Function1<RequestHeadersUriSpec<S>, RequestHeadersUriSpec<S>> req) {
+    return WebClientLocation.httpGet(url, req);
+  }
+
+  public static WebClientLocation httpGet(String url) {
+    return WebClientLocation.httpGet(url);
+  }
+
+  public static WebClientLocation httpGet(ModifiedURI uri) {
+    return WebClientLocation.httpGet(uri);
+  }
+
+  public static HttpClientLocation urlApache(String url) {
     return new HttpClientLocation(url, false, defaultClient.get());
   }
 
-  public static HttpClientLocation url(ModifiedURI uri) {
-    return url(new SimpleUrl(uri));
+  public static HttpClientLocation urlApache(ModifiedURI uri) {
+    return urlApache(new SimpleUrl(uri));
   }
 
   // public static HttpClientLocation url(URL url) {
   // return url(new SimpleUrl(url));
   // }
 
-  public static HttpClientLocation url(SimpleUrl url) {
+  public static HttpClientLocation urlApache(SimpleUrl url) {
     return HttpClientLocation.url(url, defaultClient.get());
   }
 
   @SneakyThrows
-  public static HttpClientLocation urlPost(String url, String body) {
+  public static HttpClientLocation urlApachePost(String url, String body) {
     return HttpClientLocation.url(url, new HttpPost(), new StringEntity(body), defaultClient.get());
   }
 
-  public static HttpClientLocation url(String sourceHyperlink, String relativeOrAbsoluteHyperlink) {
+  public static HttpClientLocation urlApache(String sourceHyperlink, String relativeOrAbsoluteHyperlink) {
     return HttpClientLocation.url(sourceHyperlink, relativeOrAbsoluteHyperlink, defaultClient.get());
   }
 
-  public static HttpClientLocation url(String url, JedioHttpClient client) {
+  public static HttpClientLocation urlApache(String url, JedioHttpClient client) {
     return HttpClientLocation.url(url, client);
   }
 
@@ -164,7 +183,7 @@ public class Locations {
     switch (schemaAndUrl._2) {
       case "http":
       case "https":
-        return url(externalUrl);
+        return httpGet(externalUrl);
       case "classpath":
         return classpath(schemaAndUrl._3);
       case "file":

@@ -11,9 +11,12 @@ import java.nio.charset.Charset;
 import io.vavr.Lazy;
 import lombok.SneakyThrows;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jedio.deprecated;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.url.impl.ModifiedURI;
 
+@Deprecated
+@deprecated("use WebClientLocation as a modern, async, better api wrapper of reactive WebClient")
 public class HttpStandardJavaLocation extends BaseHttpLocationLike<@NonNull HttpStandardJavaLocation>
     implements ReadableFileLocation, Closeable {
   public Lazy<URLConnection> connection = Lazy.of(() -> createConnection());

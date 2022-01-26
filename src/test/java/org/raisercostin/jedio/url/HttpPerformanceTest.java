@@ -47,7 +47,7 @@ public class HttpPerformanceTest {
       Vector<Mono<Integer>> all = Vector.range(0, totalCalls)// .toJavaParallelStream().
         .map((Integer x) -> {
           log.info("x=" + x);
-          return Locations.url(testUrl, client).readContentAsync().map(content -> {
+          return Locations.urlApache(testUrl, client).readContentAsync().map(content -> {
             assertThat(content.length()).isGreaterThan(1);
             // assertThat(content).startsWith("{\"updated\":\"");
             assertThat(content).startsWith("<!DOCTYPE html>");

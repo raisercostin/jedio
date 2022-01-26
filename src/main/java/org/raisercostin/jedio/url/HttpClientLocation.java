@@ -33,6 +33,7 @@ import org.apache.http.protocol.HttpCoreContext;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.Audit.AuditException;
 import org.jedio.RichThrowable;
+import org.jedio.deprecated;
 import org.jedio.functions.JedioFunction;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReadableFileLocation;
@@ -43,6 +44,8 @@ import reactor.core.publisher.Mono;
 @Getter(lombok.AccessLevel.NONE)
 @Setter(lombok.AccessLevel.NONE)
 @Slf4j
+@Deprecated
+@deprecated("use WebClientLocation as a modern, async, better api wrapper of reactive WebClient")
 public class HttpClientLocation extends BaseHttpLocationLike<@NonNull HttpClientLocation>
     implements ReadableFileLocation {
   public static HttpClientLocation url(SimpleUrl url, JedioHttpClient defaultClient) {

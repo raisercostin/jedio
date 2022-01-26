@@ -18,10 +18,12 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.feature.BooleanFeature;
 import org.jedio.feature.GenericFeature;
 import org.raisercostin.jedio.ReadableFileLocation;
+import org.raisercostin.jedio.url.impl.ModifiedURI;
 import org.raisercostin.nodes.Nodes;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -29,7 +31,9 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
+import org.springframework.web.reactive.function.client.WebClient.RequestBodyUriSpec;
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
+import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -39,15 +43,56 @@ import reactor.netty.resources.ConnectionProvider;
 import reactor.retry.Retry;
 
 public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLocation>
-    implements ReadableFileLocation, Closeable {
+    implements ReadableFileLocation {
   public static final WebClientFactory defaultClient = new WebClientFactory();
 
   public static WebClientLocation post(String url, MediaType applicationJson, Object params) {
     return defaultClient.post(url, applicationJson, params);
   }
 
-  public static WebClientLocation get(String url) {
+  @SuppressWarnings("unchecked")
+  @SneakyThrows
+  public static <S extends RequestHeadersUriSpec<S>> WebClientLocation httpGet(String url,
+      Function1<RequestHeadersUriSpec<S>, RequestHeadersUriSpec<S>> requestCreator) {
+    URL url2 = new URL(url);
+    return new WebClientLocation(url2, false,
+      requestCreator.apply((S) defaultClient.currentClient().get()).uri(url2.toURI()),
+      defaultClient);
+  }
+
+  @SneakyThrows
+  public static WebClientLocation httpPost(String url,
+      Function1<RequestBodyUriSpec, RequestBodyUriSpec> requestCreator) {
+    URL url2 = new URL(url);
+    return new WebClientLocation(url2, false,
+      requestCreator.apply(defaultClient.currentClient().post()).uri(url2.toURI()),
+      defaultClient);
+  }
+
+  @SneakyThrows
+  public static WebClientLocation httpPut(String url,
+      Function1<RequestBodyUriSpec, RequestBodyUriSpec> requestCreator) {
+    URL url2 = new URL(url);
+    return new WebClientLocation(url2, false,
+      requestCreator.apply(defaultClient.currentClient().put()).uri(url2.toURI()),
+      defaultClient);
+  }
+
+  @SneakyThrows
+  public static WebClientLocation httpMethod(String url, HttpMethod method,
+      Function1<RequestBodyUriSpec, RequestBodyUriSpec> requestCreator) {
+    URL url2 = new URL(url);
+    return new WebClientLocation(url2, false,
+      requestCreator.apply(defaultClient.currentClient().method(method)).uri(url2.toURI()),
+      defaultClient);
+  }
+
+  public static WebClientLocation httpGet(String url) {
     return defaultClient.get(url);
+  }
+
+  public static WebClientLocation httpGet(ModifiedURI uri) {
+    return defaultClient.get(uri);
   }
 
   @JsonIgnore
@@ -104,6 +149,25 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
 
   @Override
   public Mono<String> readContentAsync() {
+    if (client.retryOnAnyError.isEnabled()) {
+      return readContentAsyncWithRetry();
+    }
+    //return request.exchange().flatMap(x -> x.bodyToMono(String.class));
+    return request.exchange().flatMap(clientResponse -> {
+      if (clientResponse.statusCode().isError()) {
+        return Mono.error(new ResponseStatusException(clientResponse.statusCode(), "Error"));
+      } else {
+        return Mono.just(clientResponse);
+      }
+    })
+      //      .retryWhen(
+      //        Retry.anyOf(ResponseStatusException.class)
+      //          .randomBackoff(Duration.ofSeconds(1), Duration.ofSeconds(1000))
+      //          .retryMax(3))
+      .flatMap(x -> x.bodyToMono(String.class));
+  }
+
+  public Mono<String> readContentAsyncWithRetry() {
     //return request.exchange().flatMap(x -> x.bodyToMono(String.class));
     return request.exchange().flatMap(clientResponse -> {
       if (clientResponse.statusCode().isError()) {
@@ -124,10 +188,6 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
     return readContentAsync().block(client.readContentSyncTimeout);
   }
 
-  @Override
-  public void close() throws IOException {
-  }
-
   public static class WebClientFactory implements HttpClientLocationFactory {
     private WebClient client;
     private WebClient clientWithTap;
@@ -139,11 +199,18 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
       "webclientWireTap", false, "feature.webclient.wireTap", true);
     public GenericFeature<Integer> webclientMaxConnections = GenericFeature.create(
       "webclientMaxConnections", 500, "feature.webclient.maxConnections", true);
+    public BooleanFeature retryOnAnyError = GenericFeature.booleanFeature(
+      "webclientRetryOnAnyError", false, "feature.webclient.retryOnAnyError", true);
 
     public WebClientFactory() {
       this.builder = createWebClient(false, webclientMaxConnections);
       this.client = builder.build();
       this.clientWithTap = createWebClient(true, webclientMaxConnections).build();
+    }
+
+    public WebClientLocation get(ModifiedURI uri) {
+      URL url2 = uri.toURL();
+      return new WebClientLocation(url2, false, currentClient().get().uri(uri.toURI()), this);
     }
 
     @Override

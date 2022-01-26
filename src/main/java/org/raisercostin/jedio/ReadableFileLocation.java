@@ -104,7 +104,8 @@ public interface ReadableFileLocation extends BasicFileLocation {
         e2.addSuppressed(e);
         log.debug("Other charsets: {}", Charset.availableCharsets().keySet());
         throw RichThrowable.wrap(e2,
-          "While reading %s with charsets %s and %s. Others could exist. Enable debug to see them.", this,
+          e.getMessage() + " - Error while reading %s with charsets %s and %s. Enable debug to see available charsets.",
+          this,
           charset1_UTF8, charset2_ISO_8859_1);
       }
     }
