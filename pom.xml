@@ -84,7 +84,7 @@
     <scm.connection.url>scm:git:${git.url}.git</scm.connection.url>
     <maven.test.skip>false</maven.test.skip>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-    <sonar.organization${org}</sonar.organization>
+    <sonar.organization>${org}</sonar.organization>
     <timestamp>${maven.build.timestamp}</timestamp>
   </properties>
   <dependencyManagement>
