@@ -6,6 +6,7 @@
     <artifactId>maven-defaults-raisercostin</artifactId>
     <version>1.23</version>
   </parent>
+  <groupId>org.raisercostin</groupId>
   <artifactId>jedio</artifactId>
   <version>0.81-SNAPSHOT</version>
   <name>jedio</name>
@@ -70,10 +71,11 @@
     <git.userOrGroup>raisercostin</git.userOrGroup>
     <issues.url>${git.url}/issues</issues.url>
     <jackson-bom.version>${jackson.version}</jackson-bom.version>
-    <jackson.version>2.12.3</jackson.version>
+    <jackson.version>2.12.5</jackson.version>
     <m2e.apt.activation>jdt_apt</m2e.apt.activation>
-    <main.class>None</main.class>
+    <mainClass>None</mainClass>
     <maven.build.timestamp.format>yyyyMMdd'T'HHmmss</maven.build.timestamp.format>
+    <myJavaVersion>15</myJavaVersion>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <maven.test.skip>false</maven.test.skip>
@@ -251,6 +253,14 @@
     </dependency>
   </dependencies>
   <repositories>
+    <repository>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+    </repository>
     <repository>
       <id>raisercostin-github</id>
       <name>Repository at https://github.com/raisercostin/maven-repo</name>
@@ -545,7 +555,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>${main.class}</mainClass>
+              <mainClass>${mainClass}</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -593,7 +603,7 @@
             <configuration>
               <archive>
                 <manifest>
-                  <mainClass>${main.class}</mainClass>
+                  <mainClass>${mainClass}</mainClass>
                 </manifest>
               </archive>
               <descriptorRefs>
@@ -608,7 +618,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
-          <mainClass>${main.class}</mainClass>
+          <mainClass>${mainClass}</mainClass>
         </configuration>
       </plugin>
       <plugin>
