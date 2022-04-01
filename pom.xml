@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+>
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.raisercostin</groupId>
@@ -118,12 +121,6 @@
       <artifactId>checker-qual</artifactId>
       <version>3.11.0</version>
     </dependency>
-    <!--
-    <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
-    </dependency>
-    -->
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
@@ -131,41 +128,11 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.8.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
     </dependency>
-    <!-- 
-    <dependency>
-      <groupId>org.apache.maven.shared</groupId>
-      <artifactId>maven-artifact-transfer</artifactId>
-      <version>0.12.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.resolver</groupId>
-      <artifactId>maven-resolver-impl</artifactId>
-      <version>1.6.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.resolver</groupId>
-      <artifactId>maven-resolver-transport-wagon</artifactId>
-      <version>1.6.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.scm</groupId>
-      <artifactId>maven-scm-provider-gitexe</artifactId>
-      <version>1.11.2</version>
-    </dependency>
-     -->
-    <dependency>
-      <groupId>co.paralleluniverse</groupId>
-      <artifactId>comsat-httpclient</artifactId>
-      <version>0.7.0</version>
-      <optional>true</optional>
-    </dependency>
-    <!-- <dependency> <groupId>io.reactivex.rxjava2</groupId> <artifactId>rxjava</artifactId> <version>2.2.4</version> </dependency> -->
     <dependency>
       <groupId>com.typesafe</groupId>
       <artifactId>config</artifactId>
@@ -178,42 +145,6 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
-    <!-- testing -->
-    <!-- Not test as we might use asserts in test clients main classes. -->
-    <!-- <dependency> <groupId>junit</groupId> <artifactId>junit</artifactId> <version>4.12</version> <type>jar</type> </dependency> -->
-    <!--     <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.platform</groupId>
-      <artifactId>junit-platform-runner</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
- -->
-    <!-- <dependency> <groupId>org.junit.platform</groupId> <artifactId>junit-platform-launcher</artifactId> <version>1.1.0</version> <scope>test</scope>
-      </dependency> -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
@@ -230,13 +161,9 @@
       <artifactId>jcl-over-slf4j</artifactId>
       <optional>true</optional>
     </dependency>
-    <!-- <dependency> <groupId>org.jetbrains.kotlin</groupId> <artifactId>kotlin-stdlib</artifactId> <version>${kotlin.version}</version> </dependency>
-      <dependency> <groupId>org.jetbrains.kotlin</groupId> <artifactId>kotlin-test-junit</artifactId> <version>${kotlin.version}</version> <scope>test</scope>
-      </dependency> -->
     <dependency>
       <groupId>org.raisercostin</groupId>
       <artifactId>jedi-nodes-java</artifactId>
-      <version>0.23</version>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -244,22 +171,8 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>co.paralleluniverse</groupId>
-      <artifactId>quasar-core</artifactId>
-      <version>${quasar.version}</version>
-      <!-- <classifier>jdk8</classifier> -->
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>co.paralleluniverse</groupId>
-      <artifactId>quasar-reactive-streams</artifactId>
-      <version>${quasar.version}</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>org.raisercostin</groupId>
       <artifactId>raisercostin-commons</artifactId>
-      <version>2.27</version>
       <exclusions>
         <exclusion>
           <groupId>org.raisercostin</groupId>
@@ -279,26 +192,6 @@
       <groupId>io.projectreactor.netty</groupId>
       <artifactId>reactor-netty</artifactId>
     </dependency>
-    <!--already included in all-->
-    <dependency>
-      <groupId>io.github.resilience4j</groupId>
-      <artifactId>resilience4j-circuitbreaker</artifactId>
-      <version>${resilience4j.version}</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>io.github.resilience4j</groupId>
-      <artifactId>resilience4j-reactor</artifactId>
-      <version>${resilience4j.version}</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>io.github.resilience4j</groupId>
-      <artifactId>resilience4j-timelimiter</artifactId>
-      <version>${resilience4j.version}</version>
-      <optional>true</optional>
-    </dependency>
-    <!-- logs -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -315,40 +208,6 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-webflux</artifactId>
     </dependency>
-    <!-- tests -->
-    <!--
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-test</artifactId>
-      <type>jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
-      <type>jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.projectreactor</groupId>
-      <artifactId>reactor-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.skyscreamer</groupId>
-      <artifactId>jsonassert</artifactId>
-      <version>1.5.0</version>
-      <scope>test</scope>
-    </dependency>
-     -->
-    <!-- <dependency> <groupId>org.mapstruct</groupId> <artifactId>mapstruct-jdk8</artifactId> <version>${org.mapstruct.version}</version> </dependency> -->
-    <!-- <dependency> <groupId>org.mapstruct</groupId> <artifactId>mapstruct-processor</artifactId> <version>${org.mapstruct.version}</version>
-      </dependency> -->
     <!-- pdfbox, poi, tabula -->
     <dependency>
       <groupId>technology.tabula</groupId>
@@ -383,12 +242,6 @@
       <artifactId>vavr</artifactId>
     </dependency>
     <dependency>
-      <groupId>ar.com.synergian</groupId>
-      <artifactId>wagon-git</artifactId>
-      <version>0.3.0</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>${lombok.version}</version>
@@ -408,7 +261,6 @@
       <id>raisercostin-github</id>
       <url>https://raw.githubusercontent.com/raisercostin/maven-repo/master/</url>
     </repository>
-
   </repositories>
   <build>
     <finalName>${project.artifactId}</finalName>
@@ -432,7 +284,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore/>
+                    <ignore />
                   </action>
                 </pluginExecution>
               </pluginExecutions>
@@ -579,7 +431,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore/>
+                  <ignore />
                 </action>
               </pluginExecution>
               <pluginExecution>
@@ -592,7 +444,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore/>
+                  <ignore />
                 </action>
               </pluginExecution>
             </pluginExecutions>
@@ -605,13 +457,19 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.8</version>
         <!--$NO-MVN-MAN-VER$ -->
         <configuration>
           <target>
-            <echo message="ant cleanup started."/>
-            <fixcrlf eol="unix" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" includes="**/*.java **/*.xml" preservelastmodified="true" srcdir="${basedir}" tab="remove" tablength="2"/>
-            <echo message="ant cleanup finished."/>
+            <echo message="ant cleanup started." />
+            <fixcrlf
+              eol="unix"
+              excludes="target/**/* .git/**/* src/test/resources/lsports/**/*"
+              includes="**/*.java **/*.xml"
+              preservelastmodified="true"
+              srcdir="${basedir}"
+              tab="remove"
+              tablength="2" />
+            <echo message="ant cleanup finished." />
           </target>
         </configuration>
         <!-- not always needed -->
@@ -788,17 +646,5 @@
         </executions>
       </plugin>
     </plugins>
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.scm</groupId>
-        <artifactId>maven-scm-provider-gitexe</artifactId>
-        <version>1.11.2</version>
-      </extension>
-      <extension>
-        <groupId>ar.com.synergian</groupId>
-        <artifactId>wagon-git</artifactId>
-        <version>0.3.0</version>
-      </extension>
-    </extensions>
   </build>
 </project>
