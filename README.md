@@ -1,7 +1,7 @@
 # jedio
 Uniform, fluent access to files, urls and other resources API for java, kotlin and scala. 
 
-[![Download](https://api.bintray.com/packages/raisercostin/maven/jedio/images/download.svg)](https://bintray.com/raisercostin/maven/jedio/_latestVersion)
+[![Versions](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Fraisercostin%2Fmaven-repo%2Fmaster%2Forg%2Fraisercostin%2Fjedio%2Fmaven-metadata.xml)](https://github.com/raisercostin/maven-repo/tree/master/org/raisercostin/jedio)
 [![Build Status](https://travis-ci.org/raisercostin/jedio.svg?branch=master)](https://travis-ci.org/raisercostin/jedio)
 <!--
 [![Codacy Badge](https://www.codacy.com/project/badge/fe1bb28a7735433d89a238ce6f6305c1)](https://www.codacy.com/app/raisercostin/jedio)
