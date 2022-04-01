@@ -252,11 +252,12 @@
   </dependencies>
   <repositories>
     <repository>
+      <id>raisercostin-github</id>
+      <name>Repository at https://github.com/raisercostin/maven-repo</name>
+      <url>https://raw.githubusercontent.com/raisercostin/maven-repo/master</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
-      <id>raisercostin-github</id>
-      <url>https://raw.githubusercontent.com/raisercostin/maven-repo/master/</url>
     </repository>
   </repositories>
   <build>
