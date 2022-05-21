@@ -14,7 +14,6 @@ import io.vavr.control.Try;
 import lombok.ToString;
 import org.jedio.BiCheckedConsumer;
 import org.raisercostin.nodes.Nodes;
-import reactor.core.Disposable;
 
 @ToString
 public class GenericFeature<T> implements Feature<T> {
@@ -180,17 +179,17 @@ public class GenericFeature<T> implements Feature<T> {
   }
 
   public void registerOnChange(CheckedFunction2<T, T, T> onChange) {
-    registerOnChangeFunction(null, onChange);
+    registerOnChangeFunction(onChange);
   }
 
-  public void registerNewCallbackOnChange(Disposable oldDisposable, BiCheckedConsumer<T, T> onChange) {
-    registerOnChangeFunction(oldDisposable, (from, to) -> {
+  public void registerNewCallbackOnChange(BiCheckedConsumer<T, T> onChange) {
+    registerOnChangeFunction((from, to) -> {
       onChange.accept(from, to);
       return to;
     });
   }
 
-  private void registerOnChangeFunction(Disposable oldDisposable, CheckedFunction2<T, T, T> onChange) {
+  private void registerOnChangeFunction(CheckedFunction2<T, T, T> onChange) {
     //      Preconditions.checkArgument(oldDisposable == null || oldDisposable == this.onChange,
     //        "On %s - The oldDisposable %s is different than the given one %s", this, this.onChange, oldDisposable);
     //      Preconditions.checkArgument(onChange == null || onChange == this.onChange,
