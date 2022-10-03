@@ -68,6 +68,7 @@ import org.raisercostin.jedio.op.CopyEvent;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.DeleteOptions;
 import org.raisercostin.jedio.op.OperationContext;
+import org.raisercostin.jedio.zip.ZipLocation;
 import org.raisercostin.nodes.Nodes;
 import org.raisercostin.nodes.impl.JsonNodes;
 import org.springframework.core.io.ClassPathResource;
@@ -1049,5 +1050,9 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   @Override
   public String toExternalForm() {
     return "file://localhost/" + absoluteAndNormalized();
+  }
+
+  public ZipLocation unzip() {
+    return new ZipLocation(this);
   }
 }
