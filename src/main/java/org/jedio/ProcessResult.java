@@ -30,7 +30,7 @@ public class ProcessResult {
   public final String output;
   public final String error;
   public final boolean finished;
-  private Process proc;
+  public final Process proc;
 
   public ProcessResult(DirLocation current, List<String> commandAndParams, Pattern sensibleRegex, Process proc) {
     try {
@@ -61,10 +61,10 @@ public class ProcessResult {
       if (this.finished) {
         int exitValue = this.proc.exitValue();
         if (exitValue != 0) {
-          if (!this.error.isEmpty()) {
-            throw new RuntimeException("Couldn't execute [" + this.command + "] errorCode=" + exitValue + "\nOutput:["
-                + this.output + "]\n Error:[" + this.error + "]");
-          }
+          //if (!this.error.isEmpty()) {
+          throw new RuntimeException("Couldn't execute [" + this.command + "] errorCode=" + exitValue + "\nOutput:["
+              + this.output + "]\n Error:[" + this.error + "]");
+          //}
         }
       } else {
         throw new RuntimeException(
@@ -81,10 +81,10 @@ public class ProcessResult {
 
   private void message(DirLocation current, int exitValue, String command, String output, String error) {
     if (exitValue == 0 && output.isEmpty() && error.isEmpty()) {
-      logger.info(current.toString() + " > [" + command + "]");
+      logger.info("{} > [{}]", current, command);
     } else {
-      logger.info(current.toString() + " > " + command + "\nExitValue: " + exitValue + "\nOutput:[" + print(output)
-          + "]\nError:[" + print(error) + "]\n");
+      logger.info("{} > {}\nExitValue: {}\nOutput:[{}]\nError:[{}]\n", current, command, exitValue, print(output),
+        print(error));
     }
   }
 

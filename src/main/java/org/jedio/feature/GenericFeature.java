@@ -14,6 +14,7 @@ import io.vavr.control.Try;
 import lombok.ToString;
 import org.jedio.BiCheckedConsumer;
 import org.raisercostin.nodes.Nodes;
+import reactor.core.Disposable;
 
 @ToString
 public class GenericFeature<T> implements Feature<T> {
@@ -162,7 +163,11 @@ public class GenericFeature<T> implements Feature<T> {
   }
 
   public void registerNewCallbackOnChange(boolean call, BiConsumer<T, T> onChange) {
-    registerOnChange((from, to) -> {
+    registerNewCallbackOnChange(null, call, onChange);
+  }
+
+  public void registerNewCallbackOnChange(Disposable oldDisposable, boolean call, BiConsumer<T, T> onChange) {
+    registerOnChange(oldDisposable, (from, to) -> {
       onChange.accept(from, to);
       return to;
     });
@@ -171,18 +176,29 @@ public class GenericFeature<T> implements Feature<T> {
     }
   }
 
-  public void registerAction(BiCheckedConsumer<T, T> onChange) {
-    registerOnChange((from, to) -> {
+  public void registerAction(Disposable oldDisposable, BiCheckedConsumer<T, T> onChange) {
+    registerOnChange(oldDisposable, (from, to) -> {
       onChange.accept(from, to);
       return to;
     });
   }
 
-  public void registerOnChange(CheckedFunction2<T, T, T> onChange) {
+  public void registerAction(BiCheckedConsumer<T, T> onChange) {
+    registerOnChange(null, (from, to) -> {
+      onChange.accept(from, to);
+      return to;
+    });
+  }
+
+  public void registerOnChange(Disposable oldDisposable, CheckedFunction2<T, T, T> onChange) {
     registerOnChangeFunction(onChange);
   }
 
   public void registerNewCallbackOnChange(BiCheckedConsumer<T, T> onChange) {
+    registerNewCallbackOnChange(null, onChange);
+  }
+
+  public void registerNewCallbackOnChange(Disposable oldDisposable, BiCheckedConsumer<T, T> onChange) {
     registerOnChangeFunction((from, to) -> {
       onChange.accept(from, to);
       return to;
