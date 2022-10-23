@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.raisercostin</groupId>
@@ -75,10 +76,10 @@
     <m2e.apt.activation>jdt_apt</m2e.apt.activation>
     <mainClass>None</mainClass>
     <maven.build.timestamp.format>yyyyMMdd'T'HHmmss</maven.build.timestamp.format>
-    <myJavaVersion>15</myJavaVersion>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <maven.test.skip>false</maven.test.skip>
+    <myJavaVersion>15</myJavaVersion>
     <org>raisercostin</org>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -262,12 +263,12 @@
       <url>https://repo.maven.apache.org/maven2</url>
     </repository>
     <repository>
-      <id>raisercostin-github</id>
-      <name>Repository at https://github.com/raisercostin/maven-repo</name>
-      <url>https://raw.githubusercontent.com/raisercostin/maven-repo/master</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
+      <id>raisercostin-github</id>
+      <name>Repository at https://github.com/raisercostin/maven-repo</name>
+      <url>https://raw.githubusercontent.com/raisercostin/maven-repo/master</url>
     </repository>
   </repositories>
   <build>
@@ -292,7 +293,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore />
+                    <ignore/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>
@@ -439,7 +440,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore />
+                  <ignore/>
                 </action>
               </pluginExecution>
               <pluginExecution>
@@ -452,7 +453,7 @@
                   </goals>
                 </pluginExecutionFilter>
                 <action>
-                  <ignore />
+                  <ignore/>
                 </action>
               </pluginExecution>
             </pluginExecutions>
@@ -468,9 +469,9 @@
         <!--$NO-MVN-MAN-VER$ -->
         <configuration>
           <target>
-            <echo message="ant cleanup started." />
-            <fixcrlf eol="unix" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" includes="**/*.java **/*.xml" preservelastmodified="true" srcdir="${basedir}" tab="remove" tablength="2" />
-            <echo message="ant cleanup finished." />
+            <echo message="ant cleanup started."/>
+            <fixcrlf eol="unix" excludes="target/**/* .git/**/* src/test/resources/lsports/**/*" includes="**/*.java **/*.xml" preservelastmodified="true" srcdir="${basedir}" tab="remove" tablength="2"/>
+            <echo message="ant cleanup finished."/>
           </target>
         </configuration>
         <!-- not always needed -->
