@@ -29,10 +29,10 @@ function releasePerformLocal(){
   
   mkdir -p $repo/$groupPath/$artifactId/$version
   cp $localMavenRepo/$groupPath/$artifactId/$version/$artifactId-$version* $repo/$groupPath/$artifactId/$version/
-  rm -f $repo/$groupPath/$artifactId/$version/$artifactId-$version.pom.sha1
-  sha1sum.exe $repo/$groupPath/$artifactId/$version/$artifactId-$version.pom | cut -d ' ' -f 1 > $repo/$groupPath/$artifactId/$version/$artifactId-$version.pom.sha1
-  rm -f $repo/$groupPath/$artifactId/$version/$artifactId-$version.pom.md5
-  md5sum.exe $repo/$groupPath/$artifactId/$version/$artifactId-$version.pom | cut -d ' ' -f 1 > $repo/$groupPath/$artifactId/$version/$artifactId-$version.pom.md5
+  createChecksums .pom $version $repo $localMavenRepo $groupPath $artifactId
+  createChecksums .jar $version $repo $localMavenRepo $groupPath $artifactId
+  createChecksums -javadoc.jar $version $repo $localMavenRepo $groupPath $artifactId
+  createChecksums -sources.jar $version $repo $localMavenRepo $groupPath $artifactId
   rm -rf $repo/$groupPath/$artifactId/$version/*main*
   git -C $repo status
   git -C $repo add .
@@ -47,16 +47,17 @@ function normalizePom(){
     -Dsort.sortExecutions=true -Dsort.sortDependencyExclusions=artifactId -Dsort.lineSeparator="\n" -Dsort.ignoreLineSeparators=false -Dsort.expandEmptyElements=false \
     -Dsort.nrOfIndentSpace=2 -Dsort.indentSchemaLocation=true
 }
-function createPomChecksums(){
-  local -r version=${1?Missing version like 0.72}
-  local -r repo=${2:-d:/home/raiser/work/maven-repo}
-  local -r localMavenRepo=${3:-c:/Users/raiser/.m2/repository}
-  local -r groupPath=${4:-org/raisercostin}
-  local -r artifactId=${5:-jedio}
-  rm -f $repo/$groupPath/$artifactId/$version/$artifactId-$version.pom.sha1
-  sha1sum.exe $repo/$groupPath/$artifactId/$version/$artifactId-$version.pom | cut -d ' ' -f 1 > $repo/$groupPath/$artifactId/$version/$artifactId-$version.pom.sha1
-  rm -f $repo/$groupPath/$artifactId/$version/$artifactId-$version.pom.md5
-  md5sum.exe $repo/$groupPath/$artifactId/$version/$artifactId-$version.pom | cut -d ' ' -f 1 > $repo/$groupPath/$artifactId/$version/$artifactId-$version.pom.md5
+function createChecksums(){
+  local -r classifier=${1?Missing version like 0.72}
+  local -r version=${2?Missing version like 0.72}
+  local -r repo=${3:-d:/home/raiser/work/maven-repo}
+  local -r localMavenRepo=${4:-c:/Users/raiser/.m2/repository}
+  local -r groupPath=${5:-org/raisercostin}
+  local -r artifactId=${6:-jedio}
+  rm -f $repo/$groupPath/$artifactId/$version/$artifactId-$version$classifier.sha1
+  sha1sum.exe $repo/$groupPath/$artifactId/$version/$artifactId-$version$classifier | cut -d ' ' -f 1 > $repo/$groupPath/$artifactId/$version/$artifactId-$version$classifier.sha1
+  rm -f $repo/$groupPath/$artifactId/$version/$artifactId-$version$classifier.md5
+  md5sum.exe $repo/$groupPath/$artifactId/$version/$artifactId-$version$classifier | cut -d ' ' -f 1 > $repo/$groupPath/$artifactId/$version/$artifactId-$version$classifier.md5
 }
 function runTest(){
   local -r test=${1:-LocationsTest}
