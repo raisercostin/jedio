@@ -155,7 +155,9 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
     //return request.exchange().flatMap(x -> x.bodyToMono(String.class));
     return request.exchange().flatMap(clientResponse -> {
       if (clientResponse.statusCode().isError()) {
-        return Mono.error(new ResponseStatusException(clientResponse.statusCode(), "Error"));
+        return clientResponse.bodyToMono(String.class)
+          .flatMap(errorReason -> Mono.error(
+            new ResponseStatusException(clientResponse.statusCode(), errorReason)));
       } else {
         return Mono.just(clientResponse);
       }
