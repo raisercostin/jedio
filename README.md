@@ -137,6 +137,11 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
 ## Development
 
 - To release 
-  - `npm run normalize-pom release-prepare release-perform-local`
+  - ```
+    echo cannot execute all in one command for now
+    npm run normalize-pom
+    npm run release-prepare
+    npm run release-perform-local
+    ```
 - Deprecated
   - `mvn release:prepare release:perform -DskipTests=true -Prelease -Darguments="-DskipTests=true -Prelease"`
