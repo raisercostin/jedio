@@ -10,17 +10,17 @@ import lombok.ToString;
 
 @ToString(callSuper = true)
 public class ClockFeature extends GenericFeature<Clock> implements Feature<Clock> {
-  public static ClockFeature clock = ClockFeature.create("clock", Clock.systemDefaultZone(), null, true, true);
+  public static ClockFeature clock = ClockFeature.create("clock", "", Clock.systemDefaultZone(), null, true, true);
 
-  public static ClockFeature create(String name, Clock compileDefault, String propertyName,
+  public static ClockFeature create(String name, String description, Clock compileDefault, String propertyName,
       boolean realtime, boolean runtimeReadonly) {
-    return new ClockFeature(name, compileDefault, propertyName, realtime, runtimeReadonly);
+    return new ClockFeature(name, description, compileDefault, propertyName, realtime, runtimeReadonly);
   }
 
-  public ClockFeature(String name, Clock compileDefault, String propertyName, boolean realtime,
+  public ClockFeature(String name, String description, Clock compileDefault, String propertyName, boolean realtime,
       boolean runtimeReadonly)
   {
-    super(name, compileDefault, propertyName, realtime, runtimeReadonly);
+    super(name, description, compileDefault, propertyName, realtime, runtimeReadonly);
   }
 
   public Instant nowInstant() {

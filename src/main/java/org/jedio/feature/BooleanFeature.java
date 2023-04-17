@@ -5,8 +5,10 @@ import org.slf4j.Logger;
 
 @ToString(callSuper = true)
 public class BooleanFeature extends GenericFeature<Boolean> implements Feature<Boolean> {
-  public BooleanFeature(String name, Boolean compileDefault, String propertyName, boolean realtime) {
-    super(name, compileDefault, propertyName, realtime, false);
+  public BooleanFeature(String name, String description, Boolean compileDefault, String propertyName,
+      boolean realtime)
+  {
+    super(name, description, compileDefault, propertyName, realtime, false);
   }
 
   public boolean isEnabled() {

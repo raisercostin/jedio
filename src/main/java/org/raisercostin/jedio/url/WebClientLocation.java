@@ -196,11 +196,11 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
     public Duration existsTimeout = Duration.ofSeconds(30);
     public Duration readContentSyncTimeout = Duration.ofSeconds(30);
     public BooleanFeature webclientWireTap = GenericFeature.booleanFeature(
-      "webclientWireTap", false, "feature.webclient.wireTap", true);
+      "webclientWireTap", "", false, "feature.webclient.wireTap", true);
     public GenericFeature<Integer> webclientMaxConnections = GenericFeature.create(
-      "webclientMaxConnections", 500, "feature.webclient.maxConnections", true);
+      "webclientMaxConnections", "", 500, "feature.webclient.maxConnections", true);
     public BooleanFeature retryOnAnyError = GenericFeature.booleanFeature(
-      "webclientRetryOnAnyError", false, "feature.webclient.retryOnAnyError", true);
+      "webclientRetryOnAnyError", "", false, "feature.webclient.retryOnAnyError", true);
 
     public WebClientFactory() {
       this.builder = createWebClient(false, webclientMaxConnections);

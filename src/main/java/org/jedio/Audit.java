@@ -38,7 +38,7 @@ import org.jedio.feature.GenericFeature;
 @Slf4j
 public class Audit {
   public static final BooleanFeature debugAlwaysLog = GenericFeature.booleanFeature(
-    "debugAlwaysLog", true, "jedio.debug.alwaysLog", true);
+    "debugAlwaysLog", "", true, "jedio.debug.alwaysLog", true);
 
   public static class AuditException extends RuntimeException {
     private static final long serialVersionUID = -1727380682618906991L;

@@ -1,20 +1,19 @@
 package org.jedio.feature;
 
-import static java.time.temporal.ChronoUnit.NANOS;
-
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 
 import lombok.ToString;
 
 @ToString(callSuper = true)
 public class DurationFeature extends GenericFeature<Duration> implements Feature<Duration> {
-  public DurationFeature(String name, Duration compileDefault, String propertyName, boolean realtime) {
-    super(name, compileDefault, propertyName, realtime, false);
+  public DurationFeature(String name, String description, Duration compileDefault, String propertyName,
+      boolean realtime)
+  {
+    super(name, description, compileDefault, propertyName, realtime, false);
   }
 
   public int secondsInt() {

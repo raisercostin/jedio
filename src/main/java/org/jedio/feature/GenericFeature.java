@@ -20,29 +20,25 @@ import reactor.core.Disposable;
 public class GenericFeature<T> implements Feature<T> {
   private static final Config config = ConfigFactory.load("revobet");
 
-  public static <T> GenericFeature<T> create(String name, T compileDefault, String propertyName, boolean realtime) {
-    return create(name, compileDefault, propertyName, realtime, false);
+  public static <T> GenericFeature<T> create(String name, String description, T compileDefault, String propertyName,
+      boolean realtime) {
+    return create(name, description, compileDefault, propertyName, realtime, false);
   }
 
-  public static <T> GenericFeature<T> create(String name, T compileDefault, String propertyName,
+  public static <T> GenericFeature<T> create(String name, String description, T compileDefault, String propertyName,
       boolean realtime, boolean runtimeReadonly) {
-    return new GenericFeature<>(name, compileDefault, propertyName, realtime, runtimeReadonly);
+    return new GenericFeature<>(name, description, compileDefault, propertyName, realtime, runtimeReadonly);
   }
 
-  public static DurationFeature duration(String name, Duration compileDefault, String propertyName,
+  public static DurationFeature duration(String name, String description, Duration compileDefault, String propertyName,
       boolean realtime) {
-    return new DurationFeature(name, compileDefault, propertyName, realtime);
-  }
-
-  public static BooleanFeature booleanFeature(String name, Boolean compileDefault, String propertyName,
-      boolean realtime) {
-    return new BooleanFeature(name, compileDefault, propertyName, realtime);
+    return new DurationFeature(name, description, compileDefault, propertyName, realtime);
   }
 
   public static BooleanFeature booleanFeature(String name, String description, Boolean compileDefault,
       String propertyName,
       boolean realtime) {
-    return new BooleanFeature(name, compileDefault, propertyName, realtime);
+    return new BooleanFeature(name, description, compileDefault, propertyName, realtime);
   }
 
   public static LoggerFeature loggerFeature(String name, Boolean compileDefault, String propertyName,
@@ -57,6 +53,7 @@ public class GenericFeature<T> implements Feature<T> {
   }
 
   public String name;
+  public String description;
   public T compileValue;
   public Option<T> startValue;
   public Option<T> runtimeValue;
@@ -67,10 +64,11 @@ public class GenericFeature<T> implements Feature<T> {
   public boolean runtimeValueReadOnly;
   private CheckedFunction2<T, T, T> onChange;
 
-  public GenericFeature(String name, T compileDefault, String propertyName, boolean realtime,
+  public GenericFeature(String name, String description, T compileDefault, String propertyName, boolean realtime,
       boolean runtimeValueReadOnly)
   {
     this.name = name;
+    this.description = description;
     this.compileValue = compileDefault;
     String propertyNameCorrected = propertyName != null && propertyName.isEmpty() ? null : propertyName;
     this.propertyName = propertyNameCorrected;
@@ -88,9 +86,9 @@ public class GenericFeature<T> implements Feature<T> {
 
   @Override
   public String description() {
-    return Strings.lenientFormat("%s(%s/%s with value [%s]. atCompile=[%s]  atStart=[%s] atRuntime=[%s])",
+    return Strings.lenientFormat("%s(%s/%s with value [%s]. atCompile=[%s]  atStart=[%s] atRuntime=[%s], desc=[%s])",
       getClass().getSimpleName(), name(), runtimeProperty(), value(), compileTimeValue(), startValue(),
-      runtimeValue());
+      runtimeValue(), description);
   }
 
   public String shortDescription() {

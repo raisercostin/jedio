@@ -11,37 +11,45 @@ import org.slf4j.LoggerFactory;
  */
 @ToString(callSuper = true)
 public class LoggerFeature extends GenericFeature<Boolean> implements Feature<Boolean> {
-  public static LoggerFeature loggerFeature(String name, Boolean compileDefault, String propertyName,
+  public static LoggerFeature loggerFeature(String name, String description, Boolean compileDefault,
+      String propertyName,
       boolean realtime, Class<?> clazz) {
-    return new LoggerFeature(name, compileDefault, propertyName, realtime, org.slf4j.LoggerFactory.getLogger(clazz),
+    return new LoggerFeature(name, description, compileDefault, propertyName, realtime,
+      org.slf4j.LoggerFactory.getLogger(clazz),
       Level.INFO, Level.DEBUG);
   }
 
-  public static LoggerFeature loggerFeature(String name, Boolean compileDefault, String propertyName,
+  public static LoggerFeature loggerFeature(String name, String description, Boolean compileDefault,
+      String propertyName,
       boolean realtime, String loggerName) {
-    return new LoggerFeature(name, compileDefault, propertyName, realtime, loggerName, Level.INFO, Level.DEBUG);
+    return new LoggerFeature(name, description, compileDefault, propertyName, realtime, loggerName, Level.INFO,
+      Level.DEBUG);
   }
 
-  public static LoggerFeature loggerFeature(String name, Boolean compileDefault, String propertyName,
+  public static LoggerFeature loggerFeature(String name, String description, Boolean compileDefault,
+      String propertyName,
       boolean realtime, String loggerName, Level inactiveLevel, Level activeLevel) {
-    return new LoggerFeature(name, compileDefault, propertyName, realtime, loggerName, inactiveLevel, activeLevel);
+    return new LoggerFeature(name, description, compileDefault, propertyName, realtime, loggerName, inactiveLevel,
+      activeLevel);
   }
 
   public Logger log;
   private Level activeLevel;
   private Level inactiveLevel;
 
-  private LoggerFeature(String name, Boolean compileDefault, String propertyName, boolean realtime, String loggerName,
+  private LoggerFeature(String name, String description, Boolean compileDefault, String propertyName, boolean realtime,
+      String loggerName,
       Level inactiveLevel, Level activeLevel)
   {
-    this(name, compileDefault, propertyName, realtime, org.slf4j.LoggerFactory.getLogger(loggerName), inactiveLevel,
-      activeLevel);
+    this(name, description, compileDefault, propertyName, realtime, org.slf4j.LoggerFactory.getLogger(loggerName),
+      inactiveLevel, activeLevel);
   }
 
-  private LoggerFeature(String name, Boolean compileDefault, String propertyName, boolean realtime, Logger log,
+  private LoggerFeature(String name, String description, Boolean compileDefault, String propertyName, boolean realtime,
+      Logger log,
       Level inactiveLevel, Level activeLevel)
   {
-    super(name, compileDefault, propertyName, realtime, false);
+    super(name, description, compileDefault, propertyName, realtime, false);
     this.inactiveLevel = inactiveLevel;
     this.activeLevel = activeLevel;
     this.log = log;
