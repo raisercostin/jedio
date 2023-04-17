@@ -41,15 +41,34 @@ public class GenericFeature<T> implements Feature<T> {
     return new BooleanFeature(name, description, compileDefault, propertyName, realtime);
   }
 
+  public static BooleanFeature booleanFeature(String name, Boolean compileDefault,
+      String propertyName, boolean realtime) {
+    return booleanFeature(name, "", compileDefault, propertyName, realtime);
+  }
+
   public static LoggerFeature loggerFeature(String name, Boolean compileDefault, String propertyName,
       boolean realtime, String loggerName) {
-    return LoggerFeature.loggerFeature(name, compileDefault, propertyName, realtime, loggerName);
+    return LoggerFeature.loggerFeature(name, "", compileDefault, propertyName, realtime, loggerName);
   }
 
   public static LoggerFeature loggerFeature(String name, Boolean compileDefault, String propertyName,
       boolean realtime, String loggerName, Level inactiveLevel, Level activeLevel) {
-    return LoggerFeature.loggerFeature(name, compileDefault, propertyName, realtime, loggerName, inactiveLevel,
+    return LoggerFeature.loggerFeature(name, "", compileDefault, propertyName, realtime, loggerName, inactiveLevel,
       activeLevel);
+  }
+
+  public static TextFeature text(String name, String description, String compileDefault,
+      String propertyName) {
+    return new TextFeature(name, description, compileDefault, propertyName, false, false);
+  }
+
+  public static TextFeature text(String name, String description, String compileDefault,
+      String propertyName, boolean realtime) {
+    return new TextFeature(name, description, compileDefault, propertyName, realtime, false);
+  }
+
+  public static ActionFeature actionFeature(String name, String description, String... actions) {
+    return new ActionFeature(name, description, actions);
   }
 
   public String name;
