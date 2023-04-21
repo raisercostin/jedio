@@ -1,6 +1,5 @@
 package org.raisercostin.jedio.url;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
@@ -14,12 +13,15 @@ import java.util.Collections;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.vavr.Function1;
 import lombok.SneakyThrows;
+import lombok.ToString;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.feature.BooleanFeature;
 import org.jedio.feature.GenericFeature;
 import org.raisercostin.jedio.ReadableFileLocation;
+import org.raisercostin.jedio.url.WebClientLocation.RequestError;
 import org.raisercostin.jedio.url.impl.ModifiedURI;
 import org.raisercostin.nodes.Nodes;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
@@ -41,6 +44,7 @@ import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.retry.Retry;
+import reactor.util.retry.RetryBackoffSpec;
 
 public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLocation>
     implements ReadableFileLocation {
@@ -155,7 +159,7 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
     //return request.exchange().flatMap(x -> x.bodyToMono(String.class));
     return request.exchange().flatMap(clientResponse -> {
       if (clientResponse.statusCode().isError()) {
-        return Mono.error(new ResponseStatusException(clientResponse.statusCode(), "Error"));
+        return Mono.error(new RequestError(clientResponse, "Error"));
       } else {
         return Mono.just(clientResponse);
       }
@@ -167,19 +171,51 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
       .flatMap(x -> x.bodyToMono(String.class));
   }
 
+  @ToString
+  public static class RequestError extends ResponseStatusException {
+    private ClientResponse clientResponse;
+
+    public RequestError(ClientResponse clientResponse, String reason) {
+      super(clientResponse.statusCode(), reason);
+      this.clientResponse = clientResponse;
+    }
+
+    @ToString.Include
+    public String getDetails() {
+      return Nodes.yml.toString(clientResponse);
+    }
+
+    @Override
+    public HttpHeaders getResponseHeaders() {
+      return clientResponse.headers().asHttpHeaders();
+    }
+
+    @Override
+    public String getMessage() {
+      //HttpStatus code = clientResponse.statusCode();
+      String msg = Nodes.yml.toString(this);//code + getReason();
+      return NestedExceptionUtils.buildMessage(msg, getCause());
+    }
+  }
+
   public Mono<String> readContentAsyncWithRetry() {
+    return readContentAsyncWithRetry(Duration.ofSeconds(1), Duration.ofSeconds(1000), 3);
+  }
+
+  public Mono<String> readContentAsyncWithRetry(Duration firstBackoff, Duration maxBackoff, int retryMax) {
+    RetryBackoffSpec retry = reactor.util.retry.Retry.backoff(retryMax, firstBackoff)
+      .maxBackoff(maxBackoff)
+      .filter(throwable -> throwable instanceof RequestError)
+      .jitter(0.5);
     //return request.exchange().flatMap(x -> x.bodyToMono(String.class));
     return request.exchange().flatMap(clientResponse -> {
       if (clientResponse.statusCode().isError()) {
-        return Mono.error(new ResponseStatusException(clientResponse.statusCode(), "Error"));
+        return Mono.error(new RequestError(clientResponse, "Error"));
       } else {
         return Mono.just(clientResponse);
       }
     })
-      .retryWhen(
-        Retry.anyOf(ResponseStatusException.class)
-          .randomBackoff(Duration.ofSeconds(1), Duration.ofSeconds(1000))
-          .retryMax(3))
+      .retryWhen(retry)
       .flatMap(x -> x.bodyToMono(String.class));
   }
 
