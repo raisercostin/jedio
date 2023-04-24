@@ -1,5 +1,7 @@
 package org.raisercostin.jedio.url;
 
+import static io.vavr.API.Seq;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
@@ -12,6 +14,7 @@ import java.util.Collections;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.vavr.Function1;
+import io.vavr.Tuple;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -159,7 +162,7 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
     //return request.exchange().flatMap(x -> x.bodyToMono(String.class));
     return request.exchange().flatMap(clientResponse -> {
       if (clientResponse.statusCode().isError()) {
-        return Mono.error(new RequestError(clientResponse, "Error"));
+        return Mono.error(new RequestError(this, clientResponse, "Error"));
       } else {
         return Mono.just(clientResponse);
       }
@@ -174,15 +177,26 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
   @ToString
   public static class RequestError extends ResponseStatusException {
     private ClientResponse clientResponse;
+    private WebClientLocation webClientLocation;
 
-    public RequestError(ClientResponse clientResponse, String reason) {
+    public RequestError(WebClientLocation webClientLocation, ClientResponse clientResponse, String reason) {
       super(clientResponse.statusCode(), reason);
+      this.webClientLocation = webClientLocation;
       this.clientResponse = clientResponse;
     }
 
     @ToString.Include
     public String getDetails() {
-      return Nodes.yml.toString(clientResponse);
+      //HttpStatus code = clientResponse.statusCode();
+      //String msg = Nodes.yml.toString(Tuple.of(this.get);//code + getReason();
+      return Nodes.yml.toString(Seq(
+        Tuple.of("request", webClientLocation.url),
+        Tuple.of("statusCode", clientResponse.statusCode()),
+        Tuple.of("rawStatusCode", clientResponse.rawStatusCode()),
+        Tuple.of("headers", clientResponse.headers().asHttpHeaders()),
+        Tuple.of("body", clientResponse.bodyToMono(String.class).block(Duration.ofSeconds(1)))
+      //
+      ));
     }
 
     @Override
@@ -192,9 +206,7 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
 
     @Override
     public String getMessage() {
-      //HttpStatus code = clientResponse.statusCode();
-      String msg = Nodes.yml.toString(this);//code + getReason();
-      return NestedExceptionUtils.buildMessage(msg, getCause());
+      return NestedExceptionUtils.buildMessage(getDetails(), getCause());
     }
   }
 
@@ -210,7 +222,7 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
     //return request.exchange().flatMap(x -> x.bodyToMono(String.class));
     return request.exchange().flatMap(clientResponse -> {
       if (clientResponse.statusCode().isError()) {
-        return Mono.error(new RequestError(clientResponse, "Error"));
+        return Mono.error(new RequestError(this, clientResponse, "Error"));
       } else {
         return Mono.just(clientResponse);
       }
