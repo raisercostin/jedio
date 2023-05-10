@@ -53,8 +53,8 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
     implements ReadableFileLocation {
   public static final WebClientFactory defaultClient = new WebClientFactory();
 
-  public static WebClientLocation post(String url, MediaType applicationJson, Object params) {
-    return defaultClient.post(url, applicationJson, params);
+  public static WebClientLocation post(String url, MediaType applicationJson, Object bodyValue) {
+    return defaultClient.post(url, applicationJson, bodyValue);
   }
 
   @SuppressWarnings("unchecked")
@@ -265,17 +265,18 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
     @SneakyThrows
     public WebClientLocation get(String url) {
       URL url2 = new URL(url);
-      return new WebClientLocation(url2, false, currentClient().get().uri(url2.toURI()), this);
+      RequestHeadersSpec<?> req = currentClient().get().uri(url2.toURI());
+      return new WebClientLocation(url2, false, req, this);
     }
 
     @SneakyThrows
-    public WebClientLocation post(String url, MediaType applicationJson, Object params) {
-      log.info("post {}: {}", url, params);
+    public WebClientLocation post(String url, MediaType mediaType, Object bodyValue) {
+      log.info("post {}: {}", url, bodyValue);
       RequestHeadersSpec<?> req = currentClient()
         .post()
         .uri(url)
-        .contentType(MediaType.APPLICATION_JSON)
-        .bodyValue(params)
+        .contentType(mediaType)
+        .bodyValue(bodyValue)
       //.retrieve()
       //.onStatus(statusPredicate, exceptionFunction)
       //      .onStatus(HttpStatus.NOT_FOUND::equals,
