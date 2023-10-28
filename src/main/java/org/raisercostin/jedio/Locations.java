@@ -97,8 +97,12 @@ public class Locations {
     return PathLocation.tempFile(prefix, sufix);
   }
 
-  public static InputStreamLocation stream(InputStream inputStream) {
-    return InputStreamLocation.stream(inputStream);
+  public static InputStreamLocation stream(String name, InputStream inputStream) {
+    return InputStreamLocation.stream(name, inputStream);
+  }
+
+  public static InMemoryLocation memory(String name, String content) {
+    return new InMemoryLocation(name, content);
   }
 
   public static WebLocation web(String webAddress) {

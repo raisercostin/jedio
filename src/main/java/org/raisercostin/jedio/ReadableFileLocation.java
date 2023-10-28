@@ -17,6 +17,7 @@ import org.jedio.functions.JedioProcedure;
 import org.jedio.sugar;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.op.CopyOptions;
+import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Mono;
 
 public interface ReadableFileLocation extends BasicFileLocation {
@@ -118,5 +119,12 @@ public interface ReadableFileLocation extends BasicFileLocation {
   @sugar("readContentAsync() and ulterior handling should be used.")
   default String readContent(Charset charset) {
     return readContentAsync().block(Duration.ofSeconds(30));
+  }
+
+  default PathLocation toPathLocationCopyIfNotPossible() {
+    if (this instanceof PathLocation) {
+      return (PathLocation) this;
+    }
+    return Locations.tempDir("spot-").child(filename()).copyFrom(this, CopyOptions.copyDoNotOverwriteAndThrow());
   }
 }

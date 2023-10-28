@@ -82,6 +82,7 @@ public class GenericFeature<T> implements Feature<T> {
   public String propertyName;
   public boolean runtimeValueReadOnly;
   private CheckedFunction2<T, T, T> onChange;
+  private int counter;
 
   public GenericFeature(String name, String description, T compileDefault, String propertyName, boolean realtime,
       boolean runtimeValueReadOnly)
@@ -121,6 +122,9 @@ public class GenericFeature<T> implements Feature<T> {
 
   @Override
   public String name() {
+    if (counter > 0) {
+      return name + "#" + counter;
+    }
     return name;
   }
 
@@ -147,7 +151,7 @@ public class GenericFeature<T> implements Feature<T> {
       if (!Objects.equal(convertedValue, this.runtimeValue.getOrNull()) && !this.value().equals(convertedValue)) {
         Option<T> oldRuntimeValue = this.runtimeValue;
         T newValue = convertedValue;
-        FeatureService.SERVICE_LOG.info("{}={} converted as [{}] oldValue={} for feature {}", name, newValue,
+        FeatureService.SERVICE_LOG.info("{}={} converted as [{}] oldValue={} for feature {}", name(), newValue,
           convertedValue,
           oldRuntimeValue, this);
         this.oldRuntimeValue = oldRuntimeValue;
@@ -228,5 +232,10 @@ public class GenericFeature<T> implements Feature<T> {
     //      Preconditions.checkArgument(onChange == null || onChange == this.onChange,
     //        "On %s - The oldDisposable %s is different than the given one %s", this, this.onChange, oldDisposable);
     this.onChange = onChange;
+  }
+
+  @Override
+  public void incrementName() {
+    counter++;
   }
 }

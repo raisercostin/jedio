@@ -16,8 +16,16 @@ public class FeatureService {
   public static io.vavr.collection.Map<String, Feature<?>> features = API.SortedMap();
 
   public static void register(Feature<?> feature) {
-    SERVICE_LOG.info("Register feature {}", feature.description());
-    features = features.put(feature.name(), feature);
+    Option<Feature<?>> existing = features.get(feature.name());
+    if (existing.isDefined()) {
+      SERVICE_LOG.warn("A feature with the same name is already registered:\nold: {}\nnew: {}", existing.get(),
+        feature.description());
+      feature.incrementName();
+      register(feature);
+    } else {
+      SERVICE_LOG.info("Register feature {}", feature.description());
+      features = features.put(feature.name(), feature);
+    }
   }
 
   /**In a spring application the logger was changed. Loggers must be again reinitialized.*/

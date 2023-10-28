@@ -40,11 +40,11 @@ public interface Feature<T> {
   }
 
   default T value() {
-    return runtimeValue().getOrElse(beforeRuntime());
+    return runtimeValue().getOrElse(() -> beforeRuntime());
   }
 
   default T beforeRuntime() {
-    return startValue().getOrElse(compileTimeValue());
+    return startValue().getOrElse(() -> compileTimeValue());
   }
 
   default Option<T> startValue() {
@@ -73,4 +73,6 @@ public interface Feature<T> {
   /**Reinitialization if needed*/
   default void postConstruct() {
   }
+
+  void incrementName();
 }

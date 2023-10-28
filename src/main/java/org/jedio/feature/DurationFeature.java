@@ -21,14 +21,28 @@ public class DurationFeature extends GenericFeature<Duration> implements Feature
   }
 
   public boolean isExpired(Temporal lastUpdate) {
-    return isExpired(lastUpdate, ClockFeature.clock.nowOffsetDateTime());
+    return isExpired(lastUpdate, now());
+  }
+
+  private Instant now() {
+    return ClockFeature.clock.nowInstant();
+  }
+
+  public boolean isExpired(OffsetDateTime lastUpdate, Instant now) {
+    return isExpired(lastUpdate.toInstant(), now);
   }
 
   public boolean isExpired(Temporal lastUpdate, Temporal now) {
+    if (lastUpdate instanceof OffsetDateTime && now instanceof Instant) {
+      return isExpired((OffsetDateTime) lastUpdate, (Instant) now);
+    }
     return lastUpdate != null && age(lastUpdate, now).compareTo(value()) >= 0;
   }
 
   private Duration age(Temporal lastUpdate, Temporal now) {
+    if (lastUpdate instanceof OffsetDateTime && now instanceof Instant) {
+      return age((OffsetDateTime) lastUpdate, (Instant) now);
+    }
     return Duration.between(lastUpdate, now);
   }
 
@@ -39,7 +53,7 @@ public class DurationFeature extends GenericFeature<Duration> implements Feature
   }
 
   public Duration age(OffsetDateTime lastUpdate) {
-    return ClockFeature.clock.ageFrom(lastUpdate);
+    return age(now(), lastUpdate);
   }
 
   public boolean isEnabled() {
@@ -69,7 +83,9 @@ public class DurationFeature extends GenericFeature<Duration> implements Feature
     //        : Duration.between(timestamp, ClockFeature.clock.nowOffsetDateTime());
     return Long.compare(ageInMillis(clock.millis(), lastUpdate.toInstant().toEpochMilli()), duration.toMillis());
   }
-
+  public int compareToTimeout(Instant now, OffsetDateTime lastUpdate) {
+    return Long.compare(ageInMillis(now.toEpochMilli(), lastUpdate.toInstant().toEpochMilli()), value().toMillis());
+  }
   private long ageInMillis(long now, long old) {
     return now - old;
   }

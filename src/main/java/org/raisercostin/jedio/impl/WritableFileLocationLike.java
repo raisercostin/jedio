@@ -31,7 +31,7 @@ public interface WritableFileLocationLike<SELF extends @NonNull WritableFileLoca
   @Override
   @sugar
   default SELF copyFrom(InputStream inputStream, CopyOptions options) {
-    return copyFrom(Locations.stream(inputStream), options);
+    return copyFrom(Locations.stream(null, inputStream), options);
   }
 
   @Override

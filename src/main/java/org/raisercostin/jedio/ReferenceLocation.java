@@ -4,12 +4,17 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.DosFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFileAttributes;
 import java.util.function.Function;
 
 import io.vavr.Function2;
 import io.vavr.control.Option;
 import lombok.SneakyThrows;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jedio.sugar;
 import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.impl.LinkLocationLike;
@@ -80,9 +85,17 @@ public interface ReferenceLocation extends Location {
 
   boolean exists();
 
+  /**A dir has files but not content.*/
   boolean isDir();
 
+  /**A file has content.*/
   boolean isFile();
+
+  /**A file has content.*/
+  @sugar
+  default boolean hasContent() {
+    return isFile();
+  }
 
   void symlinkTo(ReferenceLocation parent);
 
@@ -152,5 +165,27 @@ public interface ReferenceLocation extends Location {
   @SneakyThrows
   default FileTime createdDateTime() {
     return (FileTime) Files.getAttribute(asPathLocation().toPath(), "basic:creationTime", LinkOption.NOFOLLOW_LINKS);
+  }
+
+  @SneakyThrows
+  default FileTime modifiedDateTime() {
+    return Files.getLastModifiedTime(asPathLocation().toPath(), LinkOption.NOFOLLOW_LINKS);
+    //    return (FileTime) Files.getAttribute(path.asPathLocation().toPath(), "basic:modifiedTime",
+    //      LinkOption.NOFOLLOW_LINKS);
+  }
+
+  @SneakyThrows
+  default BasicFileAttributes basicAttributes(LinkOption... options) {
+    return Files.readAttributes(asPathLocation().toPath(), BasicFileAttributes.class, options);
+  }
+
+  @SneakyThrows
+  default PosixFileAttributes posixAttributes(LinkOption... options) {
+    return Files.readAttributes(asPathLocation().toPath(), PosixFileAttributes.class, options);
+  }
+
+  @SneakyThrows
+  default DosFileAttributes dosAttributes(LinkOption... options) {
+    return Files.readAttributes(asPathLocation().toPath(), DosFileAttributes.class, options);
   }
 }

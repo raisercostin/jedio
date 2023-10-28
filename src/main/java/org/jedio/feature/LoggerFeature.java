@@ -88,7 +88,7 @@ public class LoggerFeature extends GenericFeature<Boolean> implements Feature<Bo
 
   /**Create a sub-logger. This should also be disabled by feature but keeps it's separate identity.*/
   public Logger log(Class<?> clazz) {
-    return org.slf4j.LoggerFactory.getLogger(name + "." + clazz.getName());
+    return org.slf4j.LoggerFactory.getLogger(name() + "." + clazz.getName());
   }
 
   public boolean isInfoEnabled() {

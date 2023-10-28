@@ -21,9 +21,16 @@ import reactor.core.publisher.Mono;
 public class InMemoryLocation
     implements FileLocation, NonExistingLocation, ReadableFileLocationLike<@NonNull InMemoryLocation>,
     WritableFileLocationLike<@NonNull InMemoryLocation>, NonExistingLocationLike<@NonNull InMemoryLocation> {
+  public final String name;
   public String content;
 
   public InMemoryLocation(String content) {
+    this.name = null;
+    this.content = content;
+  }
+
+  public InMemoryLocation(String name, String content) {
+    this.name = name;
     this.content = content;
   }
 
