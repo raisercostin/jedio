@@ -83,9 +83,11 @@ public class DurationFeature extends GenericFeature<Duration> implements Feature
     //        : Duration.between(timestamp, ClockFeature.clock.nowOffsetDateTime());
     return Long.compare(ageInMillis(clock.millis(), lastUpdate.toInstant().toEpochMilli()), duration.toMillis());
   }
+
   public int compareToTimeout(Instant now, OffsetDateTime lastUpdate) {
     return Long.compare(ageInMillis(now.toEpochMilli(), lastUpdate.toInstant().toEpochMilli()), value().toMillis());
   }
+
   private long ageInMillis(long now, long old) {
     return now - old;
   }

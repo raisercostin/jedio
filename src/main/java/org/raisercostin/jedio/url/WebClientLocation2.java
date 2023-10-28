@@ -1,6 +1,5 @@
 package org.raisercostin.jedio.url;
 
-
 import static io.vavr.API.Seq;
 
 import java.io.IOException;

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.raisercostin</groupId>
@@ -77,8 +76,8 @@
     <m2e.apt.activation>jdt_apt</m2e.apt.activation>
     <mainClass>None</mainClass>
     <maven.build.timestamp.format>yyyyMMdd'T'HHmmss</maven.build.timestamp.format>
-    <maven.compiler.source>${java.version}</maven.compiler.source>
-    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <maven.compiler.source>${myJavaVersion}</maven.compiler.source>
+    <maven.compiler.target>${myJavaVersion}</maven.compiler.target>
     <maven.test.skip>false</maven.test.skip>
     <myJavaVersion>17</myJavaVersion>
     <org>raisercostin</org>
@@ -521,8 +520,8 @@
         </dependencies>
          -->
         <configuration>
-          <source>${source.java.version}</source>
-          <target>${target.java.version}</target>
+          <source>${myJavaVersion}</source>
+          <target>${myJavaVersion}</target>
           <showWarnings>true</showWarnings>
           <showDeprecation>true</showDeprecation>
           <!-- eclipse compiler -->
