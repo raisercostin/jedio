@@ -1,22 +1,71 @@
-name: Maven Package
+name: Maven Publish
 on:
+  workflow_dispatch: # This enables manual trigger
+    inputs:
+      newVersion:
+        description: 'Set version'
+        required: true
+      nextVersion:
+        description: 'Next version'
+        required: true
   push:
     branches:
-      - master  # Set a branch to trigger the workflow
+      - master
+
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK 17 (Temurin)
-      uses: actions/setup-java@v2
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
-    - name: Publish Release
-      if: github.ref == 'refs/heads/main'
-      run: |
-        mvn versions:set -DnewVersion=${{ github.sha }}
-        mvn deploy
+      - name: Checkout Source Code
+        uses: actions/checkout@v2
+        if: ${{ success() }}
+
+      - name: Set up JDK 17 (Temurin)
+        uses: actions/setup-java@v2
+        if: ${{ success() }}
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set Version from Input
+        run: mvn versions:set -DnewVersion=${{ github.event.inputs.newVersion }}
+        if: github.event_name == 'workflow_dispatch'
+
+      - name: Build and Package
+        run: mvn -B package --file pom.xml
+        if: ${{ success() }}
+
+      - name: Deploy to Local Repo
+        run: mvn deploy
+        if: ${{ success() }}
+        if: github.event_name == 'workflow_dispatch'
+
+      - name: Set Next Version from Input
+        run: mvn versions:set -DnewVersion=${{ github.event.inputs.nextVersion }}
+        if: ${{ success() }}
+        if: github.event_name == 'workflow_dispatch'
+
+      - name: Checkout Maven Repo
+        uses: actions/checkout@v2
+        if: ${{ success() }}
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          repository: raisercostin/maven-repo
+          path: maven-repo
+
+      - name: Copy Artifacts
+        run: cp -R target/maven-repo/* maven-repo/
+        if: ${{ success() }}
+        if: github.event_name == 'workflow_dispatch'
+
+      - name: Push to GitHub Maven Repo
+        run: |
+          cd maven-repo
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git add .
+          git commit -m "Publish Maven Artifacts"
+          git push
+        if: ${{ success() }}
+        if: github.event_name == 'workflow_dispatch'
