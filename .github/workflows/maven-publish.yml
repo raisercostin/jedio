@@ -22,11 +22,17 @@ jobs:
         if: ${{ success() }}
 
       - name: Set up JDK 17 (Temurin)
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3.1.0
         if: ${{ success() }}
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Cache Maven packages
+        uses: actions/cache@v3.0.1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
       - name: Set Version from Input
         run: mvn versions:set -DnewVersion=${{ github.event.inputs.newVersion }}
