@@ -44,26 +44,22 @@ jobs:
 
       - name: Deploy to Local Repo
         run: mvn deploy
-        if: ${{ success() }}
-        if: github.event_name == 'workflow_dispatch'
+        if: ${{ success() }} && github.event_name == 'workflow_dispatch'
 
       - name: Set Next Version from Input
         run: mvn versions:set -DnewVersion=${{ github.event.inputs.nextVersion }}
-        if: ${{ success() }}
-        if: github.event_name == 'workflow_dispatch'
+        if: ${{ success() }} && github.event_name == 'workflow_dispatch'
 
       - name: Checkout Maven Repo
         uses: actions/checkout@v2
-        if: ${{ success() }}
-        if: github.event_name == 'workflow_dispatch'
+        if: ${{ success() }} && github.event_name == 'workflow_dispatch'
         with:
           repository: raisercostin/maven-repo
           path: maven-repo
 
       - name: Copy Artifacts
         run: cp -R target/maven-repo/* maven-repo/
-        if: ${{ success() }}
-        if: github.event_name == 'workflow_dispatch'
+        if: ${{ success() }} && github.event_name == 'workflow_dispatch'
 
       - name: Push to GitHub Maven Repo
         run: |
@@ -73,5 +69,4 @@ jobs:
           git add .
           git commit -m "Publish Maven Artifacts"
           git push
-        if: ${{ success() }}
-        if: github.event_name == 'workflow_dispatch'
+        if: ${{ success() }} && github.event_name == 'workflow_dispatch'
