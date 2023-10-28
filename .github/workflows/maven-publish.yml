@@ -1,0 +1,22 @@
+name: Maven Package
+on:
+  push:
+    branches:
+      - master  # Set a branch to trigger the workflow
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 17 (Temurin)
+      uses: actions/setup-java@v2
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+    - name: Publish Release
+      if: github.ref == 'refs/heads/main'
+      run: |
+        mvn versions:set -DnewVersion=${{ github.sha }}
+        mvn deploy
