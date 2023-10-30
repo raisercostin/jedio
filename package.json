@@ -2,7 +2,9 @@
   "name": "jedio",
   "scripts": {
     "normalize-pom": "ts-node scripts.ts normalizePom",
-    "release-prepare": "ts-node scripts.ts releasePrepare",
+    "prerelease-prepare": "npm install",
+    "release-prepare": "ts-node scripts.ts releasePrepare || echo 'If preparation failed is better to rollback' && npm run release-rollback",
+    "release-rollback": "mvn release:rollback",
     "release-perform-local": "ts-node scripts.ts releasePerformLocal --repo d:/home/raiser/work/maven-repo --localMavenRepo c:/Users/raiser/.m2/repository --groupPath org/raisercostin --artifactId jedio",
     "mvn-update-lib-versions": "mvn versions:update-properties && mvn versions:use-latest-versions",
     "reformat": "mvn validate -DskipTests",

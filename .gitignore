@@ -34,3 +34,4 @@
 /.checkstyle
 /.externalToolBuilders/org.eclipse.jdt.core.javabuilder.launch
 /bin/
+/node_modules/*
