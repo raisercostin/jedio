@@ -141,7 +141,7 @@ Uniform, fluent access to files, urls and other resources API for java, kotlin a
     echo cannot execute all in one command for now
     npm run normalize-pom
     npm run release-prepare
-    npm run release-perform-local
+    npm run release-perform-local 0.86
     ```
 - Deprecated
   - `mvn release:prepare release:perform -DskipTests=true -Prelease -Darguments="-DskipTests=true -Prelease"`
