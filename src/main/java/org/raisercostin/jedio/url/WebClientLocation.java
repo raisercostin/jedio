@@ -240,7 +240,7 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
     private WebClient client;
     private WebClient clientWithTap;
     public Builder builder;
-    public Scheduler scheduler = Schedulers.elastic();
+    public Scheduler scheduler = Schedulers.boundedElastic();
     public Duration existsTimeout = Duration.ofSeconds(30);
     public Duration readContentSyncTimeout = Duration.ofSeconds(30);
     public BooleanFeature webclientWireTap = GenericFeature.booleanFeature(

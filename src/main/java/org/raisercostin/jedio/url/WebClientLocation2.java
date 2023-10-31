@@ -42,6 +42,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -259,7 +260,7 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       return "RequestResponse %s %s".formatted(responseEntity.getStatusCode(), clientLocation.url);
     }
 
-    public HttpStatus getStatusCode() {
+    public HttpStatusCode getStatusCode() {
       return responseEntity.getStatusCode();
     }
 
@@ -450,9 +451,10 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       return NestedExceptionUtils.buildMessage(getDetails(), getCause());
     }
 
-    public String getBody() {
-      return (String) responseEntity.getBody();
-    }
+    //    @Override
+    //    public String getBody() {
+    //      return super.getBody().getDetail();
+    //    }
   }
 
   @Override
