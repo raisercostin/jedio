@@ -8,7 +8,7 @@
     <encoder>
       <!-- eclipse clickable place -->
       <!-- %4relative %highlight - to color-->
-      <pattern>%4relative [%level] [%-10.10thread] \(%file:%line\) %-120message - %logger{10.10}.%-20.20method - %n%xException</pattern>
+      <pattern>%4relative [%level] [%-10.10thread] \(%file:%line\) %-120message - %logger{10}.%-20.20method - %n%xException</pattern>
     </encoder>
   </appender>
 

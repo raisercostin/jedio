@@ -338,6 +338,7 @@
             <exclude>.git/</exclude>
             <exclude>target/</exclude>
             <exclude>node_modules/</exclude>
+            <exclude>package-lock.json</exclude>
             <exclude>**/*.xml</exclude>
           </excludes>
           <lineEnding>LF</lineEnding>
@@ -647,6 +648,7 @@
                 <exclude>.git/**</exclude>
                 <exclude>**/target/**</exclude>
                 <exclude>**/node_modules/**</exclude>
+                <exclude>package-lock.json</exclude>
                 <exclude>.m2/**</exclude>
               </excludes>
               <!-- configure your formatting preferences here (see link below) https://acegi.github.io/xml-format-maven-plugin/xml-format-mojo.html -->
