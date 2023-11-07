@@ -12,11 +12,11 @@ public interface WritableFileLocation extends BasicFileLocation {
     return write(content, Charset.forName(charset));
   }
 
-  <T extends WritableFileLocation> T copyFrom(InputStream inputStream);
+  WritableFileLocation copyFrom(InputStream inputStream);
 
-  <T extends WritableFileLocation> T copyFrom(InputStream inputStream, CopyOptions options);
+  WritableFileLocation copyFrom(InputStream inputStream, CopyOptions options);
 
-  <T extends WritableFileLocation> T copyFrom(ReadableFileLocation source, CopyOptions options);
+  WritableFileLocation copyFrom(ReadableFileLocation source, CopyOptions options);
 
   WritableFileLocation write(String content);
 }
