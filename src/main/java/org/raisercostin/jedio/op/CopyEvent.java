@@ -8,6 +8,7 @@ public enum CopyEvent {
   CopyIgnoreDestinationMetaExists,
   CopyIgnoreDestinationExists,
   CopyIgnoreContentType,
+  BackupOfDestination,
   CopyFileStarted,
   CopyReplacing(
       "A replace of content started"),

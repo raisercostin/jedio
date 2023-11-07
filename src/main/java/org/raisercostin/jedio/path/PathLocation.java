@@ -540,13 +540,17 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
       boolean destAndHttpMetaExists = metaHttp.exists() && exists() && !metaShouldBeCreated;
       if (metaShouldBeCreated && metaHttp.exists()) {
         reportOperationEvent(copyOptions, true, CopyEvent.CopyIgnoreDestinationMetaExists, source, metaHttp);
-      } else if (destAndHttpMetaExists && !copyOptions.replaceExisting()) {
+      } else if (destAndHttpMetaExists && copyOptions.ignoreExisting()) {
         reportOperationEvent(copyOptions, true, CopyEvent.CopyIgnoreDestinationExists, source, this);
       } else {
         // source is analysed for existance only if will actually try to copy
         if (!sourceExists) {
           reportOperationEvent(copyOptions, true, CopyEvent.CopyIgnoreSourceDoesNotExists, source, this);
         } else {
+          if (copyOptions.backupExisting()) {
+            reportOperationEvent(copyOptions, false, CopyEvent.BackupOfDestination, source, this);
+            this.renamedIfExist();
+          }
           reportOperationEvent(copyOptions, false, CopyEvent.CopyFileStarted, source, this);
           source.usingInputStreamAndMeta(true, streamAndMeta -> {
             if (streamAndMeta.meta.isSuccess) {
@@ -588,6 +592,21 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
       }
     }
     return this;
+  }
+
+  private void renamedIfExist() {
+    rename(backupName());
+  }
+
+  private PathLocation backupName() {
+    int counter = 1;
+    PathLocation newFile;
+    do {
+      int counter2 = counter;
+      newFile = withBasename(x -> x + "-" + counter2);
+      counter++;
+    } while (newFile.exists());
+    return newFile;
   }
 
   private void reportOperationEvent(CopyOptions copyOptions, boolean operationIgnored, CopyEvent event,

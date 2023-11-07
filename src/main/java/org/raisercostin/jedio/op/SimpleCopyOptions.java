@@ -19,7 +19,14 @@ import org.raisercostin.jedio.ReferenceLocation;
 @With
 @Builder
 public class SimpleCopyOptions implements CopyOptions {
-  public final boolean replaceExisting;
+  public enum CopyStyle {
+    ReplaceExisting,
+    BackupExisting,
+    IgnoreExisting,
+    ThrowIfExisting
+  }
+
+  public final CopyStyle style;
   public final boolean copyMeta;
   public final boolean throwIfIgnored;
   public final Predicate<StreamAndMeta> acceptStreamAndMeta;
@@ -37,13 +44,23 @@ public class SimpleCopyOptions implements CopyOptions {
   }
 
   @Override
-  public boolean throwOnError() {
-    return this.throwIfIgnored;
+  public boolean ignoreExisting() {
+    return style == CopyStyle.IgnoreExisting;
+  }
+
+  @Override
+  public boolean backupExisting() {
+    return style == CopyStyle.BackupExisting;
   }
 
   @Override
   public boolean replaceExisting() {
-    return this.replaceExisting;
+    return style == CopyStyle.ReplaceExisting;
+  }
+
+  @Override
+  public boolean throwOnError() {
+    return this.throwIfIgnored;
   }
 
   public CopyOptions withDefaultReporting() {

@@ -9,6 +9,7 @@ import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.impl.ReferenceLocationLike;
+import org.raisercostin.jedio.op.SimpleCopyOptions.CopyStyle;
 
 public interface CopyOptions extends OperationOptions {
   // case class CopyOptions(overwriteIfAlreadyExists: Boolean = false, copyMeta:
@@ -23,22 +24,34 @@ public interface CopyOptions extends OperationOptions {
   }
 
   static SimpleCopyOptions copyDoNotOverwriteAndThrow() {
-    return new SimpleCopyOptions(false, false, true, Predicates.alwaysTrue(), OperationListener.defaultListener);
+    return new SimpleCopyOptions(CopyStyle.ThrowIfExisting, false, true, Predicates.alwaysTrue(),
+      OperationListener.defaultListener);
   }
 
   static SimpleCopyOptions copyDoNotOverwriteButIgnore() {
-    return new SimpleCopyOptions(false, false, false, Predicates.alwaysTrue(), OperationListener.defaultListener);
+    return new SimpleCopyOptions(CopyStyle.IgnoreExisting, false, false, Predicates.alwaysTrue(),
+      OperationListener.defaultListener);
   }
 
   static SimpleCopyOptions copyOverwrite() {
-    return new SimpleCopyOptions(true, false, true, Predicates.alwaysTrue(), OperationListener.defaultListener);
+    return new SimpleCopyOptions(CopyStyle.ReplaceExisting, false, true, Predicates.alwaysTrue(),
+      OperationListener.defaultListener);
+  }
+
+  static CopyOptions copyBackupExisting() {
+    return new SimpleCopyOptions(CopyStyle.BackupExisting, false, true, Predicates.alwaysTrue(),
+      OperationListener.defaultListener);
   }
 
   Duration timeoutOnItem = Duration.ofSeconds(1);
   Duration timeoutTotal = Duration.ofSeconds(60);
   boolean reportSteps = false;
 
+  boolean ignoreExisting();
+
   boolean replaceExisting();
+
+  boolean backupExisting();
 
   boolean throwOnError();
 

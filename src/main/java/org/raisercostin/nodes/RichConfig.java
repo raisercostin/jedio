@@ -171,25 +171,29 @@ public class RichConfig {
   }
 
   public String resolveBoth(String content, String defaultValue) {
-    return resolve(content).getOrElse(resolve(defaultValue).get());
+    return resolve(content).getOrElse(() -> resolve(defaultValue).get());
   }
 
   public Try<String> resolve(String content) {
-    String template = "template=" + escapeOneValue(content);
-    Config placeholderConfig = Try.of(() -> ConfigFactory.parseString(template,
-      ConfigParseOptions.defaults().setSyntax(ConfigSyntax.CONF)))
-      .recoverWith(x -> Try.failure(new RuntimeException("When parsing [" + template + "]", x)))
-      .get();
-    Config resolvedConfig = placeholderConfig.withFallback(config)
-      .resolve(ConfigResolveOptions.noSystem().setUseSystemEnvironment(false).setAllowUnresolved(false));
-    String resolvedString = resolvedConfig.getString("template");
-    if (strictResolve) {
-      if (p.matcher(resolvedString).find()) {
-        return Try.failure(new RuntimeException(
-          "Value [%s] not resolved.".formatted(resolvedString)));
+    try {
+      String template = "template=" + escapeOneValue(content);
+      Config placeholderConfig = Try.of(() -> ConfigFactory.parseString(template,
+        ConfigParseOptions.defaults().setSyntax(ConfigSyntax.CONF)))
+        .recoverWith(x -> Try.failure(new RuntimeException("When parsing [" + template + "]", x)))
+        .get();
+      Config resolvedConfig = placeholderConfig.withFallback(config)
+        .resolve(ConfigResolveOptions.noSystem().setUseSystemEnvironment(false).setAllowUnresolved(false));
+      String resolvedString = resolvedConfig.getString("template");
+      if (strictResolve) {
+        if (PATTERN_VARIABLES.matcher(resolvedString).find()) {
+          return Try.failure(new RuntimeException(
+            "Value [%s] not resolved.".formatted(resolvedString)));
+        }
       }
+      return Try.success(resolvedString);
+    } catch (Exception e) {
+      return Try.failure(e);
     }
-    return Try.success(resolvedString);
   }
 
   /**Values from json or properties must be changed to be seen by HOCON.
@@ -240,14 +244,14 @@ public class RichConfig {
     return new RichConfig(Nodes.hocon.toConfigFromHocon(escaped));
   }
 
-  private static Pattern p = Pattern.compile("(\"?(\\$\\{[^}]+\\})\"?)");
+  private static Pattern PATTERN_VARIABLES = Pattern.compile("(\"?(\\$\\{[^}]+\\})\"?)");
 
   public static String escapeSubstitutionsInJson(String content) {
     //    if (content.startsWith("\"") && content.endsWith("\"")) {
     //    } else {
     //      content = "\"" + content + "\"";
     //    }
-    Matcher matcher = p.matcher(content);
+    Matcher matcher = PATTERN_VARIABLES.matcher(content);
     if (!matcher.find()) {
       return content;
     }
