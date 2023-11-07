@@ -12,7 +12,7 @@ import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.op.CopyOptions;
 
 /** Writable by me or others? */
-public interface WritableFileLocationLike<SELF extends @NonNull WritableFileLocationLike<SELF>>
+public interface WritableFileLocationLike<SELF extends WritableFileLocationLike<SELF>>
     extends WritableFileLocation, BasicFileLocationLike<SELF> {
   @Override
   default SELF write(String content, String charset) {

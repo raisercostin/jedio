@@ -28,7 +28,7 @@ import org.raisercostin.jedio.url.impl.ModifiedURI;
 import reactor.core.publisher.Flux;
 
 // TODO maybe should contain type <T> of the actual internal instance
-public interface ReferenceLocationLike<SELF extends @NonNull ReferenceLocationLike<SELF>>
+public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
     extends LocationLike<SELF>, ReferenceLocation {
 
   @Override

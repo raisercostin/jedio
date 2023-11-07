@@ -1,13 +1,12 @@
 package org.raisercostin.jedio.impl;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.sugar;
 import org.raisercostin.jedio.BasicFileLocation;
 import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.op.DeleteOptions;
 
-public interface BasicFileLocationLike<SELF extends @NonNull BasicFileLocationLike<SELF>>
+public interface BasicFileLocationLike<SELF extends BasicFileLocationLike<SELF>>
     extends ExistingLocationLike<SELF>, BasicFileLocation {
 
   @Override
