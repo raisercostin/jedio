@@ -71,6 +71,18 @@ public class GenericFeature<T> implements Feature<T> {
     return new ActionFeature(name, description, actions);
   }
 
+  public static ActionFeature actionFeature(String name, Runnable runnable) {
+    ActionFeature action = ActionFeature.actionFeature(name, "");
+    action.registerAction((a, b) -> runnable.run());
+    return action;
+  }
+
+  public static ActionFeature actionFeature(String name, BiCheckedConsumer<String, String> consumer) {
+    ActionFeature action = ActionFeature.actionFeature(name, "");
+    action.registerAction(consumer);
+    return action;
+  }
+
   public String name;
   public String description;
   public T compileValue;
