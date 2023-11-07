@@ -18,5 +18,5 @@ public interface WritableFileLocation extends BasicFileLocation {
 
   <T extends WritableFileLocation> T copyFrom(ReadableFileLocation source, CopyOptions options);
 
-  <T extends WritableFileLocation> T write(String content);
+  WritableFileLocation write(String content);
 }

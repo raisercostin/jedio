@@ -19,6 +19,7 @@ import org.raisercostin.jedio.find.FileTraversal2;
 import org.raisercostin.jedio.find.PathWithAttributes;
 import org.raisercostin.jedio.impl.LinkLocationLike;
 import org.raisercostin.jedio.impl.NonExistingLocationLike;
+import org.raisercostin.jedio.impl.WritableFileLocationLike;
 import org.raisercostin.jedio.path.PathLocation;
 import org.raisercostin.jedio.url.impl.ModifiedURI;
 import reactor.core.publisher.Flux;
