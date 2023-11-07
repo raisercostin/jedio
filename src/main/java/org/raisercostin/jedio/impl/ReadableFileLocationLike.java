@@ -16,7 +16,7 @@ import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.nodes.Nodes;
 
-public interface ReadableFileLocationLike<SELF extends @NonNull ReadableFileLocationLike<SELF>>
+public interface ReadableFileLocationLike<SELF extends ReadableFileLocationLike<SELF>>
     extends ReadableFileLocation, BasicFileLocationLike<SELF> {
 
   @Override
