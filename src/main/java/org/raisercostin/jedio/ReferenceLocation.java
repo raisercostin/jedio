@@ -85,6 +85,17 @@ public interface ReferenceLocation extends Location {
 
   boolean exists();
 
+  default ReferenceLocation backupName() {
+    int counter = 1;
+    ReferenceLocation newFile;
+    do {
+      int counter2 = counter;
+      newFile = withBasename(x -> x + "-" + counter2);
+      counter++;
+    } while (newFile.exists());
+    return newFile;
+  }
+
   /**A dir has files but not content.*/
   boolean isDir();
 

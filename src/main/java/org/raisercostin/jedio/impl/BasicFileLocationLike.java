@@ -22,7 +22,7 @@ public interface BasicFileLocationLike<SELF extends @NonNull BasicFileLocationLi
   }
 
   @Override
-  default void rename(WritableFileLocation writableFileLocation) {
+  default <T extends WritableFileLocation> T rename(T writableFileLocation) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 }

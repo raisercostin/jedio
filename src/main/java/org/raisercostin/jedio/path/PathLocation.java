@@ -594,21 +594,6 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     return this;
   }
 
-  private void renamedIfExist() {
-    rename(backupName());
-  }
-
-  private PathLocation backupName() {
-    int counter = 1;
-    PathLocation newFile;
-    do {
-      int counter2 = counter;
-      newFile = withBasename(x -> x + "-" + counter2);
-      counter++;
-    } while (newFile.exists());
-    return newFile;
-  }
-
   private void reportOperationEvent(CopyOptions copyOptions, boolean operationIgnored, CopyEvent event,
       ExistingLocation src, ReferenceLocation dst, Object... args) {
     copyOptions.reportOperationEvent(event, src, dst, args);
@@ -628,7 +613,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
-  public void rename(WritableFileLocation destLocation) {
+  public <T extends WritableFileLocation> T rename(T destLocation) {
     try {
       Path src = toPath();
       Path dest = destLocation.asPathLocation().toPath();
@@ -641,6 +626,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
         mkdirOnParentIfNeeded();
         Files.move(src, dest);
       }
+      return destLocation;
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

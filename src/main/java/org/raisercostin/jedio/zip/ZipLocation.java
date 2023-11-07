@@ -127,7 +127,7 @@ public class ZipLocation
   }
 
   @Override
-  public void rename(WritableFileLocation writableFileLocation) {
+  public <T extends WritableFileLocation> T rename(T writableFileLocation) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 

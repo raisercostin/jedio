@@ -8,5 +8,9 @@ public interface BasicFileLocation extends ExistingLocation {
 
   NonExistingLocation deleteFile(DeleteOptions options);
 
-  void rename(WritableFileLocation writableFileLocation);
+  <T extends WritableFileLocation> T rename(T writableFileLocation);
+
+  default <T extends WritableFileLocation> T renamedIfExist() {
+    return rename((T) backupName());
+  }
 }
