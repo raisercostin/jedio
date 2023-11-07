@@ -7,4 +7,5 @@ import java.lang.annotation.RetentionPolicy;
 /** Documents that the annotated class/field/method is safe for concurrent access. */
 @Documented
 @Retention(RetentionPolicy.CLASS)
-public @interface threadsafe {}
+public @interface threadsafe {
+}

@@ -2,6 +2,7 @@ package org.raisercostin.nodes;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -167,6 +168,10 @@ public class RichConfig {
 
   public String resolve(String content, String defaultValue) {
     return resolve(content).getOrElse(defaultValue);
+  }
+
+  public String resolveBoth(String content, String defaultValue) {
+    return resolve(content).getOrElse(resolve(defaultValue).get());
   }
 
   public Try<String> resolve(String content) {
