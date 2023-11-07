@@ -86,6 +86,9 @@ public interface ReferenceLocation extends Location {
   boolean exists();
 
   default ReferenceLocation backupName() {
+    if (!exists()) {
+      return this;
+    }
     int counter = 1;
     ReferenceLocation newFile;
     do {

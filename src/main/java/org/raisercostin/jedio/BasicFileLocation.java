@@ -11,6 +11,9 @@ public interface BasicFileLocation extends ExistingLocation {
   <T extends WritableFileLocation> T rename(T writableFileLocation);
 
   default <T extends WritableFileLocation> T renamedIfExist() {
+    if (!exists()) {
+      return (T) this;
+    }
     return rename((T) backupName());
   }
 }
