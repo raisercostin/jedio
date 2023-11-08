@@ -44,10 +44,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
@@ -417,14 +419,16 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
 
   @ToString
   @JsonAutoDetect(getterVisibility = Visibility.NONE)
-  public static class RequestError extends ResponseStatusException {
-    private ResponseEntity responseEntity;
-    private WebClientLocation2 webClientLocation;
+  public static class RequestError extends ErrorResponseException {
+    public final ResponseEntity responseEntity;
+    public final WebClientLocation2 webClientLocation;
 
     public RequestError(WebClientLocation2 webClientLocation, ResponseEntity responseEntity, String reason) {
-      super(responseEntity.getStatusCode(), reason);
+      super(responseEntity.getStatusCode(), ProblemDetail.forStatusAndDetail(responseEntity.getStatusCode(),
+        (String) responseEntity.getBody()), null, reason, null);
       this.webClientLocation = webClientLocation;
       this.responseEntity = responseEntity;
+      this.setDetail(reason);
     }
 
     @ToString.Include
@@ -441,7 +445,6 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       ));
     }
 
-    @Override
     public HttpHeaders getResponseHeaders() {
       return responseEntity.getHeaders();
     }
