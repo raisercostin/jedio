@@ -428,7 +428,6 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
         (String) responseEntity.getBody()), null, reason, null);
       this.webClientLocation = webClientLocation;
       this.responseEntity = responseEntity;
-      this.setDetail(reason);
     }
 
     @ToString.Include
