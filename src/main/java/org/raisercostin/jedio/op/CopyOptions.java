@@ -3,7 +3,6 @@ package org.raisercostin.jedio.op;
 import java.time.Duration;
 
 import com.google.common.base.Predicates;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.raisercostin.jedio.ExistingLocation;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.ReferenceLocation;
@@ -24,28 +23,30 @@ public interface CopyOptions extends OperationOptions {
   }
 
   static SimpleCopyOptions copyDoNotOverwriteAndThrow() {
-    return new SimpleCopyOptions(CopyStyle.ThrowIfExisting, false, true, Predicates.alwaysTrue(),
+    return new SimpleCopyOptions(CopyStyle.ThrowIfExisting, false, false, true, Predicates.alwaysTrue(),
       OperationListener.defaultListener);
   }
 
   static SimpleCopyOptions copyDoNotOverwriteButIgnore() {
-    return new SimpleCopyOptions(CopyStyle.IgnoreExisting, false, false, Predicates.alwaysTrue(),
+    return new SimpleCopyOptions(CopyStyle.IgnoreExisting, false, false, false, Predicates.alwaysTrue(),
       OperationListener.defaultListener);
   }
 
   static SimpleCopyOptions copyOverwrite() {
-    return new SimpleCopyOptions(CopyStyle.ReplaceExisting, false, true, Predicates.alwaysTrue(),
+    return new SimpleCopyOptions(CopyStyle.ReplaceExisting, false, false, true, Predicates.alwaysTrue(),
       OperationListener.defaultListener);
   }
 
-  static CopyOptions copyBackupExisting() {
-    return new SimpleCopyOptions(CopyStyle.BackupExisting, false, true, Predicates.alwaysTrue(),
+  static SimpleCopyOptions copyBackupExisting() {
+    return new SimpleCopyOptions(CopyStyle.BackupExisting, false, false, true, Predicates.alwaysTrue(),
       OperationListener.defaultListener);
   }
 
   Duration timeoutOnItem = Duration.ofSeconds(1);
   Duration timeoutTotal = Duration.ofSeconds(60);
   boolean reportSteps = false;
+
+  boolean ignoreNonExistingSource();
 
   boolean ignoreExisting();
 

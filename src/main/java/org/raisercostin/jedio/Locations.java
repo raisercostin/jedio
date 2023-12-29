@@ -48,6 +48,11 @@ public class Locations {
     return ClasspathLocation.classpath(path);
   }
 
+  /**Will create the location even if the resource does not exists.*/
+  public static ClasspathLocation classpathOptional(String path) {
+    return ClasspathLocation.classpathOptional(path);
+  }
+
   public static PathLocation pathFromRelative(String relativePath) {
     return PathLocation.pathFromRelative(relativePath);
   }

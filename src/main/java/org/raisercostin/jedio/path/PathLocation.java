@@ -546,7 +546,11 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
       } else {
         // source is analysed for existance only if will actually try to copy
         if (!sourceExists) {
-          reportOperationEvent(copyOptions, true, CopyEvent.CopyIgnoreSourceDoesNotExists, source, this);
+          if (copyOptions.ignoreNonExistingSource()) {
+            reportOperationEvent(copyOptions, false, CopyEvent.CopyIgnoreSourceDoesNotExists, source, this);
+          } else {
+            reportOperationEvent(copyOptions, true, CopyEvent.CopyFailed, source, this);
+          }
         } else {
           if (copyOptions.backupExisting()) {
             reportOperationEvent(copyOptions, false, CopyEvent.BackupOfDestination, source, this);

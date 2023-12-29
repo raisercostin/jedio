@@ -50,19 +50,25 @@ public class ClasspathLocation
     ExistingLocationLike<@NonNull ClasspathLocation>, ReadableFileLocationLike<@NonNull ClasspathLocation> {
 
   public static ClasspathLocation classpath(String path) {
-    return new ClasspathLocation(path);
+    return new ClasspathLocation(path, true);
+  }
+
+  public static ClasspathLocation classpathOptional(String path) {
+    return new ClasspathLocation(path, false);
   }
 
   public static ClasspathLocation classpath(Class<?> clazz, String relative) {
-    return new ClasspathLocation(clazz.getPackage().getName().replace('.', '/') + "/" + relative);
+    return new ClasspathLocation(clazz.getPackage().getName().replace('.', '/') + "/" + relative, true);
   }
 
-  private static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
+  public static final ClassLoader specialClassLoader = Option.of(ClasspathLocation.class.getClassLoader())
     .getOrElse(ClassLoader.class.getClassLoader());
 
-  private static URL toUrl(String resourcePath) {
+  private static URL toUrl(String resourcePath, boolean throwIfResourceNotExists) {
     URL res = specialClassLoader.getResource(resourcePath);
-    Preconditions.checkNotNull(res, "Couldn't get a stream for resourcePath=[%s]", resourcePath);
+    if (throwIfResourceNotExists) {
+      Preconditions.checkNotNull(res, "Couldn't get a stream for resourcePath=[%s]", resourcePath);
+    }
     return res;
   }
 
@@ -70,13 +76,12 @@ public class ClasspathLocation
   private final URL resourceUrl;
 
   public ClasspathLocation(String path) {
-    this.resourcePath = fixPath(path);
-    this.resourceUrl = toUrl(this.resourcePath);
+    this(path, true);
   }
 
-  private ClasspathLocation(String path, URL resourcePath) {
+  public ClasspathLocation(String path, boolean throwIfResourceNotExists) {
     this.resourcePath = fixPath(path);
-    this.resourceUrl = toUrl(this.resourcePath);
+    this.resourceUrl = toUrl(this.resourcePath, throwIfResourceNotExists);
   }
 
   private String fixPath(String path) {
@@ -103,13 +108,14 @@ public class ClasspathLocation
     }
   }
 
+  @Override
   public PathLocation toPathLocation() {
     return new PathLocation(toPath());
   }
 
   private Path toPath() {
     return RichThrowable.tryWithSuppressed(() -> {
-      URL resource = ClasspathLocation.class.getClassLoader().getResource(this.resourcePath);
+      URL resource = this.resourceUrl;
       System.out.println("resource=" + resource);
       Preconditions.checkNotNull(resource);
       URI uri = resource.toURI();
@@ -133,11 +139,12 @@ public class ClasspathLocation
 
   @Override
   public boolean exists() {
-    try (InputStream stream = unsafeInputStream()) {
-      return stream != null;
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    return this.resourceUrl != null;
+    //    try (InputStream stream = unsafeInputStream()) {
+    //      return stream != null;
+    //    } catch (IOException e) {
+    //      throw new RuntimeException(e);
+    //    }
   }
 
   @Override
@@ -166,7 +173,7 @@ public class ClasspathLocation
 
   @Override
   public ClasspathLocation create(String path) {
-    return new ClasspathLocation(path);
+    return classpath(path);
   }
 
   @Override

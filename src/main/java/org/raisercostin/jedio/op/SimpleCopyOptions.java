@@ -27,6 +27,7 @@ public class SimpleCopyOptions implements CopyOptions {
   }
 
   public final CopyStyle style;
+  public final boolean ignoreNonExistingSource;
   public final boolean copyMeta;
   public final boolean throwIfIgnored;
   public final Predicate<StreamAndMeta> acceptStreamAndMeta;
@@ -46,6 +47,11 @@ public class SimpleCopyOptions implements CopyOptions {
   @Override
   public boolean ignoreExisting() {
     return style == CopyStyle.IgnoreExisting;
+  }
+
+  @Override
+  public boolean ignoreNonExistingSource() {
+    return ignoreNonExistingSource;
   }
 
   @Override
