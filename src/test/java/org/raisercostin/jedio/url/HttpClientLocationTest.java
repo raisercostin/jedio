@@ -4,18 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import lombok.SneakyThrows;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.xerces.util.URI;
 import org.junit.jupiter.api.Test;
-import org.raisercostin.jedio.Locations;
-import org.raisercostin.nodes.Nodes;
 
 class HttpClientLocationTest {
   @Test
@@ -106,13 +106,16 @@ class HttpClientLocationTest {
   }
 
   @Test
-  void test9() throws UnirestException {
-    //Implement posts as simple as this Unirest.post to add headers and body to requests
-    //HttpClientLocation.url(url, new HttpPost(), new StringEntity(body), Locations.defaultClient.get());
-    HttpResponse<String> response = Unirest.post("http://revomatico")
-      .header("Content-type", "application/json")
-      .body("{body=a}")
-      .asString();
-    assertThat(false).isTrue();
+  void test9() throws IOException, InterruptedException, URISyntaxException {
+    HttpResponse<String> response = HttpClient.newBuilder()
+      .build()
+      .send(HttpRequest
+        .newBuilder()
+        .uri(new URI("http://raisercostin.org"))
+        .header("Content-type", "application/json")
+        .POST(BodyPublishers.ofString("{body=a}"))
+        .build(),
+        BodyHandlers.ofString());
+    System.out.println(response);
   }
 }

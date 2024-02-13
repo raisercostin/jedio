@@ -227,15 +227,6 @@ public class HttpClientLocation extends BaseHttpLocationLike<@NonNull HttpClient
         return IOUtils.toString(response.getEntity().getContent(), charset);
       }
     });
-    // response.getEntity().
-    // EntityUtils.Future
-    // <HttpResponse<String>> res = Unirest.get(url)
-    // // .header("User-Agent", USER_AGENT).header("Accept", "*/*")
-    // // .header("Content-Type", "application/json; charset=UTF-8").header("Accept-Encoding", "gzip,deflate,sdch")
-    // // .asStringAsync(callback)();
-    // .asStringAsync();
-    //
-    // return Mono.fromCallable(() -> res.get().getBody());
   }
 
   private static class InvalidHttpResponse extends RuntimeException {

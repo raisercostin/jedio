@@ -31,7 +31,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.feature.BooleanFeature;
 import org.jedio.feature.EnumFeature;
 import org.jedio.feature.GenericFeature;
-import org.json.JSONObject;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.url.WebClientLocation2.RequestResponse.EnrichedContent;
 import org.raisercostin.jedio.url.impl.ModifiedURI;
@@ -59,7 +58,6 @@ import org.springframework.web.reactive.function.client.WebClient.RequestBodySpe
 import org.springframework.web.reactive.function.client.WebClient.RequestBodyUriSpec;
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -98,9 +96,6 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
   }
 
   public WebClientLocation2 body(Object body) {
-    if (body instanceof JSONObject) {
-      body = body.toString();
-    }
     RequestHeadersSpec<?> request2 = request.bodyValue(body);
     return new WebClientLocation2(url, httpMethod, false, request2, client);
   }
