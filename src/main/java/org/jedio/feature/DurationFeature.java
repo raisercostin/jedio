@@ -41,7 +41,7 @@ public class DurationFeature extends GenericFeature<Duration> implements Feature
 
   private Duration age(Temporal lastUpdate, Temporal now) {
     if (lastUpdate instanceof OffsetDateTime && now instanceof Instant) {
-      return age((OffsetDateTime) lastUpdate, (Instant) now);
+      return age(lastUpdate, now);
     }
     return Duration.between(lastUpdate, now);
   }
