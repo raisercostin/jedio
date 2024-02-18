@@ -9,8 +9,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
-import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jedio.Audit.AuditException;
 import org.jedio.struct.RichIterable;
 import org.junit.jupiter.api.Disabled;
@@ -18,9 +18,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.raisercostin.jedio.Locations.Scheme;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.path.PathLocation;
 
+@Slf4j
 class LocationsTest {
   @Test
   void test() {
@@ -181,6 +183,34 @@ class LocationsTest {
   @Test
   void locationsBug2OnLinuxCannotParseIt() {
     Location loc = Locations.location("file:////root/.revobet/lsports-cache");
+    assertThat(loc).isNotNull();
+  }
+
+  @Test
+  void createAnAbsoluteLocation() {
+    PathLocation loc = (PathLocation) Locations.location("/absolute.txt", Scheme.path);
+    log.info("loc {}", loc);
+    assertThat(loc).isNotNull();
+  }
+
+  @Test
+  void createACurrentDirLocation() {
+    PathLocation loc = (PathLocation) Locations.location("./target/relative.txt", Scheme.path);
+    log.info("loc {}", loc);
+    assertThat(loc).isNotNull();
+  }
+
+  @Test
+  void createACurrentDirLocation2() {
+    PathLocation loc = (PathLocation) Locations.location("../target/relative.txt", Scheme.path);
+    log.info("loc {}", loc);
+    assertThat(loc).isNotNull();
+  }
+
+  @Test
+  void createARelativeDirLocation() {
+    RelativeLocation loc = (RelativeLocation) Locations.location("target/relative.txt", Scheme.path);
+    log.info("loc {}", loc);
     assertThat(loc).isNotNull();
   }
 }

@@ -28,13 +28,27 @@ import org.raisercostin.jedio.url.WebClientLocation;
 import org.raisercostin.jedio.url.WebLocation;
 import org.raisercostin.jedio.url.impl.ModifiedURI;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec;
-import org.springframework.web.reactive.function.client.WebClient.UriSpec;
 
 public class Locations {
   private static Lazy<JedioHttpClient> defaultClient = Lazy.of(() -> JedioHttpClient.createHighPerfHttpClient());
+
+  public enum Scheme {
+    http,
+    https,
+    /**
+     * This scheme is a catch all from a string about a file:
+     * - starting with '/' is absolute
+     * - starting with './' or '../' is relative to current dir or parent of current dir
+     * - starting without the other prefixes is just relative (without defining relative to what)
+     *   This is not allowed to be relative to current since it creates security risks
+     * See other schemes.
+     */
+    path,
+    file,
+    relative,
+    current
+  }
 
   public static RelativeLocation relative(Path path) {
     return RelativeLocation.relative(path);
@@ -176,40 +190,69 @@ public class Locations {
     return location(externalUrl.toURL());
   }
 
+  public static Location locationStrict(String url) {
+    return location(url, null);
+  }
+
+  /**Location via a url with scheme and fallback to path.*/
+  public static Location location(String url) {
+    return location(url, Scheme.path);
+  }
+
   /**Create a location. Shold have a schema.
    * */
   @JsonCreator
   @SneakyThrows
-  public static Location location(String externalUrl) {
-    Either<String, Tuple3<Matcher, String, String>> schemaAndUrl2 = RichRegex.regexp2("^([a-z]+)\\:(.*)$",
+  public static Location location(String externalUrl, Scheme defaultScheme) {
+    Either<String, Tuple3<Matcher, String, String>> schemaAndUrl = RichRegex.regexp2("^([a-z]+)\\:(.*)$",
       externalUrl);
-    if (schemaAndUrl2.isLeft()) {
-      throw new IllegalArgumentException(
-        "Couldn't find a protocol scheme as `<scheme>:<rest>` in [" + externalUrl + "]: " + schemaAndUrl2.getLeft()
-            + "]");
+    String schema;
+    String path;
+    if (schemaAndUrl.isLeft()) {
+      if (defaultScheme == null) {
+        throw new IllegalArgumentException(
+          "Couldn't find a protocol scheme as `<scheme>:<rest>` in [" + externalUrl + "]: " + schemaAndUrl.getLeft()
+              + "]");
+      }
+      schema = defaultScheme.toString();
+      path = externalUrl;
+    } else {
+      schema = schemaAndUrl.get()._2;
+      path = schemaAndUrl.get()._3;
     }
-    Tuple3<Matcher, String, String> schemaAndUrl = schemaAndUrl2.get();
-    switch (schemaAndUrl._2) {
+    switch (schema) {
       case "http":
       case "https":
         return httpGet(externalUrl);
       case "classpath":
-        return classpath(schemaAndUrl._3);
+        return classpath(path);
+      case "path":
+        return pathAbsoluteRelativeOrRelativeToCurrent(externalUrl);
       case "file":
         return pathFromExternalForm(externalUrl);
       case "relative":
-        return pathFromRelative(relative(schemaAndUrl._3));
+        return pathFromRelative(relative(path));
       case "current":
-        Preconditions.checkArgument(schemaAndUrl._3.length() == 0, "Current schema should have no relative part.");
+        Preconditions.checkArgument(path.length() == 0, "Current schema should have no relative part.");
         return current();
       case "web":
-        return web(schemaAndUrl._3);
+        return web(path);
       case "mem":
-        return mem(schemaAndUrl._3);
+        return mem(path);
       default:
         throw new IllegalArgumentException(
-          "Don't know protocol [" + schemaAndUrl._2 + "] for externalUrl [" + externalUrl + "]");
+          "Don't know protocol [" + schema + "] for externalUrl [" + externalUrl + "]");
     }
+  }
+
+  public static Location pathAbsoluteRelativeOrRelativeToCurrent(String path) {
+    if (path.startsWith("/")) {
+      return pathFromExternalForm("file://" + path);
+    }
+    if (path.startsWith("./") || path.startsWith("../")) {
+      return current().child(path);
+    }
+    return relative(path);
   }
 
   public static String toExternalUri(Location location) {

@@ -165,10 +165,13 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
       corrected = StringUtils.removeStart(corrected, "file://");
       corrected = StringUtils.removeStart(corrected, "localhost");
       corrected = StringUtils.removeStart(corrected, GENERIC_FILE_SEPARATOR);
+      int pathStarts = path.indexOf('/', "file://".length());
+      if (pathStarts == -1) {
+        throw new RuntimeException("No path was defined after file:// for [%s]".formatted(path));
+      }
       throw new RuntimeException(
-        "The hostname [" + path.substring("file://".length(), path.indexOf('/', "file://".length()))
-            + "] should be empty(`file:///<path>`) or localhost (`file://localhost/<path>`) for [" + path
-            + "].\nMaybe you wanted to pass [file://localhost/" + corrected + "]?");
+        "The hostname [%s] should be empty(`file:///<path>`) or localhost (`file://localhost/<path>`) for [%s].\nMaybe you wanted to pass [file://localhost/%s]?"
+          .formatted(path.substring("file://".length(), pathStarts), path, corrected));
     }
     if (path.startsWith("file://localhost//")) {
       return pathfromAbsolute(path.substring("file://localhost//".length() - 1));
@@ -1020,7 +1023,6 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     return create(Paths.get(path));
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public PathLocation create(Object x) {
     return create((Path) x, true, context);
@@ -1046,7 +1048,6 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     return this.path.toUri();
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public @NonNull PathLocation createWithContext(@NonNull OperationContext context) {
     return create(this.path, false, context);
