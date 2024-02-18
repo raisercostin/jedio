@@ -1,7 +1,6 @@
 package org.raisercostin.jedio;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.struct.RichIterable;

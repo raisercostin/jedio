@@ -17,7 +17,6 @@ import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.DeleteOptions;
 import reactor.core.publisher.Mono;
 
-@SuppressWarnings("unchecked")
 public class InMemoryLocation
     implements FileLocation, NonExistingLocation, ReadableFileLocationLike<InMemoryLocation>,
     WritableFileLocationLike<InMemoryLocation>, NonExistingLocationLike<InMemoryLocation> {

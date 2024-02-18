@@ -2,11 +2,7 @@ package org.raisercostin.jedio.zip;
 
 import static io.vavr.API.unchecked;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.util.Collections;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 

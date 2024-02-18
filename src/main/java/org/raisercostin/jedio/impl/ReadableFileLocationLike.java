@@ -3,7 +3,6 @@ package org.raisercostin.jedio.impl;
 import java.io.InputStream;
 
 import io.vavr.control.Option;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.RichThrowable;
 import org.jedio.deprecated;
 import org.jedio.functions.JedioFunction;

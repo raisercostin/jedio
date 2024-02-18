@@ -1,7 +1,6 @@
 package org.raisercostin.jedio.impl;
 
 import io.vavr.collection.Iterator;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.sugar;
 import org.jedio.struct.RichIterable;
 import org.raisercostin.jedio.DirLocation;
@@ -9,7 +8,6 @@ import org.raisercostin.jedio.ReadableDirLocation;
 import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.op.CopyEvent;
 import org.raisercostin.jedio.op.CopyOptions;
-import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 
 /** ReadableDir means you can find children (you can list). */
@@ -34,8 +32,6 @@ public interface ReadableDirLocationLike<SELF extends ReadableDirLocationLike<SE
     return ls(false);
   }
 
-  @SuppressWarnings("unchecked")
-  //  @Override
   @sugar
   default RichIterable<SELF> ls(boolean recursive) {
     return RichIterable.ofIterable(findFilesAndDirs(recursive).toIterable());

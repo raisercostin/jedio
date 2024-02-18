@@ -25,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.RichThrowable;
-import org.jedio.struct.RichIterable;
 import org.raisercostin.jedio.Locations;
 import org.raisercostin.jedio.ReadableDirLocation;
 import org.raisercostin.jedio.ReadableFileLocation;

@@ -4,9 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.raisercostin.jedio.classpath.ClasspathLocation;
-import org.raisercostin.jedio.fs.stream.InputStreamLocation;
-import org.raisercostin.jedio.path.PathLocation;
-import org.springframework.core.io.ClassPathResource;
 
 class ClasspathLocationTest {
   @Test

@@ -2,7 +2,6 @@ package org.raisercostin.nodes;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.regex.Matcher;

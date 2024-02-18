@@ -9,7 +9,6 @@ import io.vavr.control.Option;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.apache.commons.io.FilenameUtils;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.Cast;
 import org.jedio.deprecated;
 import org.jedio.sugar;
@@ -129,7 +128,6 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
     throw new RuntimeException("Not implemented yet!!!");
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   default Option<ReferenceLocation> parentRef() {
     return Cast.cast(parent());
@@ -140,7 +138,6 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
     throw new RuntimeException("Not implemented yet!!!");
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   default Option<ReferenceLocation> existingRef() {
     return Cast.cast(existing());

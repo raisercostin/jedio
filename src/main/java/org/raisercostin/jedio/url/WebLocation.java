@@ -2,9 +2,6 @@ package org.raisercostin.jedio.url;
 
 import java.nio.file.attribute.FileTime;
 
-import io.vavr.API;
-import io.vavr.collection.Iterator;
-import io.vavr.collection.Seq;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;

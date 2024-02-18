@@ -2,7 +2,6 @@ package org.raisercostin.jedio.url;
 
 import java.time.Duration;
 
-import io.vavr.Lazy;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.url.JedioHttpClient.JedioHttpConfig;
 import org.raisercostin.jedio.url.WebClientLocation.WebClientFactory;

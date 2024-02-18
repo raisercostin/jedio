@@ -5,7 +5,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import io.vavr.collection.Iterator;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;

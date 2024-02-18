@@ -642,7 +642,6 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
           : client;
     }
 
-    @SuppressWarnings("deprecation")
     public static Builder createWebClient(AdvancedByteBufFormat format,
         GenericFeature<Integer> webclientMaxConnections) {
       ConnectionProvider provider = ConnectionProvider

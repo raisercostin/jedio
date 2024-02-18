@@ -21,7 +21,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.feature.BooleanFeature;
 import org.jedio.feature.GenericFeature;
 import org.raisercostin.jedio.ReadableFileLocation;
-import org.raisercostin.jedio.url.WebClientLocation.RequestError;
 import org.raisercostin.jedio.url.impl.ModifiedURI;
 import org.raisercostin.nodes.Nodes;
 import org.springframework.core.NestedExceptionUtils;
@@ -46,7 +45,6 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
-import reactor.retry.Retry;
 import reactor.util.retry.RetryBackoffSpec;
 
 public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLocation>
@@ -295,7 +293,6 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
       return webclientWireTap.isEnabled() ? clientWithTap : client;
     }
 
-    @SuppressWarnings("deprecation")
     public static Builder createWebClient(boolean withTap, GenericFeature<Integer> webclientMaxConnections) {
       ConnectionProvider provider = ConnectionProvider
         .builder("revobet-webclient")

@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Spliterator;
@@ -34,8 +33,6 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import io.vavr.API;
 import io.vavr.CheckedConsumer;
@@ -62,8 +59,6 @@ import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.raisercostin.jedio.Location;
-import org.raisercostin.jedio.Locations;
 
 /**
  * Intentionally doesn't implement Iterable to force you to pass RichIterable around.
@@ -122,7 +117,6 @@ public interface RichIterable<T> {
     return new RichIterableUsingIterator<>("ofJava", Option.of(collection.size()), null, collection, collection);
   }
 
-  @SuppressWarnings("unchecked")
   static <T> RichIterable<T> ofVavr(Value<T> iterable) {
     return new RichIterableUsingIterator<>("ofVavr", smartSize(iterable), null, iterable, iterable);
   }

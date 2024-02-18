@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Spliterator;
@@ -27,10 +26,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.introspect.TypeResolutionContext.Empty;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-import io.vavr.API;
 import io.vavr.CheckedConsumer;
 import io.vavr.CheckedFunction0;
 import io.vavr.Function0;
@@ -62,7 +58,6 @@ import io.vavr.control.Try;
 import io.vavr.control.Validation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jedio.LazyToString;
 
 //TODO Couldn't make it work for CrudRepositories
 //  @SuppressWarnings("rawtypes")
