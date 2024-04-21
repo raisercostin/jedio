@@ -15,6 +15,7 @@ import org.raisercostin.jedio.impl.ReadableFileLocationLike;
 import org.raisercostin.jedio.impl.WritableFileLocationLike;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.DeleteOptions;
+import org.raisercostin.jedio.op.OperationOptions.ReadOptions;
 import reactor.core.publisher.Mono;
 
 public class InMemoryLocation
@@ -94,16 +95,16 @@ public class InMemoryLocation
   @Override
   public InputStream unsafeInputStream() {
     //return new ByteArrayInputStream(this.content.getBytes());
-    return IOUtils.toInputStream(this.content, Charsets.UTF_8);
+    return IOUtils.toInputStream(this.content, ReadOptions.utf8);
   }
 
   @Override
-  public String readContentSync(Charset charset) {
+  public String readContentSync(ReadOptions options) {
     return this.content;
   }
 
   @Override
-  public Mono<String> readContentAsync(Charset charset) {
+  public Mono<String> readContentAsync(ReadOptions options) {
     return Mono.just(this.content);
   }
 

@@ -15,6 +15,7 @@ import org.raisercostin.jedio.DirLocation;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.impl.LinkLocationLike;
 import org.raisercostin.jedio.impl.ReadableFileLocationLike;
+import org.raisercostin.jedio.op.OperationOptions.ReadOptions;
 import reactor.core.publisher.Mono;
 
 @Data
@@ -97,24 +98,24 @@ public class DiskCachedLocation implements ReadableFileLocation, ReadableFileLoc
   }
 
   @Override
-  public String readContentSync(Charset charset) {
+  public String readContentSync(ReadOptions options) {
     ReadableFileLocation cached = this.cache.locationFor(this.location);
     if (cached.exists()) {
-      return cached.asReadableFile().readContentSync(charset);
+      return cached.asReadableFile().readContentSync(options);
     } else {
-      String content = this.location.readContentSync(charset);
+      String content = this.location.readContentSync(options);
       cached.asWritableFile().write(this.cache.transformer.apply(content));
       return content;
     }
   }
 
   @Override
-  public Mono<String> readContentAsync(Charset charset) {
+  public Mono<String> readContentAsync(ReadOptions options) {
     ReadableFileLocation cached = this.cache.locationFor(this.location);
     if (cached.exists()) {
-      return cached.asReadableFile().readContentAsync(charset);
+      return cached.asReadableFile().readContentAsync(options);
     } else {
-      return this.location.readContentAsync(charset).map(content -> {
+      return this.location.readContentAsync(options).map(content -> {
         cached.asWritableFile().write(this.cache.transformer.apply(content));
         return content;
       });

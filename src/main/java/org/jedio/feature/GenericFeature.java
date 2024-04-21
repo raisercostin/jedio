@@ -18,7 +18,7 @@ import reactor.core.Disposable;
 
 @ToString
 public class GenericFeature<T> implements Feature<T> {
-  private static final Config config = ConfigFactory.load("revobet");
+  private static final Config config = ConfigFactory.load("namek");
 
   public static <T> GenericFeature<T> create(String name, String description, T compileDefault, String propertyName,
       boolean realtime) {

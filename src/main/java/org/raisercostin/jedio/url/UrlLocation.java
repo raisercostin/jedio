@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 
 import lombok.SneakyThrows;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.raisercostin.jedio.op.OperationOptions.ReadOptions;
 import org.raisercostin.jedio.url.impl.ModifiedURI;
 
 public class UrlLocation extends BaseHttpLocationLike<@NonNull UrlLocation> {
@@ -44,7 +45,7 @@ public class UrlLocation extends BaseHttpLocationLike<@NonNull UrlLocation> {
   }
 
   @Override
-  public String readContentSync(Charset charset) {
+  public String readContentSync(ReadOptions options) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 

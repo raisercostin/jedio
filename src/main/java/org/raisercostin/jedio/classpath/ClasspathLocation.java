@@ -32,6 +32,7 @@ import org.raisercostin.jedio.RelativeLocation;
 import org.raisercostin.jedio.impl.ExistingLocationLike;
 import org.raisercostin.jedio.impl.ReadableDirLocationLike;
 import org.raisercostin.jedio.impl.ReadableFileLocationLike;
+import org.raisercostin.jedio.op.OperationOptions.ReadOptions;
 import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Flux;
 
@@ -162,9 +163,9 @@ public class ClasspathLocation
   }
 
   @Override
-  public String readContentSync(Charset charset) {
+  public String readContentSync(ReadOptions options) {
     try (BufferedInputStream b = new BufferedInputStream(unsafeInputStream())) {
-      return IOUtils.toString(b, charset);
+      return IOUtils.toString(b, options.defaultCharset);
     } catch (IOException e) {
       throw new RuntimeException("Can't read resource [" + this.resourcePath + "]", e);
     }

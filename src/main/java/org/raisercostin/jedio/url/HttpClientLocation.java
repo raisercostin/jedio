@@ -36,6 +36,7 @@ import org.jedio.RichThrowable;
 import org.jedio.deprecated;
 import org.jedio.functions.JedioFunction;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
+import org.raisercostin.jedio.op.OperationOptions.ReadOptions;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.url.impl.ModifiedURI;
 import org.raisercostin.nodes.Nodes;
@@ -243,17 +244,13 @@ public class HttpClientLocation extends BaseHttpLocationLike<@NonNull HttpClient
   }
 
   public <R> Mono<R> readContentAsyncWithMeta(CheckedFunction1<StreamAndMeta, R> consumer) {
-    return readContentAsyncWithMeta(this.charset1_UTF8, consumer);
-  }
-
-  public <R> Mono<R> readContentAsyncWithMeta(Charset charset, CheckedFunction1<StreamAndMeta, R> consumer) {
     return client.execute(() -> executeOnHttp200(consumer));
   }
 
   @Override
   @SneakyThrows
-  public String readContentSync(Charset charset) {
-    return executeOnHttp200(streamAndMeta -> streamAndMeta.readContent(charset));
+  public String readContentSync(ReadOptions options) {
+    return executeOnHttp200(streamAndMeta -> streamAndMeta.readContent(options.defaultCharset));
   }
 
   private <R> R executeOnHttp200(CheckedFunction1<StreamAndMeta, R> consumer) {
@@ -302,13 +299,13 @@ public class HttpClientLocation extends BaseHttpLocationLike<@NonNull HttpClient
   // }
 
   @Override
-  public Mono<String> readContentAsync(Charset charset) {
-    return this.client.execute(() -> readContentSync(charset));
+  public Mono<String> readContentAsync(ReadOptions options) {
+    return this.client.execute(() -> readContentSync(options));
   }
 
   @Override
-  public CompletableFuture<String> readContentAsyncCompletableFuture(Charset charset) {
-    return this.client.executeCompletableFuture(() -> readContentSync(charset));
+  public CompletableFuture<String> readContentAsyncCompletableFuture(ReadOptions options) {
+    return this.client.executeCompletableFuture(() -> readContentSync(options));
   }
 
   @Override

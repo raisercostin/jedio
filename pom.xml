@@ -63,7 +63,6 @@
     <dist.snapshot.url>file://${project.build.directory}/myArtifacts</dist.snapshot.url>
     <dist.url>${git.url}</dist.url>
     <!--<docker.image.prefix>registry.gitlab.com/dcsi/all/docker/custom</docker.image.prefix> -->
-    <docker.image.prefix>com.revomatico</docker.image.prefix>
     <experimentalCoroutines>enable</experimentalCoroutines>
     <git.host>github.com</git.host>
     <git.hostGropRep>${git.host}/${git.userOrGroup}/${git.repo}</git.hostGropRep>

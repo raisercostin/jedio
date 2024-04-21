@@ -9,21 +9,39 @@ import java.io.PipedOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.google.common.base.Preconditions;
 import io.netty.handler.logging.LogLevel;
 import io.vavr.Function1;
 import io.vavr.Tuple;
-import io.vavr.collection.Iterator;
+import io.vavr.Tuple2;
+import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -32,6 +50,7 @@ import org.jedio.feature.BooleanFeature;
 import org.jedio.feature.EnumFeature;
 import org.jedio.feature.GenericFeature;
 import org.raisercostin.jedio.ReadableFileLocation;
+import org.raisercostin.jedio.op.OperationOptions.ReadOptions;
 import org.raisercostin.jedio.url.WebClientLocation2.RequestResponse.EnrichedContent;
 import org.raisercostin.jedio.url.impl.ModifiedURI;
 import org.raisercostin.nodes.Nodes;
@@ -301,25 +320,33 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       return getBodyWithMetadata(EnrichedContent.JSON_AUGUMENTED);
     }
 
-    public String getBodyWithMetadata(EnrichedContent enrich) {
-      if (enrich == EnrichedContent.RAW_BODY) {
+    public Tuple2<Supplier<String>, Supplier<String>> getBodyAndMetadata() {
+      return Tuple.of(() -> {
         return responseEntity.getBody();
+      }, () -> {
+        return computeMetadata();
+      });
+    }
+
+    public String getBodyWithMetadata(EnrichedContent enrich) {
+      String body = responseEntity.getBody();
+      if (enrich == EnrichedContent.RAW_BODY) {
+        return body;
       }
       if (enrich == EnrichedContent.LASTMATTER) {
         throw new RuntimeException("Not implemented yet!!! " + EnrichedContent.LASTMATTER);
       }
-      String body = responseEntity.getBody();
       boolean isJson = responseEntity.getHeaders().getContentType().isCompatibleWith(MediaType.APPLICATION_JSON);
       if (isJson && (enrich == EnrichedContent.JSON_AUGUMENTED_OR_RAW || enrich == EnrichedContent.JSON_AUGUMENTED
           || enrich == EnrichedContent.JSON_WRAPPPED)) {
         if (enrich == EnrichedContent.JSON_WRAPPPED) {
-          return "{%s,\n\"content\":%s\n}".formatted(computeMetadata(), body);
+          return "{\"metadata\":%s,\n\"content\":%s\n}".formatted(computeMetadata(), body);
         } else {
           body = body.trim();
           boolean bodyIsAnObjectBetweenCurlyBraces = body.startsWith("{") && body.endsWith("}");
           if (bodyIsAnObjectBetweenCurlyBraces) {
             String bodyWithoutParanthesis = removePrefixSuffix(body.trim(), "{", "}");
-            return "{%s,\n%s\n}".formatted(computeMetadata(), bodyWithoutParanthesis);
+            return "{\"metadata\":%s,\n%s\n}".formatted(computeMetadata(), bodyWithoutParanthesis);
           } else {
             if (enrich == EnrichedContent.JSON_AUGUMENTED_OR_RAW) {
               return body;
@@ -335,39 +362,125 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
           return body;
         } else {
           Preconditions.checkArgument(enrich.allowFrontmatter, "%s doesn't allow frontmatter.", enrich);
-          return "{%s}\n---\n%s".formatted(computeMetadata(), body);
+          return "{\"metadata\":%s}\n---\n%s".formatted(computeMetadata(), body);
         }
       }
     }
 
-    private String computeMetadata() {
-      String responseHeaders = Iterator.ofAll(responseEntity.getHeaders().entrySet())
-        .map(entry -> "\"" + escapeJson(entry.getKey()) + "\": \"" + escapeJson(String.join(",", entry.getValue()))
-            + "\"")
-        .mkString("", ",\n    ", "");
-      String requestHeaders = Iterator.ofAll(requestHeaders().entrySet())
-        .map(entry -> "\"" + escapeJson(entry.getKey()) + "\": \"" + escapeJson(String.join(",", entry.getValue()))
-            + "\"")
-        .mkString("", ",\n    ", "");
-      String metadata = """
-          "metadata": {
-            "URL": "%s",
-            "Method": "%s",
-            "StatusCode": "%s",
-            "StatusCodeValue": %s,
-            "ResponseHeaders": {
-              %s
-            },
-            "RequestHeaders": {
-              %s
+    static final class HeaderMapSerializer extends StdSerializer<HttpHeaders> {
+      protected HeaderMapSerializer() {
+        super((Class<HttpHeaders>) null);
+      }
+
+      @Override
+      public void serialize(HttpHeaders value, JsonGenerator gen, SerializerProvider provider)
+          throws IOException {
+        gen.writeStartObject();
+        for (Entry<String, List<String>> entry : value.entrySet()) {
+          if (entry.getValue().size() == 1) {
+            gen.writeStringField(entry.getKey(), entry.getValue().get(0));
+          } else {
+            gen.writeArrayFieldStart(entry.getKey());
+            for (String item : entry.getValue()) {
+              gen.writeString(item);
             }
-          }""".formatted(
-        escapeJson(clientLocation.url.toExternalForm()),
-        escapeJson(clientLocation.httpMethod.toString()),
-        escapeJson(responseEntity.getStatusCode().toString()),
+            gen.writeEndArray();
+          }
+        }
+        gen.writeEndObject();
+      }
+    }
+
+    // Custom deserializer
+    static final class HeaderMapDeserializer extends StdDeserializer<HttpHeaders> {
+      protected HeaderMapDeserializer() {
+        super((Class<?>) null);
+      }
+
+      @Override
+      public HttpHeaders deserialize(JsonParser p, DeserializationContext ctxt)
+          throws IOException, JsonProcessingException {
+        HttpHeaders result = new HttpHeaders();
+        p.nextToken(); // Skip start object
+        while (p.nextToken() != JsonToken.END_OBJECT) {
+          String fieldName = p.getCurrentName();
+          p.nextToken();
+          if (p.currentToken() == JsonToken.START_ARRAY) {
+            List<String> values = new ArrayList<>();
+            while (p.nextToken() != JsonToken.END_ARRAY) {
+              values.add(p.getText());
+            }
+            result.put(fieldName, values);
+          } else {
+            result.put(fieldName, List.of(p.getText()));
+          }
+        }
+        return result;
+      }
+    }
+    //
+    //    @JsonSerialize(using = HeaderMapSerializer.class)
+    //    @JsonDeserialize(using = HeaderMapDeserializer.class)
+    //    public class HeaderMap {
+    //      //private Map<String, List<String>> headers = new HashMap<>();
+    //      public final Set<Entry<String, List<String>>> headers;
+    //
+    //      public HeaderMap(Set<Entry<String, List<String>>> headers) {
+    //        this.headers = headers;
+    //      }
+    //    }
+
+    @AllArgsConstructor
+    public static class Metadata {
+      public String url;
+      public String method;
+      public String statusCode;
+      public int statusCodeValue;
+      @JsonSerialize(using = HeaderMapSerializer.class)
+      @JsonDeserialize(using = HeaderMapDeserializer.class)
+      public HttpHeaders responseHeaders;
+      @JsonSerialize(using = HeaderMapSerializer.class)
+      @JsonDeserialize(using = HeaderMapDeserializer.class)
+      public HttpHeaders requestHeaders;
+    }
+
+    public String computeMetadata() {
+      return Nodes.json.toString(getMetadata());
+    }
+
+    public Metadata getMetadata() {
+      //      String responseHeaders = Iterator.ofAll(responseEntity.getHeaders().entrySet())
+      //        .map(entry -> "\"" + escapeJson(entry.getKey()) + "\": \"" + escapeJson(String.join(",", entry.getValue()))
+      //            + "\"")
+      //        .mkString("", ",\n    ", "");
+      //      String requestHeaders = Iterator.ofAll(requestHeaders().entrySet())
+      //        .map(entry -> "\"" + escapeJson(entry.getKey()) + "\": \"" + escapeJson(String.join(",", entry.getValue()))
+      //            + "\"")
+      //        .mkString("", ",\n    ", "");
+      //      String metadata = """
+      //          "metadata": {
+      //            "URL": "%s",
+      //            "Method": "%s",
+      //            "StatusCode": "%s",
+      //            "StatusCodeValue": %s,
+      //            "ResponseHeaders": {
+      //              %s
+      //            },
+      //            "RequestHeaders": {
+      //              %s
+      //            }
+      //          }""".formatted(
+      //        escapeJson(clientLocation.url.toExternalForm()),
+      //        escapeJson(clientLocation.httpMethod.toString()),
+      //        escapeJson(responseEntity.getStatusCode().toString()),
+      //        responseEntity.getStatusCodeValue(),
+      //        responseHeaders, requestHeaders);
+      return new Metadata(
+        clientLocation.url.toExternalForm(),
+        clientLocation.httpMethod.toString(),
+        responseEntity.getStatusCode().toString(),
         responseEntity.getStatusCodeValue(),
-        responseHeaders, requestHeaders);
-      return metadata;
+        responseEntity.getHeaders(), requestHeaders());
     }
 
     private HttpMethod requestMethod() {
@@ -455,26 +568,26 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
   }
 
   @Override
-  public String readContentSync(Charset charset) {
-    Mono<String> mono = readContentAsync();
+  public String readContentSync(ReadOptions options) {
+    Mono<String> mono = readContentAsync(options);
     return client.block(mono);
+  }
+
+  @Override
+  public Mono<String> readContentAsync(ReadOptions options) {
+    return readAsync(options).map(x -> x.getBodyWithMetadata(enrich));
   }
 
   public RequestHeadersSpec<?> request() {
     return request;
   }
 
-  public RequestResponse readCompleteContentSync() {
-    Mono<RequestResponse> mono = readAsync();
+  public RequestResponse readCompleteContentSync(ReadOptions options) {
+    Mono<RequestResponse> mono = readAsync(options);
     return client.block(mono);
   }
 
-  @Override
-  public Mono<String> readContentAsync() {
-    return readAsync().map(x -> x.getBodyWithMetadata(enrich));
-  }
-
-  public Mono<RequestResponse> readAsync() {
+  public Mono<RequestResponse> readAsync(ReadOptions options) {
     if (client.retryOnAnyError.isEnabled()) {
       return readContentAsyncWithRetry();
     }
@@ -531,22 +644,24 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
 
     public Duration existsTimeout = Duration.ofSeconds(30);
     public Duration readContentSyncTimeout = Duration.ofSeconds(90);
-    public static final EnumFeature<AdvancedByteBufFormat> webclientWireTapType = new EnumFeature<>(
+    public final EnumFeature<AdvancedByteBufFormat> webclientWireTapType = new EnumFeature<>(
       "webclientWireTapType2", "One of the values SIMPLE, TEXTUAL, HEX_DUMP", AdvancedByteBufFormat.SIMPLE,
       "feature.webclient.wireTap.type",
       true, false);
-    public static final BooleanFeature webclientWireTap = GenericFeature.booleanFeature(
+    public final BooleanFeature webclientWireTap = GenericFeature.booleanFeature(
       "webclientWireTap2", "", false, "feature.webclient.wireTap", true);
-    public static final GenericFeature<Integer> webclientMaxConnections = GenericFeature.create(
+    public final GenericFeature<Integer> webclientMaxConnections = GenericFeature.create(
       "webclientMaxConnections2", "", 500, "feature.webclient.maxConnections", true);
-    public static final BooleanFeature retryOnAnyError = GenericFeature.booleanFeature(
+    public final BooleanFeature retryOnAnyError = GenericFeature.booleanFeature(
       "webclientRetryOnAnyError2", "", false, "feature.webclient.retryOnAnyError", true);
+    public BooleanFeature webclientMicrometerMetrics = GenericFeature.booleanFeature(
+      "webclientMicrometerMetrics", "", false, "feature.webclient.micrometerMetrics", true);
 
     public WebClientFactory() {
-      this.builder = createWebClient(null, webclientMaxConnections);
+      this.builder = createWebClient(null);
       this.client = builder.build();
-      this.clientWithTapSimple = createWebClient(AdvancedByteBufFormat.SIMPLE, webclientMaxConnections).build();
-      this.clientWithTapDump = createWebClient(AdvancedByteBufFormat.HEX_DUMP, webclientMaxConnections).build();
+      this.clientWithTapSimple = createWebClient(AdvancedByteBufFormat.SIMPLE).build();
+      this.clientWithTapDump = createWebClient(AdvancedByteBufFormat.HEX_DUMP).build();
     }
 
     public WebClientLocation2 get(ModifiedURI uri) {
@@ -642,11 +757,10 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
           : client;
     }
 
-    public static Builder createWebClient(AdvancedByteBufFormat format,
-        GenericFeature<Integer> webclientMaxConnections) {
+    public Builder createWebClient(AdvancedByteBufFormat format) {
       ConnectionProvider provider = ConnectionProvider
-        .builder("revobet-webclient")
-        .metrics(true)
+        .builder("namek-webclient")
+        .metrics(webclientMicrometerMetrics.value())
         .maxConnections(webclientMaxConnections.value())
         //.pendingAcquireMaxCount(10)
         .build();
@@ -669,7 +783,7 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       //.wiretap("reactor.netty.http.client.HttpClient",
       //  LogLevel.DEBUG, AdvancedByteBufFormat.TEXTUAL);
 
-      //see RevobetFeatureService.debugLogNettyClient
+      //see NamekFeatureService.debugLogNettyClient
       //      ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("reactor.netty.http.client"))
       //        .setLevel(Level.DEBUG);
 
@@ -737,7 +851,14 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
     @Deprecated
     public <T> T block(Mono<T> mono) {
       return mono.publishOn(blockingScheduler)
+        //        .doOnSubscribe(sub -> System.out.println("Subscribed"))
+        //        .doOnSuccess(item -> System.out.println("Received item: " + item))
+        //        .retryWhen(Retry.backoff(3, Duration.ofSeconds(1))
+        //          .doBeforeRetry(retrySignal -> System.out.println("Retrying due to error: " + retrySignal.failure())))
+        //        .doOnError(error -> System.out.println("Error in mono pipeline: " + error))
         .block(readContentSyncTimeout);
+      //      return mono.publishOn(blockingScheduler)
+      //        .block(readContentSyncTimeout);
     }
   }
 }

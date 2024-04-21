@@ -13,6 +13,7 @@ import lombok.ToString;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.raisercostin.jedio.ReadableFileLocation;
 import org.raisercostin.jedio.impl.ReadableFileLocationLike;
+import org.raisercostin.jedio.op.OperationOptions.ReadOptions;
 import reactor.core.publisher.Mono;
 
 @Data
@@ -65,17 +66,17 @@ public class MemoizedLocation implements ReadableFileLocation, ReadableFileLocat
   }
 
   @Override
-  public String readContentSync(Charset charset) {
+  public String readContentSync(ReadOptions options) {
     if (this.content == null) {
-      this.content = this.location.readContentSync(charset);
+      this.content = this.location.readContentSync(options);
     }
     return this.content;
   }
 
   @Override
-  public Mono<String> readContentAsync(Charset charset) {
+  public Mono<String> readContentAsync(ReadOptions options) {
     if (this.content == null) {
-      return this.location.readContentAsync(charset).map(x -> this.content = x);
+      return this.location.readContentAsync(options).map(x -> this.content = x);
     } else {
       return Mono.just(this.content);
     }

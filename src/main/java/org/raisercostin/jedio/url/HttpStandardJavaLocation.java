@@ -13,6 +13,7 @@ import lombok.SneakyThrows;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jedio.deprecated;
 import org.raisercostin.jedio.ReadableFileLocation;
+import org.raisercostin.jedio.op.OperationOptions.ReadOptions;
 import org.raisercostin.jedio.url.impl.ModifiedURI;
 
 @Deprecated
@@ -54,7 +55,7 @@ public class HttpStandardJavaLocation extends BaseHttpLocationLike<@NonNull Http
   }
 
   @Override
-  public String readContentSync(Charset charset) {
+  public String readContentSync(ReadOptions optionst) {
     return HttpUtils.getFromURL(this.url.toExternalForm());
   }
 

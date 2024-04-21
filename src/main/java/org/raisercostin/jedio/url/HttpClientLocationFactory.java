@@ -34,7 +34,7 @@ public interface HttpClientLocationFactory {
   public static class HighPerfHttpClientFactory implements HttpClientLocationFactory {
     JedioHttpClient client = JedioHttpConfig
       .create()
-      .withName("revobet1")
+      .withName("namek1")
       .withThreads(50)//300
       .withMaxTotal(100)//1000
       .withMaxPerRoute(100)//1000

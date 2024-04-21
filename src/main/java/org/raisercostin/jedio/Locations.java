@@ -2,6 +2,7 @@ package org.raisercostin.jedio;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.regex.Matcher;
@@ -278,5 +279,63 @@ public class Locations {
   @SneakyThrows
   public static Location url(ClassPathResource classPathResource) {
     return location(classPathResource.getURL());
+  }
+
+  @sugar
+  public static PathLocation dir(String path) {
+    return PathLocation.dir(path);
+  }
+
+  @sugar
+  public static PathLocation dir(File path) {
+    return PathLocation.dir(path);
+  }
+
+  public static PathLocation dir(Path path) {
+    return PathLocation.dir(path);
+  }
+
+  @sugar
+  public static PathLocation existingDir(Path path) {
+    return PathLocation.existingDir(path);
+  }
+
+  @sugar
+  public static PathLocation existingDir(String path) {
+    return PathLocation.existingDir(path);
+  }
+
+  public static ReadableFileLocation existingFile(Path path) {
+    return ReadableFileLocation.existingFile(path);
+  }
+
+  @sugar
+  public static ReadableFileLocation existingFile(File path) {
+    return ReadableFileLocation.existingFile(path);
+  }
+
+  @sugar
+  public static ReadableFileLocation existingFile(String path) {
+    return ReadableFileLocation.existingFile(path);
+  }
+
+  @sugar
+  public static ReadableFileLocation readableFile(String path) {
+    return ReadableFileLocation.readableFile(path);
+  }
+
+  @sugar
+  public static WebClientLocation url(String sourceHyperlink, String relativeOrAbsoluteHyperlink) {
+    return WebClientLocation.url(sourceHyperlink, relativeOrAbsoluteHyperlink);
+  }
+
+  @sugar
+  public static WebClientLocation url(SimpleUrl url) {
+    return WebClientLocation.url(url);
+  }
+
+  @sugar
+  public static WebClientLocation url(URI uri) {
+    return WebClientLocation.url(uri);
   }
 }

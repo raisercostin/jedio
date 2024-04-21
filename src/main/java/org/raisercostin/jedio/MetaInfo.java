@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jedio.NodeUtils;
+import org.raisercostin.jedio.op.OperationOptions.ReadOptions;
 import org.raisercostin.nodes.Nodes;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE, force = true)
@@ -78,7 +79,7 @@ public class MetaInfo {
 
     @SneakyThrows
     public String readContent() {
-      return readContent(ReadableFileLocation.charset1_UTF8);
+      return readContent(ReadOptions.utf8);
     }
 
     @SneakyThrows

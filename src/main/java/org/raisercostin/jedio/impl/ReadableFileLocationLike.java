@@ -95,4 +95,10 @@ public interface ReadableFileLocationLike<SELF extends ReadableFileLocationLike<
     destination.copyFrom(this, options);
     return this;
   }
+
+  @Override
+  @sugar
+  default WritableFileLocation copyToFileAndReturnIt(WritableFileLocation destination, CopyOptions options) {
+    return destination.copyFrom(this, options);
+  }
 }

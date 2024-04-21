@@ -1,11 +1,11 @@
 package org.raisercostin.jedio;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
 import io.vavr.control.Option;
@@ -17,11 +17,32 @@ import org.jedio.functions.JedioProcedure;
 import org.jedio.sugar;
 import org.raisercostin.jedio.MetaInfo.StreamAndMeta;
 import org.raisercostin.jedio.op.CopyOptions;
+import org.raisercostin.jedio.op.OperationOptions.ReadOptions;
 import org.raisercostin.jedio.path.PathLocation;
 import reactor.core.publisher.Mono;
 
 public interface ReadableFileLocation extends BasicFileLocation {
   org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ReadableFileLocation.class);
+
+  ReadOptions defaultRead = new ReadOptions();
+
+  static ReadableFileLocation existingFile(Path path) {
+    return PathLocation.path(path).asReadableFile();
+  }
+
+  @sugar
+  static ReadableFileLocation existingFile(File path) {
+    return PathLocation.path(path).asReadableFile();
+  }
+
+  @sugar
+  static ReadableFileLocation existingFile(String path) {
+    return PathLocation.path(path).asReadableFile();
+  }
+
+  static ReadableFileLocation readableFile(String path) {
+    return existingFile(path).asReadableFile();
+  }
 
   @Override
   default ReadableFileLocation asReadableFile() {
@@ -42,32 +63,6 @@ public interface ReadableFileLocation extends BasicFileLocation {
 
   StreamAndMeta unsafeInputStreamAndMeta();
 
-  /**
-   * Reading async. Uses both internal connection pool and internal thread pool.
-   */
-  // @deprecated(use = "no suggestion. not implemented yet.", message = "if the content is too big String might be a bad
-  // container")
-  // TOOD should implement a readContentAsync with a input stream
-  default Mono<String> readContentAsync(Charset charset) {
-    return Mono.fromSupplier(() -> readContentSync(charset));
-  }
-
-  default CompletableFuture<String> readContentAsyncCompletableFuture(Charset charset) {
-    return readContentAsync(charset).toFuture();
-    // CompletableFuture.
-  }
-
-  /**
-   * Forces reading synchronously on current thread.
-   */
-  default String readContentSync(Charset charset) {
-    try (BufferedInputStream b = new BufferedInputStream(unsafeInputStream())) {
-      return IOUtils.toString(b, charset);
-    } catch (IOException e) {
-      throw new RuntimeException("Can't read resource [" + this + "]", e);
-    }
-  }
-
   String readMetaContent();
 
   MetaInfo readMeta();
@@ -77,49 +72,88 @@ public interface ReadableFileLocation extends BasicFileLocation {
     return copyToFile(destination, CopyOptions.copyDefault());
   }
 
+  @sugar
+  default WritableFileLocation copyToFileAndReturnIt(WritableFileLocation destination) {
+    return copyToFileAndReturnIt(destination, CopyOptions.copyDefault());
+  }
+
   ReadableFileLocation copyToFile(WritableFileLocation destination, CopyOptions options);
 
-  Charset charset1_UTF8 = StandardCharsets.UTF_8;
-  Charset charset2_ISO_8859_1 = StandardCharsets.ISO_8859_1;
+  WritableFileLocation copyToFileAndReturnIt(WritableFileLocation destination, CopyOptions options);
 
   @sugar("readContentAsync with UTF8 charset")
   default Mono<String> readContentAsync() {
-    return readContentAsync(charset1_UTF8);
+    return readContentAsync(defaultRead);
   }
 
   @sugar("readContentSync with UTF8 charset")
   default String readContentSync() {
-    return readContentSync(charset1_UTF8);
+    return readContentSync(defaultRead);
+  }
+
+  @sugar("readContentSync with UTF8 charset")
+  default String readContent() {
+    return readContentSync();
+  }
+
+  @sugar("readContentSync")
+  default String readContent(ReadOptions options) {
+    return readContentSync(options);
+  }
+
+  @sugar("readContentSync")
+  default String readContent(Charset charset) {
+    return readContentSync(defaultRead.withDefaultCharset(charset));
+  }
+
+  /**
+   * Reading async. Uses both internal connection pool and internal thread pool.
+   */
+  // @deprecated(use = "no suggestion. not implemented yet.", message = "if the content is too big String might be a bad
+  // container")
+  // TOOD should implement a readContentAsync with a input stream
+  default Mono<String> readContentAsync(ReadOptions options) {
+    return Mono.fromSupplier(() -> readContentSync(options));
+  }
+
+  default CompletableFuture<String> readContentAsyncCompletableFuture(ReadOptions options) {
+    return readContentAsync(options).toFuture();
+    // CompletableFuture.
   }
 
   @sugar("readContent with UTF8 charset")
-  @deprecated("Use readConentAsync if possible.")
-  @Deprecated
-  default String readContent() {
+  default String readContentSync(ReadOptions options) {
+    System.out.println("here");
     try {
-      return readContent(charset1_UTF8);
+      return readContentSync(options, options.defaultCharset);
     } catch (Exception e) {
       try {
-        return readContent(charset2_ISO_8859_1);
+        return readContentSync(options, options.fallbackCharset);
       } catch (Exception e2) {
-        e2.addSuppressed(e);
+        log.debug("Couldn't read fallback as well", e2);
         log.debug("Other charsets: {}", Charset.availableCharsets().keySet());
-        throw RichThrowable.wrap(e2,
-          e.getMessage() + " - Error while reading %s with charsets %s and %s. Enable debug to see available charsets.",
-          this,
-          charset1_UTF8, charset2_ISO_8859_1);
+        throw RichThrowable.wrap(e,
+          "Couldn't read %s charset %s and %s.", this.absoluteAndNormalized(), options.defaultCharset,
+          options.fallbackCharset);
+        //        throw RichThrowable.wrap(e,
+        //          e.getMessage() + " - Error while reading %s with charsets %s and %s. Enable debug to see available charsets.",
+        //          this,
+        //          options.defaultCharset, options.fallbackCharset);
       }
     }
   }
 
   /**
-   * Reading async if possible and block on current thread. This will force the clients that use async consumers to use
-   * the readContentAsync. Reading should happen in 30s. If more control is needed please use readContentAsync().
+   * Forces reading synchronously on current thread.
    */
-  @sugar("readContentAsync() and ulterior handling should be used.")
-  default String readContent(Charset charset) {
-    return readContentAsync().block(Duration.ofSeconds(30));
+  default String readContentSync(ReadOptions options, Charset charset) {
+    try (BufferedInputStream b = new BufferedInputStream(unsafeInputStream())) {
+      return IOUtils.toString(b, charset);
+    } catch (IOException e) {
+      throw new RuntimeException("Can't read resource [" + this + "]", e);
+    }
   }
+  //return readContentAsync(defaultRead.withDefaultCharset(charset)).block(defaultRead.blockingReadDuration);
 
   default PathLocation toPathLocationCopyIfNotPossible() {
     if (this instanceof PathLocation) {

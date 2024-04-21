@@ -68,6 +68,7 @@ import org.raisercostin.jedio.op.CopyEvent;
 import org.raisercostin.jedio.op.CopyOptions;
 import org.raisercostin.jedio.op.DeleteOptions;
 import org.raisercostin.jedio.op.OperationContext;
+import org.raisercostin.jedio.op.OperationOptions.ReadOptions;
 import org.raisercostin.jedio.zip.ZipLocation;
 import org.raisercostin.nodes.Nodes;
 import org.raisercostin.nodes.impl.JsonNodes;
@@ -93,6 +94,31 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   @SneakyThrows
   public static PathLocation path(ClassPathResource classPathResource) {
     return path(classPathResource.getFile());
+  }
+
+  @sugar
+  public static PathLocation dir(String path) {
+    return path(path);
+  }
+
+  @sugar
+  public static PathLocation dir(File path) {
+    return path(path);
+  }
+
+  public static PathLocation dir(Path path) {
+    // check if absolute?
+    return new PathLocation(path);
+  }
+
+  @sugar
+  public static PathLocation existingDir(Path path) {
+    return dir(path).mkdirIfNeeded().asDir();
+  }
+
+  @sugar
+  public static PathLocation existingDir(String path) {
+    return dir(path).mkdirIfNeeded().asDir();
   }
 
   private static final String WINDOWS_ABSOLUTE_FILE_PATTERN = "^file:([A-Za-z]):\\\\";
@@ -446,27 +472,54 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   public ReadableFileLocationLike<?> asReadableFile() {
     return this;
   }
+  //
+  //  @Override
+  //  public String readContentSync(ReadOptions options) {
+  //    try {
+  //      String content = Files.readString(toPath(), options.defaultCharset);
+  //      return content;
+  //    } catch (IOException e) {
+  //      try {
+  //        return readContentSyncUsingCommonsIo(options.fallbackCharset);
+  //      } catch (Throwable e2) {
+  //        //e.addSuppressed(e2);
+  //        log.debug("Couldn't read fallback as well", e2);
+  //        log.debug("Other charsets: {}", Charset.availableCharsets().keySet());
+  //        throw RichThrowable.wrap(e,
+  //          "Couldn't read %s charset %s and %s.", this.absoluteAndNormalized(), options.defaultCharset,
+  //          options.fallbackCharset);
+  //      }
+  //    }
+  //  }
 
+  public static class PathReadOptions extends ReadOptions {
+    public ByteOrderMark[] boms = {
+        ByteOrderMark.UTF_8,
+        ByteOrderMark.UTF_16LE,
+        ByteOrderMark.UTF_16BE,
+        ByteOrderMark.UTF_32LE,
+        ByteOrderMark.UTF_32BE };
+    public boolean readUsingCommonsIoBOMInputStream = false;
+  }
+
+  /**
+   * Forces reading synchronously on current thread.
+   */
   @Override
-  public String readContentSync(Charset charset) {
+  public String readContentSync(ReadOptions options, Charset charset) {
     try {
-      String content = Files.readString(toPath(), charset);
-      return content;
-    } catch (IOException e) {
-      try {
-        return readContentSyncUsingCommonsIo(charset);
-      } catch (Throwable e2) {
-        e.addSuppressed(e2);
-        log.debug("Other charsets: {}", Charset.availableCharsets().keySet());
-        throw RichThrowable.wrap(e2,
-          "While reading %s with charset %s. Others could exist. Enable debug to see them.", this, charset);
+      if (options instanceof PathReadOptions p) {
+        return readContentSyncUsingCommonsIo(p, charset);
       }
+      return Files.readString(toPath(), charset);
+    } catch (IOException e) {
+      throw org.jedio.RichThrowable.nowrap(e);
     }
   }
 
   //it seems both methods have a 0.300-0.800 s for a file of 100MB
-  public String readContentSyncUsingCommonsIo(Charset charset) {
-    try (BufferedReader b = reader(toPath(), charset)) {
+  public String readContentSyncUsingCommonsIo(PathReadOptions options, Charset charset) {
+    try (BufferedReader b = reader(options, toPath(), charset)) {
       return IOUtils.toString(b);
     } catch (IOException e) {
       log.debug("Other charsets: {}", Charset.availableCharsets().keySet());
@@ -476,10 +529,9 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @SneakyThrows
-  private BufferedReader reader(Path path, Charset charset) {
+  private BufferedReader reader(PathReadOptions options, Path path, Charset charset) {
     CharsetDecoder decoder = charset.newDecoder();
-    Reader reader = new InputStreamReader(new BOMInputStream(Files.newInputStream(path), ByteOrderMark.UTF_8,
-      ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE), decoder);
+    Reader reader = new InputStreamReader(new BOMInputStream(Files.newInputStream(path), options.boms), decoder);
     return new BufferedReader(reader);
   }
 
@@ -1030,6 +1082,7 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   @Override
   public PathLocation asDir() {
+    Preconditions.checkArgument(isDir(), "%s should be a dir.", this);
     return this;
   }
 

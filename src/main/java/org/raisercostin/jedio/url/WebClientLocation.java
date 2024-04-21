@@ -6,21 +6,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Collections;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.netty.handler.logging.LogLevel;
 import io.vavr.Function1;
 import io.vavr.Tuple;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jedio.sugar;
 import org.jedio.feature.BooleanFeature;
+import org.jedio.feature.EnumFeature;
 import org.jedio.feature.GenericFeature;
 import org.raisercostin.jedio.ReadableFileLocation;
+import org.raisercostin.jedio.op.OperationOptions.ReadOptions;
 import org.raisercostin.jedio.url.impl.ModifiedURI;
 import org.raisercostin.nodes.Nodes;
 import org.springframework.core.NestedExceptionUtils;
@@ -32,7 +36,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
@@ -43,13 +49,30 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
+import reactor.netty.http.HttpProtocol;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
+import reactor.netty.transport.logging.AdvancedByteBufFormat;
 import reactor.util.retry.RetryBackoffSpec;
 
 public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLocation>
     implements ReadableFileLocation {
   public static final WebClientFactory defaultClient = new WebClientFactory();
+
+  @sugar
+  public static WebClientLocation url(String sourceHyperlink, String relativeOrAbsoluteHyperlink) {
+    return httpGet(SimpleUrl.resolve(sourceHyperlink, relativeOrAbsoluteHyperlink).toExternalForm());
+  }
+
+  @sugar
+  public static WebClientLocation url(SimpleUrl url) {
+    return httpGet(url.toExternalForm());
+  }
+
+  @sugar
+  public static WebClientLocation url(URI uri) {
+    return httpGet(uri.toString());
+  }
 
   public static WebClientLocation post(String url, MediaType applicationJson, Object bodyValue) {
     return defaultClient.post(url, applicationJson, bodyValue);
@@ -230,28 +253,40 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
   }
 
   @Override
-  public String readContentSync(Charset charset) {
-    return readContentAsync().block(client.readContentSyncTimeout);
+  public String readContentSync(ReadOptions options) {
+    if (!options.blockingReadDuration.equals(client.readContentSyncTimeout)) {
+      log.info("While reading {} readoptions {} is ignored and client config {} is used.", this.toExternalForm(),
+        options.blockingReadDuration, client.readContentSyncTimeout);
+    }
+    return readContentAsync(options).block(client.readContentSyncTimeout);
   }
 
   public static class WebClientFactory implements HttpClientLocationFactory {
     private WebClient client;
-    private WebClient clientWithTap;
+    private WebClient clientWithTapSimple;
+    private WebClient clientWithTapDump;
     public Builder builder;
     public Scheduler scheduler = Schedulers.boundedElastic();
     public Duration existsTimeout = Duration.ofSeconds(30);
     public Duration readContentSyncTimeout = Duration.ofSeconds(30);
-    public BooleanFeature webclientWireTap = GenericFeature.booleanFeature(
+    public final EnumFeature<AdvancedByteBufFormat> webclientWireTapType = new EnumFeature<>(
+      "webclientWireTapType2", "One of the values SIMPLE, TEXTUAL, HEX_DUMP", AdvancedByteBufFormat.SIMPLE,
+      "feature.webclient.wireTap.type",
+      true, false);
+    public final BooleanFeature webclientWireTap = GenericFeature.booleanFeature(
       "webclientWireTap", "", false, "feature.webclient.wireTap", true);
-    public GenericFeature<Integer> webclientMaxConnections = GenericFeature.create(
+    public final GenericFeature<Integer> webclientMaxConnections = GenericFeature.create(
       "webclientMaxConnections", "", 500, "feature.webclient.maxConnections", true);
-    public BooleanFeature retryOnAnyError = GenericFeature.booleanFeature(
+    public final BooleanFeature retryOnAnyError = GenericFeature.booleanFeature(
       "webclientRetryOnAnyError", "", false, "feature.webclient.retryOnAnyError", true);
+    public final BooleanFeature webclientMicrometerMetrics = GenericFeature.booleanFeature(
+      "webclientMicrometerMetrics", "", false, "feature.webclient.micrometerMetrics", true);
 
     public WebClientFactory() {
-      this.builder = createWebClient(false, webclientMaxConnections);
+      this.builder = createWebClient(null);
       this.client = builder.build();
-      this.clientWithTap = createWebClient(true, webclientMaxConnections).build();
+      this.clientWithTapSimple = createWebClient(AdvancedByteBufFormat.SIMPLE).build();
+      this.clientWithTapDump = createWebClient(AdvancedByteBufFormat.HEX_DUMP).build();
     }
 
     public WebClientLocation get(ModifiedURI uri) {
@@ -290,13 +325,15 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
     }
 
     public final WebClient currentClient() {
-      return webclientWireTap.isEnabled() ? clientWithTap : client;
+      return webclientWireTap.isEnabled()
+          ? (webclientWireTapType.value() == AdvancedByteBufFormat.SIMPLE ? clientWithTapSimple : clientWithTapDump)
+          : client;
     }
 
-    public static Builder createWebClient(boolean withTap, GenericFeature<Integer> webclientMaxConnections) {
+    public Builder createWebClient(AdvancedByteBufFormat format) {
       ConnectionProvider provider = ConnectionProvider
-        .builder("revobet-webclient")
-        .metrics(true)
+        .builder("namek-webclient")
+        .metrics(webclientMicrometerMetrics.value())
         .maxConnections(webclientMaxConnections.value())
         //.pendingAcquireMaxCount(10)
         .build();
@@ -304,19 +341,28 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
       //logging - https://www.baeldung.com/spring-log-webclient-calls
       HttpClient httpClient = HttpClient
         .create(provider)
+        .protocol(HttpProtocol.H2, HttpProtocol.HTTP11)
         //.responseTimeout(Duration.ofSeconds(10))
         .compress(true)
-        .wiretap(withTap)
-      //      .tcpConfiguration(tcpClient -> tcpClient
+      //.wiretap("jedio.http", LogLevel.INFO, AdvancedByteBufFormat.TEXTUAL)
+      //.attr(null, null)
+      //.tcpConfiguration(tcpClient -> tcpClient
       //        .bootstrap(b -> BootstrapHandlers.updateLogSupport(b,
       //          new LoggingHandler(HttpClient.class, LogLevel.INFO, ByteBufFormat.SIMPLE))))
       ;
+      if (format != null) {
+        httpClient = httpClient.wiretap("jedio.http", LogLevel.INFO, format);
+      }
       //.wiretap("reactor.netty.http.client.HttpClient",
       //  LogLevel.DEBUG, AdvancedByteBufFormat.TEXTUAL);
 
-      //see RevobetFeatureService.debugLogNettyClient
+      //see NamekFeatureService.debugLogNettyClient
       //      ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger("reactor.netty.http.client"))
       //        .setLevel(Level.DEBUG);
+
+      //      DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+      //      factory.setDefaultUriVariables(Collections.singletonMap("url", "http://localhost:8080"));
+      //      factory.setEncodingMode(EncodingMode.URI_COMPONENT);
 
       Builder client = WebClient.builder()
         .exchangeStrategies(ExchangeStrategies.builder()
@@ -328,13 +374,50 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
               .defaultCodecs()
               .jackson2JsonEncoder(new Jackson2JsonEncoder(Nodes.json.mapper, MediaType.APPLICATION_JSON));
           })
+
           .build())
+        .filter(encodePlusSignFilter())
         .clientConnector(new ReactorClientHttpConnector(httpClient))
         //.baseUrl(url)
-        .defaultCookie("cookieKey", "cookieValue")
+        //.defaultCookie("cookieKey", "cookieValue")
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        .defaultUriVariables(Collections.singletonMap("url", "http://localhost:8080"));
+        .defaultHeader(HttpHeaders.USER_AGENT, "curl/8.2.1")
+        //> GET /json/program/liveEvents?oneSectionResult=true HTTP/2
+        //> Host: sports.tipico.com
+        //> User-Agent: curl/8.2.1
+        //> Accept: */*
+        .defaultUriVariables(Collections.singletonMap("url", "http://localhost:8080"))
+      //        .uriBuilderFactory(factory)
+      //        .filter(ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
+      //          // Log Headers
+      //          HttpHeaders headers = clientRequest.headers();
+      //          HttpMethod method = clientRequest.method();
+      //          System.out.println("Request Headers: " + headers);
+      //
+      //          // Continue processing
+      //          return Mono.just(clientRequest);
+      //        }))
+      //
+      ;
       return client;
+    }
+
+    /** Web Client is not encoding the '+' sign, so in an already constructed URL, this must be manually encoded.
+     *  Another way would be to pass the query parameters name and values, but this would require some changes in the implementation of WebClientLocation2 and in it's usages.
+     *  See <a>https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/util/UriBuilder.html#queryParam(java.lang.String,java.lang.Object...)</a>*/
+    private static ExchangeFilterFunction encodePlusSignFilter() {
+      return (request, next) -> {
+        String encodedUrl = request.url().toString().replace("+", "%2B");
+        URI modifiedUri;
+        try {
+          modifiedUri = new URI(encodedUrl);
+        } catch (URISyntaxException e) {
+          throw new RuntimeException("Failed to create modified URI.", e);
+        }
+        return next.exchange(ClientRequest.from(request)
+          .url(modifiedUri)
+          .build());
+      };
     }
   }
 }

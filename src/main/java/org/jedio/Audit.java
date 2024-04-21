@@ -319,7 +319,7 @@ public class Audit {
     if (format.equals("Content could not be parsed to %s . Content saved in %s")) {
       return true;
     }
-    if (throwable.getMessage() != null && throwable.getMessage().startsWith("revobet-knwon> ")) {
+    if (throwable.getMessage() != null && throwable.getMessage().startsWith("namek-knwon> ")) {
       return true;
     }
     if (throwable.getCause() != null && throwable.getCause().getMessage() != null

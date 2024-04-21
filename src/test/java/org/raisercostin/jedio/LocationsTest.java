@@ -170,19 +170,19 @@ class LocationsTest {
 
   @Test
   void locationsFromUrl2() {
-    Location loc = Locations.location("file:/C:\\Users\\raiser/.revobet/lsports-cache");
+    Location loc = Locations.location("file:/C:\\Users\\raiser/.namek/lsports-cache");
     assertThat(loc).isNotNull();
   }
 
   @Test
   void locationsBug1OnLinuxCannotParseIt() {
-    Location loc = Locations.location("file://localhost//root/.revobet/lsports-cache");
+    Location loc = Locations.location("file://localhost//root/.namek/lsports-cache");
     assertThat(loc).isNotNull();
   }
 
   @Test
   void locationsBug2OnLinuxCannotParseIt() {
-    Location loc = Locations.location("file:////root/.revobet/lsports-cache");
+    Location loc = Locations.location("file:////root/.namek/lsports-cache");
     assertThat(loc).isNotNull();
   }
 
