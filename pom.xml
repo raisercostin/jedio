@@ -71,7 +71,7 @@
     <issues.url>${git.url}/issues</issues.url>
     <jackson-bom.version>2.15.3</jackson-bom.version>
     <jackson.version>2.12.5</jackson.version>
-    <lombok.version>1.18.30</lombok.version>
+    <lombok.version>1.18.32</lombok.version>
     <m2e.apt.activation>jdt_apt</m2e.apt.activation>
     <mainClass>None</mainClass>
     <maven.build.timestamp.format>yyyyMMdd'T'HHmmss</maven.build.timestamp.format>
@@ -167,7 +167,7 @@
     <dependency>
       <groupId>org.raisercostin</groupId>
       <artifactId>jedi-nodes-java</artifactId>
-      <version>0.27</version>
+      <version>0.32</version>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
