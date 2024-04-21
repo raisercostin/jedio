@@ -28,12 +28,12 @@ public class WebLocation implements ReadableDirLocation, ReadableDirLocationLike
   public final boolean isRoot;
   public final String webAddress;
   private static final RichIterable<String> prefixes1 = RichIterable.of(
-    // "http://",
+    "http://",
     "https://"
   //
   );
   private static final RichIterable<String> prefixes2 = RichIterable.of(
-    // "",
+    "",
     "www.");
   private static final RichIterable<String> suffixes = RichIterable.of(
     "",

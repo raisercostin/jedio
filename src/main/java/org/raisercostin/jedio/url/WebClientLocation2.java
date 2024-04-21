@@ -41,7 +41,9 @@ import io.netty.handler.logging.LogLevel;
 import io.vavr.Function1;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
+import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -137,6 +139,10 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
   public static WebClientLocation2 get(String url, MediaType applicationJson, Object params,
       MultiValueMap<String, String> headers) {
     return defaultClient.get(url, applicationJson, params, headers);
+  }
+
+  public static WebClientLocation2 get(SimpleUrl link) {
+    return get(link.toExternalForm());
   }
 
   public static WebClientLocation2 get(String url) {
@@ -398,38 +404,32 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       }
 
       @Override
-      public HttpHeaders deserialize(JsonParser p, DeserializationContext ctxt)
-          throws IOException, JsonProcessingException {
+      public HttpHeaders deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         HttpHeaders result = new HttpHeaders();
-        p.nextToken(); // Skip start object
+        if (p.currentToken() != JsonToken.START_OBJECT) {
+          throw ctxt.mappingException("Expected JSON object");
+        }
+
         while (p.nextToken() != JsonToken.END_OBJECT) {
           String fieldName = p.getCurrentName();
-          p.nextToken();
+          p.nextToken(); // move to value, it should either start an array or present a single value
           if (p.currentToken() == JsonToken.START_ARRAY) {
             List<String> values = new ArrayList<>();
             while (p.nextToken() != JsonToken.END_ARRAY) {
               values.add(p.getText());
             }
-            result.put(fieldName, values);
+            result.addAll(fieldName, values);
+          } else if (p.currentToken().isScalarValue()) { // ensure the token is a scalar value (like a string)
+            result.add(fieldName, p.getText());
           } else {
-            result.put(fieldName, List.of(p.getText()));
+            throw ctxt.mappingException("Expected a JSON array or a scalar value for field: " + fieldName);
           }
         }
         return result;
       }
     }
-    //
-    //    @JsonSerialize(using = HeaderMapSerializer.class)
-    //    @JsonDeserialize(using = HeaderMapDeserializer.class)
-    //    public class HeaderMap {
-    //      //private Map<String, List<String>> headers = new HashMap<>();
-    //      public final Set<Entry<String, List<String>>> headers;
-    //
-    //      public HeaderMap(Set<Entry<String, List<String>>> headers) {
-    //        this.headers = headers;
-    //      }
-    //    }
 
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class Metadata {
       public String url;
@@ -607,11 +607,11 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       int retryMax) {
     return readContentInfoWithRetry(firstBackoff, maxBackoff, retryMax)
       .flatMap(clientResponse -> {
-        if (clientResponse.getStatusCode().isError()) {
-          return Mono.error(new RequestError(this, clientResponse, "Error"));
-        } else {
-          return Mono.just(new RequestResponse(this, clientResponse));
-        }
+        //        if (clientResponse.getStatusCode().isError()) {
+        //          return Mono.error(new RequestError(this, clientResponse, "Error"));
+        //        } else {
+        return Mono.just(new RequestResponse(this, clientResponse));
+        //        }
       })
       .doOnNext(content -> {
         log.info("get {} done. size {}", url, content.getBody() == null ? null : content.getBody().length());

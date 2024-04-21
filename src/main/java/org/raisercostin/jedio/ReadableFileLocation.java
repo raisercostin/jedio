@@ -123,7 +123,6 @@ public interface ReadableFileLocation extends BasicFileLocation {
 
   @sugar("readContent with UTF8 charset")
   default String readContentSync(ReadOptions options) {
-    System.out.println("here");
     try {
       return readContentSync(options, options.defaultCharset);
     } catch (Exception e) {
