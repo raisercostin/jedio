@@ -3,6 +3,9 @@ package org.jedio.feature;
 import java.time.Duration;
 import java.util.function.BiConsumer;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+
 import ch.qos.logback.classic.Level;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
@@ -12,6 +15,8 @@ import io.vavr.CheckedFunction2;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import lombok.ToString;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.framework.qual.DefaultQualifier;
 import org.jedio.BiCheckedConsumer;
 import org.raisercostin.nodes.Nodes;
 import reactor.core.Disposable;
@@ -119,12 +124,19 @@ public class GenericFeature<T> implements Feature<T> {
   @Override
   public String description() {
     return Strings.lenientFormat("%s(%s/%s with value [%s]. atCompile=[%s]  atStart=[%s] atRuntime=[%s], desc=[%s])",
-      getClass().getSimpleName(), name(), runtimeProperty(), value(), compileTimeValue(), startValue(),
-      runtimeValue(), description);
+      new Object[] {
+          getClass().getSimpleName(),
+          name(),
+          runtimeProperty(),
+          value(),
+          compileTimeValue(),
+          startValue(),
+          runtimeValue(),
+          description });
   }
 
   public String shortDescription() {
-    return Strings.lenientFormat("feature(%s=%s)", name(), value());
+    return Strings.lenientFormat("feature(%s=%s)", new Object[] { name(), value() });
   }
 
   @Override

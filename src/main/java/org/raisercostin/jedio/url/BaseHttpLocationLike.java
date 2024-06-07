@@ -31,17 +31,17 @@ public abstract class BaseHttpLocationLike<SELF extends @NonNull BaseHttpLocatio
   // }
 
   @SneakyThrows
-  public static URL resolve(String url, String childOrAbsolute) {
+  public static String resolve(String url, String childOrAbsolute) {
     if (url == null) {
-      return new URL(childOrAbsolute);
+      return new URL(childOrAbsolute).toExternalForm();
     }
     if (childOrAbsolute == null || childOrAbsolute.isEmpty()) {
-      return new URL(url);
+      return new URL(url).toExternalForm();
     }
     return resolve(new URL(url), childOrAbsolute);
   }
 
-  public static URL resolve(URL url, String child) {
+  public static String resolve(URL url, String child) {
     return SimpleUrl.resolve(url, child);
   }
 
@@ -94,8 +94,9 @@ public abstract class BaseHttpLocationLike<SELF extends @NonNull BaseHttpLocatio
   }
 
   @Override
+  @SneakyThrows
   public SELF child(String path) {
-    return create(resolve(this.url, path), true);
+    return create(new URL(resolve(this.url, path)), true);
   }
 
   @Override

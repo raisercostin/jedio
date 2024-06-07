@@ -167,7 +167,7 @@ public class NodeUtils {
   }
 
   @SneakyThrows
-  private static <T, V> Object setByKey(@NonNull T object, @Nullable Object key,
+  private static <T, V> Object setByKey(@NonNull T object, Object key,
       V value) {
     if (object instanceof java.util.Map) {
       ((java.util.Map<Object, V>) object).put(key, value);
@@ -201,7 +201,7 @@ public class NodeUtils {
       String.format("Don't know how to set %s[%s] on object %s", object.getClass(), key, object));
   }
 
-  private static <T extends @NonNull Object> @Nullable T getByKey(@Nullable Object object, Object key, boolean nullable,
+  private static <T extends @NonNull Object> @Nullable T getByKey(Object object, Object key, boolean nullable,
       boolean caseInsensitive, boolean nullIfInvalid) {
     @Nullable
     T value = getByKeyNullable(object, key, caseInsensitive, nullIfInvalid);

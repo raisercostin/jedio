@@ -19,8 +19,11 @@ import org.raisercostin.jedio.url.impl.ModifiedURI;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PUBLIC)
 public class SimpleUrl {
   @SneakyThrows
-  public static URL resolve(String url, String childOrAbsolute) {
-    if (url == null) {
+  public static String resolve(String url, String childOrAbsolute) {
+    if (childOrAbsolute.startsWith("javascript:")) {
+      return childOrAbsolute;
+    }
+    if (url == null || childOrAbsolute.startsWith("javascript:")) {
       return resolve((URL) null, childOrAbsolute);
     } else {
       return resolve(new URL(url), childOrAbsolute);
@@ -28,18 +31,18 @@ public class SimpleUrl {
   }
 
   @SneakyThrows
-  public static URL resolve(URL url, String childOrAbsolute) {
+  public static String resolve(URL url, String childOrAbsolute) {
     if (StringUtils.isEmpty(childOrAbsolute)) {
-      return url;
+      return url.toExternalForm();
     }
     ModifiedURI child = new ModifiedURI(childOrAbsolute, false);
     if (url == null || child.isAbsoluteURI()) {
-      return new URL(child.getEscapedURI());
+      return new URL(child.getEscapedURI()).toExternalForm();
     }
     child.normalize();
     ModifiedURI base = new ModifiedURI(url.toExternalForm(), true);
     ModifiedURI result = new ModifiedURI(base, child);
-    return new URL(result.toString());
+    return new URL(result.toString()).toExternalForm();
   }
 
   @SneakyThrows

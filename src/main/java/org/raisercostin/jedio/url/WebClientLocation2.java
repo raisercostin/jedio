@@ -12,12 +12,8 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -41,7 +36,6 @@ import io.netty.handler.logging.LogLevel;
 import io.vavr.Function1;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
-import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -445,7 +439,11 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
     }
 
     public String computeMetadata() {
-      return Nodes.json.toString(getMetadata());
+      return computeMetadata(getMetadata());
+    }
+
+    public String computeMetadata(Metadata metadata) {
+      return Nodes.json.toString(metadata);
     }
 
     public Metadata getMetadata() {
@@ -656,12 +654,18 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       "webclientRetryOnAnyError2", "", false, "feature.webclient.retryOnAnyError", true);
     public BooleanFeature webclientMicrometerMetrics = GenericFeature.booleanFeature(
       "webclientMicrometerMetrics", "", false, "feature.webclient.micrometerMetrics", true);
+    private static final HttpProtocol[] defaultProtocols = { HttpProtocol.H2, HttpProtocol.HTTP11 };
 
     public WebClientFactory() {
-      this.builder = createWebClient(null);
+      this(defaultProtocols);
+    }
+
+    public WebClientFactory(HttpProtocol... protocols) {
+      protocols = protocols == null ? defaultProtocols : protocols;
+      this.builder = createWebClient(null, protocols);
       this.client = builder.build();
-      this.clientWithTapSimple = createWebClient(AdvancedByteBufFormat.SIMPLE).build();
-      this.clientWithTapDump = createWebClient(AdvancedByteBufFormat.HEX_DUMP).build();
+      this.clientWithTapSimple = createWebClient(AdvancedByteBufFormat.SIMPLE, protocols).build();
+      this.clientWithTapDump = createWebClient(AdvancedByteBufFormat.HEX_DUMP, protocols).build();
     }
 
     public WebClientLocation2 get(ModifiedURI uri) {
@@ -757,7 +761,7 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
           : client;
     }
 
-    public Builder createWebClient(AdvancedByteBufFormat format) {
+    public Builder createWebClient(AdvancedByteBufFormat format, HttpProtocol[] protocols) {
       ConnectionProvider provider = ConnectionProvider
         .builder("namek-webclient")
         .metrics(webclientMicrometerMetrics.value())
@@ -768,7 +772,7 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       //logging - https://www.baeldung.com/spring-log-webclient-calls
       HttpClient httpClient = HttpClient
         .create(provider)
-        .protocol(HttpProtocol.H2, HttpProtocol.HTTP11)
+        .protocol(protocols)
         //.responseTimeout(Duration.ofSeconds(10))
         .compress(true)
       //.wiretap("jedio.http", LogLevel.INFO, AdvancedByteBufFormat.TEXTUAL)

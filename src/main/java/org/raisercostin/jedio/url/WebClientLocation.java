@@ -61,7 +61,7 @@ public class WebClientLocation extends BaseHttpLocationLike<@NonNull WebClientLo
 
   @sugar
   public static WebClientLocation url(String sourceHyperlink, String relativeOrAbsoluteHyperlink) {
-    return httpGet(SimpleUrl.resolve(sourceHyperlink, relativeOrAbsoluteHyperlink).toExternalForm());
+    return httpGet(SimpleUrl.resolve(sourceHyperlink, relativeOrAbsoluteHyperlink));
   }
 
   @sugar
