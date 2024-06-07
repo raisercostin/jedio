@@ -803,7 +803,7 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
               .maxInMemorySize(256 * 1024 * 1024);
             configurer
               .defaultCodecs()
-              .jackson2JsonEncoder(new Jackson2JsonEncoder(Nodes.json.mapper, MediaType.APPLICATION_JSON));
+              .jackson2JsonEncoder(new Jackson2JsonEncoder(Nodes.json.mapper.get(), MediaType.APPLICATION_JSON));
           })
 
           .build())
