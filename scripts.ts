@@ -12,7 +12,7 @@ function releasePrepareAndPerform(): void {
 
 function releasePrepare(argv?: any): void {
   shell.exec(
-    'mvn -B release:prepare -DskipTests=true -Prelease -Darguments="-DskipTests=true -Prelease"'
+    'mvn -B release:prepare -DskipTests=true -Prelease -Darguments="-DskipTests=true -Prelease"',
   );
 }
 
@@ -26,7 +26,7 @@ function releasePerformLocal(args?: any): void {
   shell.mkdir("-p", `${repo}/${groupPath}/${artifactId}/${version}`);
   shell.cp(
     `${localMavenRepo}/${groupPath}/${artifactId}/${version}/${artifactId}-${version}*`,
-    `${repo}/${groupPath}/${artifactId}/${version}/`
+    `${repo}/${groupPath}/${artifactId}/${version}/`,
   );
 
   // Call createChecksums for each type
@@ -37,7 +37,7 @@ function releasePerformLocal(args?: any): void {
       repo,
       localMavenRepo,
       groupPath,
-      artifactId
+      artifactId,
     );
   });
 
@@ -45,7 +45,7 @@ function releasePerformLocal(args?: any): void {
   shell.exec(`git -C ${repo} status`);
   shell.exec(`git -C ${repo} add .`);
   shell.exec(
-    `git -C ${repo} commit -m "Release ${artifactId}-${version}" || echo "ignore commit failure, proceed"`
+    `git -C ${repo} commit -m "Release ${artifactId}-${version}" || echo "ignore commit failure, proceed"`,
   );
   shell.exec(`git -C ${repo} push`);
   shell.rm("-f", "pom.xml.releaseBackup", "release.properties");
@@ -65,7 +65,7 @@ function createChecksums(
   repo: string,
   localMavenRepo: string,
   groupPath: string,
-  artifactId: string
+  artifactId: string,
 ): void {
   let file = `${repo}/${groupPath}/${artifactId}/${version}/${artifactId}-${version}${classifier}`;
   shell.rm("-f", `${file}.sha1`);
@@ -83,8 +83,7 @@ function release(argv?: any) {
   releasePerformLocal(argv);
 }
 
-const argsForRelease: { [key: string]: Options } =
-{
+const argsForRelease: { [key: string]: Options } = {
   repo: {
     type: "string",
     demandOption: true,
@@ -112,8 +111,8 @@ const argsForRelease: { [key: string]: Options } =
     type: "string",
     demandOption: true,
     describe: "Maven released version like 0.72",
-  }
-}
+  },
+};
 
 const argv = yargs
   .scriptName("scripts")
@@ -121,12 +120,17 @@ const argv = yargs
     "releasePrepareAndPerform",
     "Executes releasePrepare and releasePerformLocal",
     {},
-    releasePrepareAndPerform
+    releasePrepareAndPerform,
   )
   .command("normalizePom", "Normalizes the POM file", {}, normalizePom)
   .command("release", "Prepares AND release", argsForRelease, release)
   .command("releasePrepare", "Prepares the release", {}, releasePrepare)
-  .command("releasePerformLocal", "Performs the release locally", argsForRelease, releasePerformLocal)
+  .command(
+    "releasePerformLocal",
+    "Performs the release locally",
+    argsForRelease,
+    releasePerformLocal,
+  )
   .demandCommand()
   .help()
   .alias("help", "h").argv;
