@@ -54,7 +54,7 @@ public class SimpleUrl {
     return from(uri).keepQuery(keepQuery);
   }
 
-  ModifiedURI uri;
+  public final ModifiedURI uri;
 
   @SneakyThrows
   public SimpleUrl withoutQuery() {

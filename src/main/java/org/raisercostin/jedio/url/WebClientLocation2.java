@@ -12,13 +12,17 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,6 +38,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.google.common.base.Preconditions;
 import io.netty.handler.logging.LogLevel;
 import io.vavr.Function1;
+import io.vavr.Lazy;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import lombok.AllArgsConstructor;
@@ -42,6 +47,7 @@ import lombok.SneakyThrows;
 import lombok.ToString;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jedio.RichThrowable;
 import org.jedio.feature.BooleanFeature;
 import org.jedio.feature.EnumFeature;
 import org.jedio.feature.GenericFeature;
@@ -84,20 +90,20 @@ import reactor.util.retry.Retry;
 
 public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientLocation2>
     implements ReadableFileLocation {
-  public static final WebClientFactory defaultClient = new WebClientFactory();
+  public static final Lazy<WebClientFactory> defaultClient = Lazy.of(() -> new WebClientFactory("default"));
 
   public static WebClientLocation2 post(String url, MediaType applicationJson, Object params) {
-    return defaultClient.post(url, applicationJson, params, null);
+    return defaultClient().post(url, applicationJson, params, null);
   }
 
   @Deprecated
   public static WebClientLocation2 post(String url, MediaType applicationJson, Object params,
       MultiValueMap<String, String> headers) {
-    return defaultClient.post(url, applicationJson, params, headers);
+    return defaultClient().post(url, applicationJson, params, headers);
   }
 
   public static WebClientLocation2 post(String url) {
-    return defaultClient.post(url);
+    return defaultClient().post(url);
   }
 
   public WebClientLocation2 header(String name, String value) {
@@ -118,11 +124,11 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
   @Deprecated
   public static WebClientLocation2 put(String url, MediaType applicationJson, Object params,
       MultiValueMap<String, String> headers) {
-    return defaultClient.put(url, applicationJson, params, headers);
+    return defaultClient().put(url, applicationJson, params, headers);
   }
 
   public static WebClientLocation2 put(String url) {
-    return defaultClient.put(url);
+    return defaultClient().put(url);
   }
 
   /**
@@ -132,7 +138,7 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
   @Deprecated
   public static WebClientLocation2 get(String url, MediaType applicationJson, Object params,
       MultiValueMap<String, String> headers) {
-    return defaultClient.get(url, applicationJson, params, headers);
+    return defaultClient().get(url, applicationJson, params, headers);
   }
 
   public static WebClientLocation2 get(SimpleUrl link) {
@@ -140,7 +146,7 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
   }
 
   public static WebClientLocation2 get(String url) {
-    return defaultClient.get(url);
+    return defaultClient().get(url);
   }
 
   @SuppressWarnings("unchecked")
@@ -149,8 +155,12 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       Function1<RequestHeadersUriSpec<S>, RequestHeadersUriSpec<S>> requestCreator) {
     URL url2 = new URL(url);
     return new WebClientLocation2(url2, HttpMethod.GET, false,
-      requestCreator.apply((S) defaultClient.currentClient().get()).uri(url2.toURI()),
-      defaultClient);
+      requestCreator.apply((S) defaultClient().currentClient().get()).uri(url2.toURI()),
+      defaultClient());
+  }
+
+  private static WebClientFactory defaultClient() {
+    return defaultClient.get();
   }
 
   @SneakyThrows
@@ -158,8 +168,8 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       Function1<RequestBodyUriSpec, RequestBodyUriSpec> requestCreator) {
     URL url2 = new URL(url);
     return new WebClientLocation2(url2, HttpMethod.POST, false,
-      requestCreator.apply(defaultClient.currentClient().post()).uri(url2.toURI()),
-      defaultClient);
+      requestCreator.apply(defaultClient().currentClient().post()).uri(url2.toURI()),
+      defaultClient());
   }
 
   @SneakyThrows
@@ -167,8 +177,8 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       Function1<RequestBodyUriSpec, RequestBodyUriSpec> requestCreator) {
     URL url2 = new URL(url);
     return new WebClientLocation2(url2, HttpMethod.PUT, false,
-      requestCreator.apply(defaultClient.currentClient().put()).uri(url2.toURI()),
-      defaultClient);
+      requestCreator.apply(defaultClient().currentClient().put()).uri(url2.toURI()),
+      defaultClient());
   }
 
   @SneakyThrows
@@ -176,16 +186,16 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       Function1<RequestBodyUriSpec, RequestBodyUriSpec> requestCreator) {
     URL url2 = new URL(url);
     return new WebClientLocation2(url2, method, false,
-      requestCreator.apply(defaultClient.currentClient().method(method)).uri(url2.toURI()),
-      defaultClient);
+      requestCreator.apply(defaultClient().currentClient().method(method)).uri(url2.toURI()),
+      defaultClient());
   }
 
   public static WebClientLocation2 httpGet(String url) {
-    return defaultClient.get(url);
+    return defaultClient().get(url);
   }
 
   public static WebClientLocation2 httpGet(ModifiedURI uri) {
-    return defaultClient.get(uri);
+    return defaultClient().get(uri);
   }
 
   @JsonIgnore
@@ -367,7 +377,7 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       }
     }
 
-    static final class HeaderMapSerializer extends StdSerializer<HttpHeaders> {
+    public static final class HeaderMapSerializer extends StdSerializer<HttpHeaders> {
       protected HeaderMapSerializer() {
         super((Class<HttpHeaders>) null);
       }
@@ -392,7 +402,7 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
     }
 
     // Custom deserializer
-    static final class HeaderMapDeserializer extends StdDeserializer<HttpHeaders> {
+    public static final class HeaderMapDeserializer extends StdDeserializer<HttpHeaders> {
       protected HeaderMapDeserializer() {
         super((Class<?>) null);
       }
@@ -426,6 +436,10 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Metadata {
+      public static Metadata error(String url, Throwable e) {
+        return new Metadata(url, "GET", null, -1, null, null, RichThrowable.toString(e), null);
+      }
+
       public String url;
       public String method;
       public String statusCode;
@@ -436,6 +450,18 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       @JsonSerialize(using = HeaderMapSerializer.class)
       @JsonDeserialize(using = HeaderMapDeserializer.class)
       public HttpHeaders requestHeaders;
+      public String error;
+
+      @JsonAnyGetter
+      public Map<String, Object> fields;
+
+      @JsonAnySetter
+      public void addField(String name, Object value) {
+        if (fields == null) {
+          fields = new HashMap<>();
+        }
+        fields.put(name, value);
+      }
     }
 
     public String computeMetadata() {
@@ -478,7 +504,7 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
         clientLocation.httpMethod.toString(),
         responseEntity.getStatusCode().toString(),
         responseEntity.getStatusCodeValue(),
-        responseEntity.getHeaders(), requestHeaders());
+        responseEntity.getHeaders(), requestHeaders(), null, null);
     }
 
     private HttpMethod requestMethod() {
@@ -631,6 +657,7 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
   }
 
   public static class WebClientFactory implements HttpClientLocationFactory {
+    public final String name;
     private WebClient client;
     private WebClient clientWithTapSimple;
     private WebClient clientWithTapDump;
@@ -656,11 +683,12 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       "webclientMicrometerMetrics", "", false, "feature.webclient.micrometerMetrics", true);
     private static final HttpProtocol[] defaultProtocols = { HttpProtocol.H2, HttpProtocol.HTTP11 };
 
-    public WebClientFactory() {
-      this(defaultProtocols);
+    public WebClientFactory(String name) {
+      this(name, defaultProtocols);
     }
 
-    public WebClientFactory(HttpProtocol... protocols) {
+    public WebClientFactory(String name, HttpProtocol... protocols) {
+      this.name = name;
       protocols = protocols == null ? defaultProtocols : protocols;
       this.builder = createWebClient(null, protocols);
       this.client = builder.build();
