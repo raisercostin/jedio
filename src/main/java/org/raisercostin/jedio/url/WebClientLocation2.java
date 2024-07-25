@@ -606,6 +606,10 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
     return request;
   }
 
+  public RequestResponse readCompleteContentSync() {
+    return readCompleteContentSync(ReadOptions.defaultRead);
+  }
+
   public RequestResponse readCompleteContentSync(ReadOptions options) {
     Mono<RequestResponse> mono = readAsync(options);
     return client.block(mono);
