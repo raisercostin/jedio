@@ -375,6 +375,9 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
 
   @Override
   public NonExistingLocation deleteFile(DeleteOptions options) {
+    if (!exists() && options.ignoreNonExisting()) {
+      return this;
+    }
     if (options.deleteByRename()) {
       deleteFileByRename();
     } else {
@@ -445,6 +448,15 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
       return fn.apply(this);
     } else {
       return this;
+    }
+  }
+
+  //  @Override
+  public PathLocation nonExisting(Function<PathLocation, PathLocation> fn) {
+    if (exists()) {
+      return this;
+    } else {
+      return fn.apply(this);
     }
   }
 
@@ -678,17 +690,26 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
       Path src = toPath();
       Path dest = destLocation.asPathLocation().toPath();
       if (isDir()) {
-        logger.info("rename dir " + src + " to " + destLocation);
+        logger.info("rename dir {} to {}", src, destLocation);
+        if (Files.isSameFile(src, dest)) {
+          logger.debug("rename same " + src);
+          return destLocation;
+        }
         mkdirOnParentIfNeeded();
         Files.move(src, dest);
       } else {
-        logger.info("rename file " + src + " to " + destLocation);
+        logger.info("rename file {} to {}", src, destLocation);
+        if (destLocation.exists() && Files.isSameFile(src, dest)) {
+          logger.debug("rename same " + src);
+          return destLocation;
+        }
         mkdirOnParentIfNeeded();
         Files.move(src, dest);
       }
       return destLocation;
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException(
+        "Couldn't rename %s to %s".formatted(this.absoluteAndNormalized(), destLocation.absoluteAndNormalized()), e);
     }
   }
 
@@ -728,6 +749,11 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
     createSymlink(toPath(), target.asPathLocation().toPath());
   }
 
+  @Override
+  public void userSymlinkTo(ReferenceLocation dest) {
+    asWritableFile().write(dest.absoluteAndNormalized());
+  }
+
   private void createJunction(Path symlink, Path target) {
     if (SystemUtils.IS_OS_WINDOWS) {
       createWindowsJunction(symlink, symlink, target);
@@ -742,11 +768,16 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   private void createSymlink(Path symlink, Path target) {
-    if (SystemUtils.IS_OS_WINDOWS) {
-      createWindowsSymlink(symlink, symlink.toFile().getAbsolutePath(), target.toFile().getName());
-    } else {
-      createLinuxSymlink(symlink, symlink.toFile().getAbsolutePath(), target.toFile().getAbsolutePath());
+    try {
+      Files.createSymbolicLink(symlink, target);
+    } catch (IOException e) {
+      throw org.jedio.RichThrowable.nowrap(e);
     }
+    //    if (SystemUtils.IS_OS_WINDOWS) {
+    //      createWindowsSymlink(symlink, symlink.toFile().getAbsolutePath(), target.toFile().getName());
+    //    } else {
+    //      createLinuxSymlink(symlink, symlink.toFile().getAbsolutePath(), target.toFile().getAbsolutePath());
+    //    }
   }
 
   private void createWindowsSymlink(Path place, String symlink, String targetName) {
@@ -768,7 +799,20 @@ public class PathLocation implements FileLocation, ChangeableLocation, NonExisti
   }
 
   @Override
+  public Option<LinkLocationLike> asJunction() {
+    if (isJunctionInWindows()) {
+      return Option.of(this);
+    } else {
+      return Option.none();
+    }
+  }
+
+  @Override
   public boolean isSymlink() {
+    return Files.isSymbolicLink(this.path);
+  }
+
+  public boolean isSymlinkOrJunction() {
     return Files.isSymbolicLink(this.path) || isJunctionInWindows();
   }
 

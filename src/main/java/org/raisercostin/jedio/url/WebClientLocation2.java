@@ -9,49 +9,36 @@ import java.io.PipedOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.google.common.base.Preconditions;
 import io.netty.handler.logging.LogLevel;
 import io.vavr.Function1;
 import io.vavr.Lazy;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.jedio.RichThrowable;
 import org.jedio.feature.BooleanFeature;
 import org.jedio.feature.EnumFeature;
 import org.jedio.feature.GenericFeature;
+import org.raisercostin.jedio.Metadata;
 import org.raisercostin.jedio.ReadableFileLocation;
+import org.raisercostin.jedio.WritableFileLocation;
 import org.raisercostin.jedio.op.OperationOptions.ReadOptions;
 import org.raisercostin.jedio.url.WebClientLocation2.RequestResponse.EnrichedContent;
 import org.raisercostin.jedio.url.impl.ModifiedURI;
@@ -273,25 +260,66 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
   }
 
   public static class RequestResponse {
+    private static org.springframework.http.HttpHeaders toSpringHeaders(java.net.http.HttpHeaders javaHeaders) {
+      org.springframework.http.HttpHeaders springHeaders = new org.springframework.http.HttpHeaders();
+      javaHeaders.map().forEach((key, values) -> springHeaders.put(key, new ArrayList<>(values)));
+      return springHeaders;
+    }
+
     private WebClientLocation2 clientLocation;
     private ResponseEntity<String> responseEntity;
+    private Metadata metadata;
+    private HttpResponse<Path> response;
 
     public RequestResponse(WebClientLocation2 clientLocation, ResponseEntity<String> responseEntity) {
       this.clientLocation = clientLocation;
       this.responseEntity = responseEntity;
+      Preconditions.checkArgument(response.request().uri().toString().equals(clientLocation.url.toExternalForm()));
+      this.metadata = new Metadata(
+        clientLocation.url.toExternalForm(),
+        clientLocation.httpMethod.toString(),
+        responseEntity.getStatusCode().toString(),
+        responseEntity.getStatusCodeValue(),
+        responseEntity.getHeaders(), requestHeaders(), null, null);
+    }
+
+    public RequestResponse(WebClientLocation2 clientLocation, HttpResponse<Path> response) {
+      this.clientLocation = clientLocation;
+      this.response = response;
+      Preconditions.checkArgument(response.request().uri().toString().equals(clientLocation.url.toExternalForm()));
+      this.metadata = new Metadata(
+        clientLocation.url.toExternalForm(),
+        clientLocation.httpMethod.toString(),
+        HttpStatusCode.valueOf(response.statusCode()).toString(),
+        response.statusCode(),
+        toSpringHeaders(response.headers()),
+        toSpringHeaders(response.request().headers()), null, null);
+    }
+
+    private MediaType getContentType() {
+      return metadata.contentType();
+    }
+
+    public String getBody() {
+      if (response != null) {
+        try {
+          return Files.readString(response.body());
+        } catch (IOException e) {
+          throw org.jedio.RichThrowable.nowrap(e);
+        }
+      }
+      return responseEntity.getBody();
+    }
+
+    public RequestResponse writeTo(WritableFileLocation dest) {
+      String body = getBody();
+      dest.write(body);
+      return this;
     }
 
     @Override
     public String toString() {
-      return "RequestResponse %s %s".formatted(responseEntity.getStatusCode(), clientLocation.url);
-    }
-
-    public HttpStatusCode getStatusCode() {
-      return responseEntity.getStatusCode();
-    }
-
-    public HttpHeaders getHeaders() {
-      return responseEntity.getHeaders();
+      return "RequestResponse %s %s".formatted(metadata.statusCode, clientLocation.url);
     }
 
     /**Sometimes you want to save with the content the full details available in the call at that moment.
@@ -318,10 +346,6 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       }
     }
 
-    public String getBody() {
-      return getRawBody();
-    }
-
     public String getBodyWrappedInMetadata() {
       return getBodyWithMetadata(EnrichedContent.JSON_WRAPPPED);
     }
@@ -332,21 +356,21 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
 
     public Tuple2<Supplier<String>, Supplier<String>> getBodyAndMetadata() {
       return Tuple.of(() -> {
-        return responseEntity.getBody();
+        return getBody();
       }, () -> {
         return computeMetadata();
       });
     }
 
     public String getBodyWithMetadata(EnrichedContent enrich) {
-      String body = responseEntity.getBody();
+      String body = getBody();
       if (enrich == EnrichedContent.RAW_BODY) {
         return body;
       }
       if (enrich == EnrichedContent.LASTMATTER) {
         throw new RuntimeException("Not implemented yet!!! " + EnrichedContent.LASTMATTER);
       }
-      boolean isJson = responseEntity.getHeaders().getContentType().isCompatibleWith(MediaType.APPLICATION_JSON);
+      boolean isJson = getContentType().isCompatibleWith(MediaType.APPLICATION_JSON);
       if (isJson && (enrich == EnrichedContent.JSON_AUGUMENTED_OR_RAW || enrich == EnrichedContent.JSON_AUGUMENTED
           || enrich == EnrichedContent.JSON_WRAPPPED)) {
         if (enrich == EnrichedContent.JSON_WRAPPPED) {
@@ -374,93 +398,6 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
           Preconditions.checkArgument(enrich.allowFrontmatter, "%s doesn't allow frontmatter.", enrich);
           return "{\"metadata\":%s}\n---\n%s".formatted(computeMetadata(), body);
         }
-      }
-    }
-
-    public static final class HeaderMapSerializer extends StdSerializer<HttpHeaders> {
-      protected HeaderMapSerializer() {
-        super((Class<HttpHeaders>) null);
-      }
-
-      @Override
-      public void serialize(HttpHeaders value, JsonGenerator gen, SerializerProvider provider)
-          throws IOException {
-        gen.writeStartObject();
-        for (Entry<String, List<String>> entry : value.entrySet()) {
-          if (entry.getValue().size() == 1) {
-            gen.writeStringField(entry.getKey(), entry.getValue().get(0));
-          } else {
-            gen.writeArrayFieldStart(entry.getKey());
-            for (String item : entry.getValue()) {
-              gen.writeString(item);
-            }
-            gen.writeEndArray();
-          }
-        }
-        gen.writeEndObject();
-      }
-    }
-
-    // Custom deserializer
-    public static final class HeaderMapDeserializer extends StdDeserializer<HttpHeaders> {
-      protected HeaderMapDeserializer() {
-        super((Class<?>) null);
-      }
-
-      @Override
-      public HttpHeaders deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        HttpHeaders result = new HttpHeaders();
-        if (p.currentToken() != JsonToken.START_OBJECT) {
-          throw ctxt.mappingException("Expected JSON object");
-        }
-
-        while (p.nextToken() != JsonToken.END_OBJECT) {
-          String fieldName = p.getCurrentName();
-          p.nextToken(); // move to value, it should either start an array or present a single value
-          if (p.currentToken() == JsonToken.START_ARRAY) {
-            List<String> values = new ArrayList<>();
-            while (p.nextToken() != JsonToken.END_ARRAY) {
-              values.add(p.getText());
-            }
-            result.addAll(fieldName, values);
-          } else if (p.currentToken().isScalarValue()) { // ensure the token is a scalar value (like a string)
-            result.add(fieldName, p.getText());
-          } else {
-            throw ctxt.mappingException("Expected a JSON array or a scalar value for field: " + fieldName);
-          }
-        }
-        return result;
-      }
-    }
-
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Metadata {
-      public static Metadata error(String url, Throwable e) {
-        return new Metadata(url, "GET", null, -1, null, null, RichThrowable.toString(e), null);
-      }
-
-      public String url;
-      public String method;
-      public String statusCode;
-      public int statusCodeValue;
-      @JsonSerialize(using = HeaderMapSerializer.class)
-      @JsonDeserialize(using = HeaderMapDeserializer.class)
-      public HttpHeaders responseHeaders;
-      @JsonSerialize(using = HeaderMapSerializer.class)
-      @JsonDeserialize(using = HeaderMapDeserializer.class)
-      public HttpHeaders requestHeaders;
-      public String error;
-
-      @JsonAnyGetter
-      public Map<String, Object> fields;
-
-      @JsonAnySetter
-      public void addField(String name, Object value) {
-        if (fields == null) {
-          fields = new HashMap<>();
-        }
-        fields.put(name, value);
       }
     }
 
@@ -499,12 +436,7 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
       //        escapeJson(responseEntity.getStatusCode().toString()),
       //        responseEntity.getStatusCodeValue(),
       //        responseHeaders, requestHeaders);
-      return new Metadata(
-        clientLocation.url.toExternalForm(),
-        clientLocation.httpMethod.toString(),
-        responseEntity.getStatusCode().toString(),
-        responseEntity.getStatusCodeValue(),
-        responseEntity.getHeaders(), requestHeaders(), null, null);
+      return metadata;
     }
 
     private HttpMethod requestMethod() {
@@ -542,10 +474,6 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
         return str.substring(prefix.length(), str.length() - suffix.length());
       }
       return str;
-    }
-
-    public String getRawBody() {
-      return responseEntity.getBody();
     }
   }
 
@@ -606,6 +534,10 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
     return request;
   }
 
+  public RequestResponse copyTo(WritableFileLocation dest) {
+    return readCompleteContentSync(null).writeTo(dest);
+  }
+
   public RequestResponse readCompleteContentSync() {
     return readCompleteContentSync(ReadOptions.defaultRead);
   }
@@ -642,7 +574,7 @@ public class WebClientLocation2 extends BaseHttpLocationLike<@NonNull WebClientL
         //        }
       })
       .doOnNext(content -> {
-        log.info("get {} done. size {}", url, content.getBody() == null ? null : content.getBody().length());
+        log.info("get {} done. size {}", url, content.getMetadata().length());
       });
   }
 

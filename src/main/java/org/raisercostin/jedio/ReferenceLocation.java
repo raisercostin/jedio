@@ -82,18 +82,26 @@ public interface ReferenceLocation extends Location {
 
   ReferenceLocation existingOrElse(Function<NonExistingLocation, DirLocation> fn);
 
+  default <T extends ReferenceLocation> T existing(Function<T, T> fn) {
+    if (exists()) {
+      return fn.apply((T) this);
+    } else {
+      return (T) this;
+    }
+  }
+  //  ReferenceLocation nonExisting(Function<ReferenceLocation, ReferenceLocation> fn);
+
   boolean exists();
 
   default ReferenceLocation backupName() {
     if (!exists()) {
       return this;
     }
-    int counter = 1;
+    int counter = 0;
     ReferenceLocation newFile;
     do {
-      int counter2 = counter;
+      int counter2 = ++counter;
       newFile = withBasename(x -> x + "-" + counter2);
-      counter++;
     } while (newFile.exists());
     return newFile;
   }
@@ -112,9 +120,17 @@ public interface ReferenceLocation extends Location {
 
   void symlinkTo(ReferenceLocation parent);
 
+  void userSymlinkTo(ReferenceLocation parent);
+
   void junctionTo(ReferenceLocation parent);
 
   Option<LinkLocationLike> asSymlink();
+
+  Option<LinkLocationLike> asJunction();
+
+  default ReadableFileLocation userSymlinkTarget() {
+    return Locations.readableFile(asReadableFile().readContent());
+  }
 
   boolean isSymlink();
 

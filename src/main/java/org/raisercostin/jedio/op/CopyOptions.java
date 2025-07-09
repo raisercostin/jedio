@@ -111,11 +111,16 @@ public interface CopyOptions extends OperationOptions {
    */
   @SuppressWarnings("null")
   static <T extends ReferenceLocationLike<T>> T meta(T referenceLocation, String meta, String extension) {
-    return referenceLocation.parent()
-      .get()
-      .child("." + meta)
-      .child(referenceLocation
-        .withExtension(originalExtension -> originalExtension + "#meta-" + meta + "-" + extension)
-        .filename());
+    return referenceLocation.withName(x -> x + "#meta-" + meta + "-" + extension);
+    //    return referenceLocation.parent()
+    //      .get()
+    //      .child("." + meta)
+    //      .child(referenceLocation
+    //        .withExtension(originalExtension -> originalExtension + "#meta-" + meta + "-" + extension)
+    //        .filename());
+  }
+
+  static <SELF extends ReferenceLocationLike<SELF>> SELF companion(SELF referenceLocation, String suffix) {
+    return referenceLocation.withName(x -> x + suffix);
   }
 }

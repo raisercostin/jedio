@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jedio.NodeUtils;
+import org.jedio.deprecated;
 import org.raisercostin.jedio.op.OperationOptions.ReadOptions;
 import org.raisercostin.nodes.Nodes;
 
@@ -30,6 +31,8 @@ import org.raisercostin.nodes.Nodes;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PUBLIC)
 @Slf4j
 @ToString
+@Deprecated
+@deprecated("use Metadata")
 public class MetaInfo {
   public static MetaInfo error(Throwable e) {
     String errorAsString = Nodes.json.toString(e);

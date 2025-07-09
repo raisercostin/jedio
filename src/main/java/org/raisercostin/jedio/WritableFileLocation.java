@@ -2,6 +2,7 @@ package org.raisercostin.jedio;
 
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.function.Function;
 
 import org.raisercostin.jedio.op.CopyOptions;
 
@@ -19,4 +20,9 @@ public interface WritableFileLocation extends BasicFileLocation {
   WritableFileLocation copyFrom(ReadableFileLocation source, CopyOptions options);
 
   WritableFileLocation write(String content);
+  //
+  //  @Override
+  //  default WritableFileLocation existing(Function<WritableFileLocation, WritableFileLocation> fn) {
+  //    throw new RuntimeException("Not implemented yet!!!");
+  //  }
 }

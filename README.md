@@ -124,7 +124,7 @@ old: `-javaagent:C:\Users\$USERNAME\.m2\repository\co\paralleluniverse\quasar-co
 <dependency>
   <groupId>org.raisercostin</groupId>
   <artifactId>jedio</artifactId>
-  <version>0.1</version>
+  <version>0.101</version>
 </dependency>
 ```
 

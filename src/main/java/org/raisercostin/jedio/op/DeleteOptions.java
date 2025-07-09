@@ -36,15 +36,15 @@ public interface DeleteOptions extends OperationOptions {
   // Boolean, optionalMeta: Boolean, monitor: OperationMonitor =
   // LoggingOperationMonitor)
 
-  static DeleteOptions deleteByRenameOption() {
+  static SimpleDeleteOptions deleteByRenameOption() {
     return new SimpleDeleteOptions(true, false);
   }
 
-  static DeleteOptions deletePermanent() {
+  static SimpleDeleteOptions deletePermanent() {
     return new SimpleDeleteOptions(false, false);
   }
 
-  static DeleteOptions deleteToBintray() {
+  static SimpleDeleteOptions deleteToBintray() {
     return deleteByRenameOption();
   }
 

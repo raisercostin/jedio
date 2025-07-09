@@ -14,6 +14,7 @@ import org.jedio.deprecated;
 import org.jedio.sugar;
 import org.raisercostin.jedio.BasicDirLocation;
 import org.raisercostin.jedio.DirLocation;
+import org.raisercostin.jedio.ExistingLocation;
 import org.raisercostin.jedio.NonExistingLocation;
 import org.raisercostin.jedio.ReferenceLocation;
 import org.raisercostin.jedio.RelativeLocation;
@@ -158,6 +159,16 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
     throw new RuntimeException("Not implemented yet!!!");
   }
 
+  //
+  //  @Override
+  //  default SELF existing(Function<Object, Object> fn) {
+  //    throw new RuntimeException("Not implemented yet!!!");
+  //  }
+  //  @Override
+  //  default <T extends SELF> T existing(Function<SELF, SELF> fn) {
+  //    throw new RuntimeException("Not implemented yet!!!");
+  //  }
+
   @Override
   default boolean exists() {
     throw new RuntimeException("Not implemented yet!!!");
@@ -179,12 +190,22 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
   }
 
   @Override
+  default void userSymlinkTo(ReferenceLocation parent) {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
   default void junctionTo(ReferenceLocation parent) {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
   @Override
   default Option<LinkLocationLike> asSymlink() {
+    throw new RuntimeException("Not implemented yet!!!");
+  }
+
+  @Override
+  default Option<LinkLocationLike> asJunction() {
     throw new RuntimeException("Not implemented yet!!!");
   }
 
@@ -293,6 +314,11 @@ public interface ReferenceLocationLike<SELF extends ReferenceLocationLike<SELF>>
   @SuppressWarnings("unchecked")
   default SELF meta(String meta, String extension) {
     return CopyOptions.meta((SELF) this, meta, extension);
+  }
+
+  @SuppressWarnings("unchecked")
+  default SELF companion(String suffix) {
+    return CopyOptions.companion((SELF) this, suffix);
   }
 
   @Override

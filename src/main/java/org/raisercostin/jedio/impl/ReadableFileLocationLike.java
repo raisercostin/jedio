@@ -81,6 +81,7 @@ public interface ReadableFileLocationLike<SELF extends ReadableFileLocationLike<
   }
 
   @Override
+  @Deprecated //meta companion should be here?
   default MetaInfo readMeta() {
     try {
       return Nodes.json.toObject(readMetaContent(), MetaInfo.class);
